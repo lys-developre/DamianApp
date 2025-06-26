@@ -15,6 +15,7 @@ import VisualScheduleScreen from './VisualScheduleScreen';
 import FoodModuleScreen from './FoodModuleScreen';
 import ReportsScreen from './ReportsScreen';
 import AdminScreen from './AdminScreen';
+import DigitalTimer from './DigitalTimer';
 
 const { width } = Dimensions.get('window');
 
@@ -139,6 +140,9 @@ export default function Main() {
           <Text style={styles.badgeText}>v4.0</Text>
         </View>
       </View>
+
+      {/* Temporizador Digital */}
+      <DigitalTimer />
 
       {/* Grid de módulos principales */}
       <View style={styles.modulesGrid}>
