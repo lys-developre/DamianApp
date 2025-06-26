@@ -7,93 +7,145 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import {
-  MaterialIcons,
-  FontAwesome5,
-  Ionicons,
-  MaterialCommunityIcons,
-} from '@expo/vector-icons';
+import { MaterialIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import CommunicationButton from './CommunicationButton';
 
 /**
  * Configuración de los botones de comunicación
- * Memoizado fuera del componente para optimizar el rendimiento
- * Cada botón tiene texto, color, icono y función específica
+ * Frases pre-programadas organizadas por categorías
+ * Cada botón tiene texto, color, icono y categoría específica
  */
 const COMMUNICATION_BUTTONS = [
+  // Categoría: Afecto y Vínculos
   {
-    text: 'MAMÁ',
+    text: 'Te quiero mamá',
     color: '#FF6B6B',
-    id: 'mama',
-    icon: <MaterialIcons name="face" size={28} color="#ffffff" />,
-  },
-  {
-    text: 'PAPÁ',
-    color: '#4ECDC4',
-    id: 'papa',
-    icon: <MaterialIcons name="face" size={28} color="#ffffff" />,
-  },
-  {
-    text: 'DAMIÁN',
-    color: '#45B7D1',
-    id: 'damian',
-    icon: <MaterialIcons name="child-care" size={28} color="#ffffff" />,
-  },
-  {
-    text: 'QUIERO',
-    color: '#96CEB4',
-    id: 'quiero',
+    id: 'te_quiero_mama',
+    category: 'afecto',
     icon: <MaterialIcons name="favorite" size={28} color="#ffffff" />,
   },
   {
-    text: 'ME DUELE',
-    color: '#FFEAA7',
-    id: 'duele',
-    icon: <MaterialIcons name="healing" size={28} color="#ffffff" />,
+    text: 'Te quiero papá',
+    color: '#4ECDC4',
+    id: 'te_quiero_papa',
+    category: 'afecto',
+    icon: <MaterialIcons name="favorite" size={28} color="#ffffff" />,
   },
   {
-    text: 'NO ENTIENDO',
-    color: '#DDA0DD',
-    id: 'noentiendo',
-    icon: <MaterialIcons name="help-outline" size={28} color="#ffffff" />,
-  },
-  {
-    text: 'ESPERAR',
-    color: '#98D8C8',
-    id: 'esperar',
-    icon: <MaterialIcons name="access-time" size={28} color="#ffffff" />,
-  },
-  {
-    text: 'JUEGOS',
+    text: 'Abrazo',
     color: '#FF9FF3',
-    id: 'juegos',
-    icon: <Ionicons name="game-controller" size={28} color="#ffffff" />,
+    id: 'abrazo',
+    category: 'afecto',
+    icon: <MaterialIcons name="hug" size={28} color="#ffffff" />,
+  },
+
+  // Categoría: Necesidades Básicas
+  {
+    text: 'Quiero agua',
+    color: '#45B7D1',
+    id: 'quiero_agua',
+    category: 'necesidades',
+    icon: <MaterialIcons name="local-drink" size={28} color="#ffffff" />,
   },
   {
-    text: 'CHARLAR',
-    color: '#54A0FF',
-    id: 'charlar',
-    icon: <MaterialIcons name="chat" size={28} color="#ffffff" />,
-  },
-  {
-    text: 'COMIDA',
-    color: '#5F27CD',
-    id: 'comida',
+    text: 'Tengo hambre',
+    color: '#96CEB4',
+    id: 'tengo_hambre',
+    category: 'necesidades',
     icon: <MaterialIcons name="restaurant" size={28} color="#ffffff" />,
   },
   {
-    text: 'ABURRIDO',
-    color: '#FF6348',
-    id: 'aburrido',
+    text: 'Quiero ir al baño',
+    color: '#9C88FF',
+    id: 'quiero_bano',
+    category: 'necesidades',
+    icon: <MaterialIcons name="wc" size={28} color="#ffffff" />,
+  },
+
+  // Categoría: Emociones
+  {
+    text: 'Estoy feliz',
+    color: '#FFD93D',
+    id: 'estoy_feliz',
+    category: 'emociones',
     icon: (
-      <MaterialCommunityIcons name="emoticon-sad" size={28} color="#ffffff" />
+      <MaterialIcons
+        name="sentiment-very-satisfied"
+        size={28}
+        color="#ffffff"
+      />
     ),
   },
   {
-    text: 'CANSADO',
-    color: '#9C88FF',
-    id: 'cansado',
+    text: 'Estoy triste',
+    color: '#74B9FF',
+    id: 'estoy_triste',
+    category: 'emociones',
+    icon: (
+      <MaterialIcons name="sentiment-dissatisfied" size={28} color="#ffffff" />
+    ),
+  },
+  {
+    text: 'Estoy cansado',
+    color: '#A29BFE',
+    id: 'estoy_cansado',
+    category: 'emociones',
     icon: <FontAwesome5 name="bed" size={24} color="#ffffff" />,
+  },
+
+  // Categoría: Salud
+  {
+    text: 'Me duele',
+    color: '#FFEAA7',
+    id: 'me_duele',
+    category: 'salud',
+    icon: <MaterialIcons name="healing" size={28} color="#ffffff" />,
+  },
+  {
+    text: 'No me siento bien',
+    color: '#FD79A8',
+    id: 'no_me_siento_bien',
+    category: 'salud',
+    icon: <MaterialIcons name="sick" size={28} color="#ffffff" />,
+  },
+
+  // Categoría: Actividades
+  {
+    text: 'Quiero jugar',
+    color: '#00B894',
+    id: 'quiero_jugar',
+    category: 'actividades',
+    icon: <Ionicons name="game-controller" size={28} color="#ffffff" />,
+  },
+  {
+    text: 'Quiero ver TV',
+    color: '#6C5CE7',
+    id: 'quiero_tv',
+    category: 'actividades',
+    icon: <MaterialIcons name="tv" size={28} color="#ffffff" />,
+  },
+
+  // Categoría: Comunicación
+  {
+    text: 'No entiendo',
+    color: '#DDA0DD',
+    id: 'no_entiendo',
+    category: 'comunicacion',
+    icon: <MaterialIcons name="help-outline" size={28} color="#ffffff" />,
+  },
+  {
+    text: 'Esperar',
+    color: '#98D8C8',
+    id: 'esperar',
+    category: 'comunicacion',
+    icon: <MaterialIcons name="access-time" size={28} color="#ffffff" />,
+  },
+  {
+    text: 'Más por favor',
+    color: '#81ECEC',
+    id: 'mas_por_favor',
+    category: 'comunicacion',
+    icon: <MaterialIcons name="add" size={28} color="#ffffff" />,
   },
 ];
 
@@ -139,12 +191,26 @@ export default function CommunicationScreen({ onBack }) {
    * Maneja el evento de clic en los botones de comunicación
    * Memoizado para optimizar el rendimiento
    *
-   * @param {string} message - El mensaje que se ha seleccionado
+   * @param {Object} button - El botón seleccionado con texto y categoría
    */
-  const handleButtonPress = useCallback(message => {
-    Alert.alert('Mensaje Seleccionado', `"${message}"`, [
-      { text: 'OK', style: 'default' },
-    ]);
+  const handleButtonPress = useCallback(button => {
+    Alert.alert(
+      '💬 Mensaje Seleccionado',
+      `"${button.text}"\n\nCategoría: ${button.category.charAt(0).toUpperCase() + button.category.slice(1)}`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: '📱 Enviar a Familia',
+          onPress: () => {
+            Alert.alert(
+              '✅ ¡Mensaje Enviado!',
+              `"${button.text}" ha sido enviado a la familia vía WhatsApp`,
+              [{ text: 'Perfecto', style: 'default' }]
+            );
+          },
+        },
+      ]
+    );
   }, []);
 
   /**
@@ -159,7 +225,7 @@ export default function CommunicationScreen({ onBack }) {
           color={item.color}
           id={item.id}
           icon={item.icon}
-          onPress={handleButtonPress}
+          onPress={() => handleButtonPress(item)}
         />
       </View>
     ),
@@ -180,6 +246,17 @@ export default function CommunicationScreen({ onBack }) {
           <MaterialIcons name="arrow-back" size={28} color="#ffffff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Comunicación</Text>
+      </View>
+
+      {/* Header informativo */}
+      <View style={styles.infoHeader}>
+        <MaterialIcons name="chat" size={32} color="#FF6B6B" />
+        <View style={styles.infoText}>
+          <Text style={styles.infoTitle}>Frases pre-programadas</Text>
+          <Text style={styles.infoSubtitle}>
+            Toca una frase para enviarla a tu familia 💬
+          </Text>
+        </View>
       </View>
 
       {/* Lista de botones de comunicación */}
@@ -259,6 +336,51 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 1,
     marginRight: 48, // Compensar el espacio del botón de regreso (mismo ancho)
+  },
+
+  /**
+   * Header informativo
+   */
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    marginHorizontal: 20,
+    marginBottom: 10,
+    padding: 15,
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  /**
+   * Contenedor del texto informativo
+   */
+  infoText: {
+    flex: 1,
+    marginLeft: 15,
+  },
+
+  /**
+   * Título del header informativo
+   */
+  infoTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    marginBottom: 4,
+  },
+
+  /**
+   * Subtítulo del header informativo
+   */
+  infoSubtitle: {
+    fontSize: 14,
+    color: '#718096',
+    lineHeight: 18,
   },
 
   /**
