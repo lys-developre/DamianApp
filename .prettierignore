@@ -1,0 +1,37 @@
+# Configuración de archivos a ignorar por Prettier
+# Este archivo especifica qué archivos NO deben ser formateados automáticamente
+
+# Dependencias y librerías externas
+node_modules/
+package-lock.json
+yarn.lock
+
+# Archivos generados por Expo
+.expo/
+dist/
+web-build/
+
+# Builds nativos
+ios/
+android/
+
+# Archivos de configuración del sistema
+.DS_Store
+.vscode/
+.idea/
+
+# Logs y archivos temporales
+*.log
+*.tmp
+
+# Archivos binarios (imágenes, etc.)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+
+# Archivos ya formateados por otras herramientas
+*.md
+*.json
