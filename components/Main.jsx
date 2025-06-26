@@ -6,172 +6,296 @@ import {
   View,
   TouchableOpacity,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import CommunicationScreen from './CommunicationScreen';
+import EmotionalRegulationScreen from './EmotionalRegulationScreen';
+import VisualScheduleScreen from './VisualScheduleScreen';
+import FoodModuleScreen from './FoodModuleScreen';
+import ReportsScreen from './ReportsScreen';
+import AdminScreen from './AdminScreen';
 
 const { width } = Dimensions.get('window');
 
 /**
  * Componente Main de la aplicación Damian APP
  *
- * Renderiza la pantalla principal con navegación simple y optimizada:
- * - Pantalla inicial con card de bienvenida
- * - Transición directa a pantalla de comunicación
- * - Diseño moderno con gradiente de fondo
- * - Compatibilidad con dispositivos modernos (notch, etc.)
- * - Funciones de navegación memoizadas para mejor rendimiento
+ * Sistema de comunicación aumentativa y regulación emocional especializado:
+ * - Comunicación asistida visual con pictogramas personalizados
+ * - Sistema de regulación emocional basado en evidencia (ABA/TEACCH)
+ * - Agenda visual inteligente para anticipación y rutinas
+ * - Módulo de alimentación gamificado con refuerzos positivos
+ * - Seguimiento y análisis de datos para familia y terapeutas
+ * - Interfaz adaptada a necesidades específicas de autismo
  *
- * Estados de navegación:
- * - Pantalla principal: Card de bienvenida
- * - Pantalla de comunicación: Botones interactivos
+ * Funcionalidades especializadas:
+ * - Pantalla principal: Hub de navegación visual
+ * - Comunicación: Frases pre-programadas con pictogramas
+ * - Regulación emocional: Semáforo emocional y estrategias de calma
+ * - Agenda visual: Rutinas diarias con pictogramas editables
+ * - Alimentación: Gamificación para introducción de alimentos
+ * - Reportes: Análisis de progreso para familia y profesionales
  *
  * Optimizaciones de rendimiento:
  * - useCallback para funciones de navegación estables
  * - Renderizado condicional eficiente
  * - Estilos optimizados con StyleSheet
+ * - Memoización de componentes críticos
  *
- * @returns {JSX.Element} Componente principal con navegación simple
+ * @returns {JSX.Element} Hub principal con navegación especializada
  * @author Damian
- * @version 3.0.0
+ * @version 4.0.0
  */
 export default function Main() {
-  const [showCommunication, setShowCommunication] = useState(false);
+  // Estados de navegación especializada
+  const [currentScreen, setCurrentScreen] = useState('home');
 
   /**
-   * Maneja la navegación a la pantalla de comunicación
-   * Memoizado para optimizar el rendimiento
+   * Navega a la pantalla de comunicación básica
    */
   const navigateToCommunication = useCallback(() => {
-    setShowCommunication(true);
+    setCurrentScreen('communication');
   }, []);
 
   /**
-   * Maneja el regreso a la pantalla principal
-   * Memoizado para optimizar el rendimiento
+   * Navega a la pantalla de regulación emocional
    */
-  const navigateBack = useCallback(() => {
-    setShowCommunication(false);
+  const navigateToEmotionalRegulation = useCallback(() => {
+    setCurrentScreen('emotional');
   }, []);
 
-  // Renderizar pantalla de comunicación si está activa
-  if (showCommunication) {
-    return <CommunicationScreen onBack={navigateBack} />;
+  /**
+   * Navega a la agenda visual diaria
+   */
+  const navigateToVisualSchedule = useCallback(() => {
+    setCurrentScreen('schedule');
+  }, []);
+
+  /**
+   * Navega al módulo de alimentación
+   */
+  const navigateToFoodModule = useCallback(() => {
+    setCurrentScreen('food');
+  }, []);
+
+  /**
+   * Navega a los reportes y análisis
+   */
+  const navigateToReports = useCallback(() => {
+    setCurrentScreen('reports');
+  }, []);
+
+  /**
+   * Navega al modo familia/terapeuta
+   */
+  const navigateToAdmin = useCallback(() => {
+    setCurrentScreen('admin');
+  }, []);
+
+  /**
+   * Regresa al hub principal
+   */
+  const navigateToHome = useCallback(() => {
+    setCurrentScreen('home');
+  }, []);
+
+  // Renderizado condicional de pantallas especializadas
+  if (currentScreen === 'communication') {
+    return <CommunicationScreen onBack={navigateToHome} />;
   }
 
-  // Renderizar pantalla principal
+  if (currentScreen === 'emotional') {
+    return <EmotionalRegulationScreen onBack={navigateToHome} />;
+  }
+
+  if (currentScreen === 'schedule') {
+    return <VisualScheduleScreen onBack={navigateToHome} />;
+  }
+
+  if (currentScreen === 'food') {
+    return <FoodModuleScreen onBack={navigateToHome} />;
+  }
+
+  if (currentScreen === 'reports') {
+    return <ReportsScreen onBack={navigateToHome} />;
+  }
+
+  if (currentScreen === 'admin') {
+    return <AdminScreen onBack={navigateToHome} />;
+  }
+
+  // Renderizar hub principal
   return (
-    <View style={styles.container}>
-      {/* Tarjeta principal con información de la app */}
-      <View style={styles.cardContainer}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+    >
+      {/* Header con título principal */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.appTitle}>Damian APP</Text>
+        <Text style={styles.appSubtitle}>Comunicación y Regulación</Text>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>v4.0</Text>
+        </View>
+      </View>
+
+      {/* Grid de módulos principales */}
+      <View style={styles.modulesGrid}>
+        {/* Módulo de Comunicación */}
         <TouchableOpacity
-          style={styles.card}
+          style={[styles.moduleCard, styles.communicationCard]}
           onPress={navigateToCommunication}
-          activeOpacity={0.9}
-          accessibilityLabel="Tarjeta de bienvenida"
-          accessibilityHint="Presiona para acceder a los botones de comunicación"
+          activeOpacity={0.8}
+          accessibilityLabel="Módulo de comunicación"
+          accessibilityHint="Accede a botones de comunicación con pictogramas"
         >
-          {/* Título principal de la aplicación */}
-          <Text style={styles.title}>Damian APP</Text>
+          <MaterialIcons name="chat" size={40} color="#ffffff" />
+          <Text style={styles.moduleTitle}>Comunicación</Text>
+          <Text style={styles.moduleDescription}>Frases y pictogramas</Text>
+        </TouchableOpacity>
 
-          {/* Subtítulo descriptivo */}
-          <Text style={styles.subtitle}>Comunicación fácil</Text>
+        {/* Módulo de Regulación Emocional */}
+        <TouchableOpacity
+          style={[styles.moduleCard, styles.emotionalCard]}
+          onPress={navigateToEmotionalRegulation}
+          activeOpacity={0.8}
+          accessibilityLabel="Módulo de regulación emocional"
+          accessibilityHint="Herramientas para manejar emociones y ansiedad"
+        >
+          <MaterialIcons
+            name="sentiment-satisfied-alt"
+            size={40}
+            color="#ffffff"
+          />
+          <Text style={styles.moduleTitle}>Regulación</Text>
+          <Text style={styles.moduleDescription}>Semáforo emocional</Text>
+        </TouchableOpacity>
 
-          {/* Badge con número de versión */}
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>v3.0</Text>
-          </View>
+        {/* Módulo de Agenda Visual */}
+        <TouchableOpacity
+          style={[styles.moduleCard, styles.scheduleCard]}
+          onPress={navigateToVisualSchedule}
+          activeOpacity={0.8}
+          accessibilityLabel="Módulo de agenda visual"
+          accessibilityHint="Rutinas diarias con pictogramas"
+        >
+          <MaterialIcons name="schedule" size={40} color="#ffffff" />
+          <Text style={styles.moduleTitle}>Agenda</Text>
+          <Text style={styles.moduleDescription}>Rutinas diarias</Text>
+        </TouchableOpacity>
 
-          {/* Icono y texto de llamada a la acción */}
-          <View style={styles.actionContainer}>
-            <MaterialIcons name="touch-app" size={32} color="#667eea" />
-            <Text style={styles.actionText}>Toca para comenzar</Text>
-          </View>
+        {/* Módulo de Alimentación */}
+        <TouchableOpacity
+          style={[styles.moduleCard, styles.foodCard]}
+          onPress={navigateToFoodModule}
+          activeOpacity={0.8}
+          accessibilityLabel="Módulo de alimentación"
+          accessibilityHint="Gamificación para probar nuevos alimentos"
+        >
+          <MaterialIcons name="restaurant" size={40} color="#ffffff" />
+          <Text style={styles.moduleTitle}>Alimentación</Text>
+          <Text style={styles.moduleDescription}>Nuevos sabores</Text>
+        </TouchableOpacity>
+
+        {/* Módulo de Reportes */}
+        <TouchableOpacity
+          style={[styles.moduleCard, styles.reportsCard]}
+          onPress={navigateToReports}
+          activeOpacity={0.8}
+          accessibilityLabel="Módulo de reportes"
+          accessibilityHint="Análisis de progreso para familia y terapeutas"
+        >
+          <MaterialIcons name="analytics" size={40} color="#ffffff" />
+          <Text style={styles.moduleTitle}>Reportes</Text>
+          <Text style={styles.moduleDescription}>Progreso y datos</Text>
+        </TouchableOpacity>
+
+        {/* Módulo de Admin/Familia */}
+        <TouchableOpacity
+          style={[styles.moduleCard, styles.adminCard]}
+          onPress={navigateToAdmin}
+          activeOpacity={0.8}
+          accessibilityLabel="Modo familia/terapeuta"
+          accessibilityHint="Configuración y personalización"
+        >
+          <MaterialIcons name="settings" size={40} color="#ffffff" />
+          <Text style={styles.moduleTitle}>Configuración</Text>
+          <Text style={styles.moduleDescription}>Modo familia</Text>
         </TouchableOpacity>
       </View>
 
       {/* Indicador visual en la parte inferior */}
       <View style={styles.bottomIndicator}>
         <Text style={styles.indicatorText}>
-          Aplicación de comunicación para Damián
+          Aplicación especializada en comunicación aumentativa y regulación
+          emocional
         </Text>
       </View>
 
       {/* Configuración de la barra de estado */}
       <StatusBar style="light" />
-    </View>
+    </ScrollView>
   );
 }
 
 /**
  * Estilos del componente Main
  *
- * Define la apariencia visual de todos los elementos:
- * - Layout y posicionamiento
- * - Colores y gradientes
- * - Tipografía y espaciado
- * - Sombras y efectos visuales
+ * Define la apariencia visual del hub principal especializado:
+ * - Layout responsivo con grid de módulos
+ * - Colores suaves y contrastantes para accesibilidad
+ * - Tipografía clara y espaciado generoso
+ * - Sombras y efectos visuales optimizados
+ * - Diseño adaptado a necesidades de autismo
  */
 const styles = StyleSheet.create({
   /**
-   * Contenedor principal de la aplicación
+   * Contenedor principal scrollable
    */
   container: {
     flex: 1,
     backgroundColor: '#667eea',
-    backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
   },
 
   /**
-   * Contenedor de la tarjeta principal
+   * Contenedor del contenido scrollable
    */
-  cardContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  contentContainer: {
+    flexGrow: 1,
+    paddingVertical: 20,
+    paddingHorizontal: 15,
   },
 
   /**
-   * Tarjeta principal con contenido
+   * Header con título y badge
    */
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 25,
-    padding: 40,
+  headerContainer: {
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 15,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 25,
-    elevation: 20,
-    minWidth: 320,
-    width: width * 0.85,
+    marginBottom: 30,
+    paddingTop: 20,
   },
 
   /**
-   * Título principal
+   * Título principal de la aplicación
    */
-  title: {
-    fontSize: 32,
+  appTitle: {
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#2d3748',
-    marginBottom: 10,
+    color: '#ffffff',
     textAlign: 'center',
+    marginBottom: 5,
   },
 
   /**
-   * Subtítulo
+   * Subtítulo descriptivo
    */
-  subtitle: {
-    fontSize: 18,
-    color: '#718096',
-    marginBottom: 20,
+  appSubtitle: {
+    fontSize: 16,
+    color: '#ffffff',
     textAlign: 'center',
+    opacity: 0.9,
+    marginBottom: 15,
   },
 
   /**
@@ -179,10 +303,9 @@ const styles = StyleSheet.create({
    */
   badge: {
     backgroundColor: '#48bb78',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 15,
-    marginBottom: 25,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
 
   /**
@@ -190,37 +313,113 @@ const styles = StyleSheet.create({
    */
   badgeText: {
     color: '#ffffff',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
   },
 
   /**
-   * Contenedor de acción
+   * Grid de módulos principales
    */
-  actionContainer: {
+  modulesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 5,
+  },
+
+  /**
+   * Card base para módulos
+   */
+  moduleCard: {
+    width: width * 0.42,
+    height: 140,
+    borderRadius: 20,
+    padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 
   /**
-   * Texto de acción
+   * Card de comunicación
    */
-  actionText: {
+  communicationCard: {
+    backgroundColor: '#FF6B6B',
+  },
+
+  /**
+   * Card de regulación emocional
+   */
+  emotionalCard: {
+    backgroundColor: '#4ECDC4',
+  },
+
+  /**
+   * Card de agenda visual
+   */
+  scheduleCard: {
+    backgroundColor: '#45B7D1',
+  },
+
+  /**
+   * Card de alimentación
+   */
+  foodCard: {
+    backgroundColor: '#96CEB4',
+  },
+
+  /**
+   * Card de reportes
+   */
+  reportsCard: {
+    backgroundColor: '#9C88FF',
+  },
+
+  /**
+   * Card de admin/familia
+   */
+  adminCard: {
+    backgroundColor: '#FFC107',
+  },
+
+  /**
+   * Título del módulo
+   */
+  moduleTitle: {
     fontSize: 16,
-    color: '#667eea',
-    fontWeight: '600',
-    marginTop: 8,
+    fontWeight: 'bold',
+    color: '#ffffff',
     textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+
+  /**
+   * Descripción del módulo
+   */
+  moduleDescription: {
+    fontSize: 12,
+    color: '#ffffff',
+    textAlign: 'center',
+    opacity: 0.9,
   },
 
   /**
    * Indicador inferior
    */
   bottomIndicator: {
-    position: 'absolute',
-    bottom: 40,
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingVertical: 20,
+    marginTop: 20,
   },
 
   /**
@@ -228,9 +427,10 @@ const styles = StyleSheet.create({
    */
   indicatorText: {
     color: '#ffffff',
-    fontSize: 14,
+    fontSize: 12,
     textAlign: 'center',
     opacity: 0.8,
     fontWeight: '500',
+    lineHeight: 16,
   },
 });
