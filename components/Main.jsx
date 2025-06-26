@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Alert } from 'react-native';
+import CommunicationButton from './CommunicationButton';
 
 /**
  * Componente Main de la aplicación Damian APP
@@ -8,13 +9,43 @@ import { StyleSheet, Text, View } from 'react-native';
  * - Fondo con gradiente morado-azul
  * - Tarjeta centrada con información de la app
  * - Badge con número de versión
+ * - Botones de comunicación modulares y reutilizables
  * - Compatibilidad con dispositivos modernos (notch, etc.)
+ *
+ * Arquitectura de componentes:
+ * - Main: Componente contenedor principal
+ * - CommunicationButton: Componente reutilizable para botones
  *
  * @returns {JSX.Element} Componente principal con el contenido de la aplicación
  * @author Damian
  * @version 1.0.0
  */
 export default function Main() {
+  /**
+   * Maneja el evento de clic en los botones de comunicación
+   *
+   * @param {string} message - El mensaje que se ha seleccionado
+   */
+  const handleButtonPress = message => {
+    Alert.alert('Botón Presionado', `Has seleccionado: "${message}"`, [
+      { text: 'OK', style: 'default' },
+    ]);
+  };
+
+  /**
+   * Configuración de los botones de comunicación
+   * Cada botón tiene un texto, color y función específica
+   */
+  const communicationButtons = [
+    { text: 'MAMÁ', color: '#FF6B6B', id: 'mama' },
+    { text: 'PAPÁ', color: '#4ECDC4', id: 'papa' },
+    { text: 'DAMIÁN', color: '#45B7D1', id: 'damian' },
+    { text: 'QUIERO', color: '#96CEB4', id: 'quiero' },
+    { text: 'ME DUELE', color: '#FFEAA7', id: 'duele' },
+    { text: 'NO ENTIENDO', color: '#DDA0DD', id: 'noentiendo' },
+    { text: 'ESPERAR', color: '#98D8C8', id: 'esperar' },
+  ];
+
   return (
     <View style={styles.container}>
       {/* Tarjeta principal con información de la app */}
@@ -23,12 +54,25 @@ export default function Main() {
         <Text style={styles.title}>Damian APP</Text>
 
         {/* Subtítulo descriptivo */}
-        <Text style={styles.subtitle}>desde Expo Go!</Text>
+        <Text style={styles.subtitle}>Comunicación fácil</Text>
 
         {/* Badge con número de versión */}
         <View style={styles.badge}>
           <Text style={styles.badgeText}>v1.0</Text>
         </View>
+      </View>
+
+      {/* Sección de botones de comunicación */}
+      <View style={styles.buttonsContainer}>
+        {communicationButtons.map(button => (
+          <CommunicationButton
+            key={button.id}
+            text={button.text}
+            color={button.color}
+            id={button.id}
+            onPress={handleButtonPress}
+          />
+        ))}
       </View>
 
       {/* Configuración de la barra de estado */}
@@ -45,6 +89,7 @@ export default function Main() {
  * - Colores y gradientes
  * - Tipografía y espaciado
  * - Sombras y efectos visuales
+ * - Botones de comunicación
  */
 const styles = StyleSheet.create({
   /**
@@ -61,8 +106,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#667eea', // Color base del gradiente
     backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', // Gradiente diagonal
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     padding: 20,
+    paddingTop: 40,
   },
 
   /**
@@ -78,7 +124,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
     borderRadius: 20, // Bordes muy redondeados
-    padding: 40, // Espaciado interno amplio
+    padding: 30, // Espaciado interno reducido
     alignItems: 'center',
     // Configuración de sombra para iOS
     shadowColor: '#000',
@@ -90,6 +136,7 @@ const styles = StyleSheet.create({
     shadowRadius: 20, // Difuminado de la sombra
     elevation: 15, // Elevación para Android
     minWidth: 300, // Ancho mínimo garantizado
+    marginBottom: 30, // Separación con los botones
   },
 
   /**
@@ -98,10 +145,10 @@ const styles = StyleSheet.create({
    * Tipografía grande y destacada para máximo impacto visual
    */
   title: {
-    fontSize: 32, // Tamaño grande para título
+    fontSize: 28, // Tamaño reducido
     fontWeight: 'bold', // Peso bold para destacar
     color: '#2d3748', // Gris oscuro para buena legibilidad
-    marginBottom: 10, // Separación con el siguiente elemento
+    marginBottom: 8, // Separación con el siguiente elemento
     textAlign: 'center', // Centrado horizontal
   },
 
@@ -111,9 +158,9 @@ const styles = StyleSheet.create({
    * Texto secundario con color más suave
    */
   subtitle: {
-    fontSize: 18, // Tamaño mediano
+    fontSize: 16, // Tamaño reducido
     color: '#718096', // Gris medio para jerarquía visual
-    marginBottom: 20, // Mayor separación antes del badge
+    marginBottom: 15, // Mayor separación antes del badge
     textAlign: 'center',
   },
 
@@ -124,9 +171,9 @@ const styles = StyleSheet.create({
    */
   badge: {
     backgroundColor: '#48bb78', // Verde éxito
-    paddingHorizontal: 16, // Padding horizontal
-    paddingVertical: 8, // Padding vertical
-    borderRadius: 15, // Bordes redondeados tipo píldora
+    paddingHorizontal: 12, // Padding horizontal reducido
+    paddingVertical: 6, // Padding vertical reducido
+    borderRadius: 12, // Bordes redondeados tipo píldora
   },
 
   /**
@@ -136,7 +183,23 @@ const styles = StyleSheet.create({
    */
   badgeText: {
     color: '#ffffff', // Blanco para contraste
-    fontSize: 14, // Tamaño pequeño para badge
+    fontSize: 12, // Tamaño pequeño para badge
     fontWeight: '600', // Semi-bold para legibilidad
+  },
+
+  /**
+   * Contenedor de los botones de comunicación
+   *
+   * Características:
+   * - Flex para ocupar el espacio disponible
+   * - Ancho completo para botones grandes
+   * - Espaciado entre botones
+   */
+  buttonsContainer: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 15, // Espaciado entre botones
   },
 });
