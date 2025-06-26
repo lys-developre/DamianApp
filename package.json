@@ -16,9 +16,8 @@
     "_comment_development": "Scripts para desarrollo y ejecución",
     "start": "expo start",
     "android": "expo start --android",
-    "ios": "expo start --ios", 
+    "ios": "expo start --ios",
     "web": "expo start --web",
-    
     "_comment_quality": "Scripts para calidad y formateo de código",
     "lint": "expo lint",
     "lint:fix": "expo lint --fix",
@@ -30,12 +29,13 @@
     "@expo/metro-runtime": "~5.0.4",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.5.1",
-    "expo": "~53.0.12",
+    "expo": "53.0.13",
     "expo-status-bar": "~2.2.3",
     "prettier": "^3.6.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.4",
+    "react-native-safe-area-context": "5.4.0",
     "react-native-web": "^0.20.0"
   },
   "devDependencies": {
