@@ -3,34 +3,38 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 /**
- * Componente DigitalTimer - Temporizador digital especializado
+ * Componente DigitalTimer - "Yo tengo paciencia"
  *
- * Temporizador visual con interfaz adaptada para necesidades especiales:
+ * Temporizador personalizado con enfoque de autoafirmación:
+ * - Mensaje en primera persona para empoderamiento
+ * - Refuerzo positivo de la autoestima
  * - Display digital grande y claro
  * - Botones de control accesibles
- * - Presets de tiempo comunes
+ * - Presets de tiempo: "Cuánto esperar"
  * - Indicadores visuales de estado
  * - Feedback visual y sonoro
+ * - Íconos de corazón para refuerzo emocional positivo
  *
  * @param {Object} props - Propiedades del componente
- * @returns {JSX.Element} Componente de temporizador digital
+ * @returns {JSX.Element} Componente de temporizador con autoafirmación
  */
 export default function DigitalTimer() {
   const [time, setTime] = useState(0); // Tiempo en segundos
   const [isRunning, setIsRunning] = useState(false);
   const [initialTime, setInitialTime] = useState(0);
+  const [activePresetIndex, setActivePresetIndex] = useState(null);
   const intervalRef = useRef(null);
 
   /**
    * Presets de tiempo comunes en segundos
    */
   const timePresets = [
-    { label: '1 min', seconds: 60 },
-    { label: '2 min', seconds: 120 },
-    { label: '5 min', seconds: 300 },
-    { label: '10 min', seconds: 600 },
-    { label: '15 min', seconds: 900 },
-    { label: '30 min', seconds: 1800 },
+    { label: '1 minuto', seconds: 60 },
+    { label: '2 minutos', seconds: 120 },
+    { label: '5 minutos', seconds: 300 },
+    { label: '10 minutos', seconds: 600 },
+    { label: '15 minutos', seconds: 900 },
+    { label: '30 minutos', seconds: 1800 },
     { label: '1 hora', seconds: 3600 },
     { label: '2 horas', seconds: 7200 },
   ];
@@ -45,9 +49,9 @@ export default function DigitalTimer() {
           if (prevTime <= 1) {
             setIsRunning(false);
             Alert.alert(
-              '¡Tiempo terminado!',
-              'El temporizador ha llegado a cero.',
-              [{ text: 'OK', style: 'default' }]
+              '¡Muy bien!',
+              'Has esperado con paciencia. ¡Excelente trabajo!',
+              [{ text: 'Gracias', style: 'default' }]
             );
             return 0;
           }
@@ -101,15 +105,17 @@ export default function DigitalTimer() {
   const resetTimer = () => {
     setIsRunning(false);
     setTime(initialTime);
+    setActivePresetIndex(null);
   };
 
   /**
    * Establece un tiempo preset
    */
-  const setPresetTime = seconds => {
+  const setPresetTime = (seconds, index) => {
     setIsRunning(false);
     setTime(seconds);
     setInitialTime(seconds);
+    setActivePresetIndex(index);
   };
 
   /**
@@ -120,22 +126,67 @@ export default function DigitalTimer() {
     return ((initialTime - time) / initialTime) * 100;
   };
 
+  /**
+   * Renderiza el texto del preset con el número destacado
+   */
+  const renderPresetText = (label, isActive, isDisabled) => {
+    const parts = label.split(' ');
+    const number = parts[0];
+    const unit = parts.slice(1).join(' ');
+
+    return (
+      <View style={styles.presetTextContainer}>
+        <Text
+          style={[
+            styles.presetButtonNumber,
+            isActive && styles.presetButtonNumberActive,
+            isDisabled && styles.presetButtonNumberDisabled,
+          ]}
+        >
+          {number}
+        </Text>
+        <Text
+          style={[
+            styles.presetButtonUnit,
+            isActive && styles.presetButtonUnitActive,
+            isDisabled && styles.presetButtonUnitDisabled,
+          ]}
+        >
+          {unit}
+        </Text>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
+      {/* Fondo de progreso que llena de abajo hacia arriba */}
+      <View
+        style={[styles.progressBackground, { height: `${getProgress()}%` }]}
+      />
+
       {/* Header del temporizador */}
       <View style={styles.header}>
-        <MaterialIcons name="timer" size={28} color="#ffffff" />
-        <Text style={styles.headerTitle}>Cuánto Esperar</Text>
+        <MaterialIcons name="favorite" size={32} color="#FFD700" />
+        <Text style={styles.headerTitle}>Yo tengo paciencia</Text>
+        <MaterialIcons name="favorite" size={32} color="#FFD700" />
       </View>
 
-      {/* Display principal del tiempo */}
+      {/* Display principal del tiempo con progreso de fondo */}
       <View style={styles.displayContainer}>
-        <Text style={styles.timeDisplay}>{formatTime(time)}</Text>
+        {/* Fondo de progreso que se llena de abajo hacia arriba */}
+        {initialTime > 0 && (
+          <View style={styles.progressBackgroundContainer}>
+            <View
+              style={[
+                styles.progressBackground,
+                { height: `${getProgress()}%` },
+              ]}
+            />
+          </View>
+        )}
 
-        {/* Barra de progreso visual */}
-        <View style={styles.progressBarContainer}>
-          <View style={[styles.progressBar, { width: `${getProgress()}%` }]} />
-        </View>
+        <Text style={styles.timeDisplay}>{formatTime(time)}</Text>
 
         {/* Indicador de estado */}
         <View style={styles.statusContainer}>
@@ -146,7 +197,7 @@ export default function DigitalTimer() {
             ]}
           />
           <Text style={styles.statusText}>
-            {isRunning ? 'En ejecución' : time > 0 ? 'Pausado' : 'Detenido'}
+            {isRunning ? 'Esperando...' : time > 0 ? 'Pausado' : 'Detenido'}
           </Text>
         </View>
       </View>
@@ -180,29 +231,30 @@ export default function DigitalTimer() {
 
       {/* Presets de tiempo */}
       <View style={styles.presetsContainer}>
-        <Text style={styles.presetsTitle}>Tiempos rápidos:</Text>
+        <Text style={styles.presetsTitle}>Cuánto esperar:</Text>
         <View style={styles.presetsGrid}>
-          {timePresets.map((preset, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.presetButton,
-                time === preset.seconds && styles.presetButtonActive,
-              ]}
-              onPress={() => setPresetTime(preset.seconds)}
-              activeOpacity={0.8}
-              accessibilityLabel={`Configurar temporizador a ${preset.label}`}
-            >
-              <Text
+          {timePresets.map((preset, index) => {
+            const isActive = activePresetIndex === index;
+            const isDisabled =
+              activePresetIndex !== null && activePresetIndex !== index;
+
+            return (
+              <TouchableOpacity
+                key={index}
                 style={[
-                  styles.presetButtonText,
-                  time === preset.seconds && styles.presetButtonTextActive,
+                  styles.presetButton,
+                  isActive && styles.presetButtonActive,
+                  isDisabled && styles.presetButtonDisabled,
                 ]}
+                onPress={() => setPresetTime(preset.seconds, index)}
+                activeOpacity={isDisabled ? 1 : 0.8}
+                disabled={isDisabled}
+                accessibilityLabel={`Configurar temporizador a ${preset.label}`}
               >
-                {preset.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                {renderPresetText(preset.label, isActive, isDisabled)}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
     </View>
@@ -226,31 +278,48 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+    position: 'relative', // Para permitir el posicionamiento absoluto del progreso
+    overflow: 'hidden', // Para que el progreso no se salga del contenedor
+  },
+
+  progressBackground: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(34, 197, 94, 0.3)', // Verde translúcido
+    borderRadius: 20,
+    zIndex: 0, // Detrás de todo el contenido
   },
 
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 25,
-    paddingVertical: 8,
+    marginBottom: 30,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    gap: 12,
+    zIndex: 1, // Por encima del fondo de progreso
   },
 
   headerTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#ffffff',
-    marginLeft: 10,
     textAlign: 'center',
-    letterSpacing: 0.5,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    letterSpacing: 1,
+    lineHeight: 28,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+    flexShrink: 1,
   },
 
   displayContainer: {
     alignItems: 'center',
     marginBottom: 25,
+    zIndex: 1, // Por encima del fondo de progreso
   },
 
   timeDisplay: {
@@ -309,6 +378,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 25,
     gap: 20,
+    zIndex: 1, // Por encima del fondo de progreso
   },
 
   controlButton: {
@@ -337,18 +407,19 @@ const styles = StyleSheet.create({
 
   presetsContainer: {
     alignItems: 'center',
+    zIndex: 1, // Por encima del fondo de progreso
   },
 
   presetsTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
     color: '#ffffff',
-    marginBottom: 18,
+    marginBottom: 20,
     textAlign: 'center',
-    letterSpacing: 0.4,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    letterSpacing: 0.6,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadowRadius: 3,
   },
 
   presetsGrid: {
@@ -361,12 +432,12 @@ const styles = StyleSheet.create({
 
   presetButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.4)',
-    minWidth: 70,
+    minWidth: 80,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -375,25 +446,79 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 3,
+    position: 'relative',
+    overflow: 'hidden',
   },
 
   presetButtonActive: {
-    backgroundColor: '#ffffff',
-    borderColor: '#ffffff',
-    shadowOpacity: 0.3,
-    elevation: 5,
+    backgroundColor: '#81C784', // Verde claro
+    borderColor: '#66BB6A',
+    transform: [{ scale: 1.1 }], // Aumenta el tamaño
+    shadowOpacity: 0.4,
+    elevation: 6,
+    minWidth: 90,
   },
 
-  presetButtonText: {
+  presetButtonDisabled: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    opacity: 0.5,
+  },
+
+  presetTextContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+
+  presetButtonNumber: {
     color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '900',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    lineHeight: 20,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+
+  presetButtonNumberActive: {
+    color: '#ffffff',
+    fontSize: 20,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 3,
+  },
+
+  presetButtonNumberDisabled: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    textShadowColor: 'transparent',
+  },
+
+  presetButtonUnit: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '600',
     textAlign: 'center',
     letterSpacing: 0.2,
+    lineHeight: 12,
+    marginTop: -2,
+    opacity: 0.9,
   },
 
-  presetButtonTextActive: {
-    color: '#764BA2',
-    fontWeight: '800',
+  presetButtonUnitActive: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '700',
+    opacity: 1,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+
+  presetButtonUnitDisabled: {
+    color: 'rgba(255, 255, 255, 0.4)',
+    opacity: 0.6,
   },
 });
