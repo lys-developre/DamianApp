@@ -31,6 +31,8 @@ export default function DigitalTimer() {
     { label: '10 min', seconds: 600 },
     { label: '15 min', seconds: 900 },
     { label: '30 min', seconds: 1800 },
+    { label: '1 hora', seconds: 3600 },
+    { label: '2 horas', seconds: 7200 },
   ];
 
   /**
@@ -72,14 +74,10 @@ export default function DigitalTimer() {
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
 
-    if (hours > 0) {
-      return `${hours.toString().padStart(2, '0')}:${minutes
-        .toString()
-        .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    return `${minutes.toString().padStart(2, '0')}:${secs
+    // Siempre mostrar formato HH:MM:SS para consistency
+    return `${hours.toString().padStart(2, '0')}:${minutes
       .toString()
-      .padStart(2, '0')}`;
+      .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   /**
@@ -126,8 +124,8 @@ export default function DigitalTimer() {
     <View style={styles.container}>
       {/* Header del temporizador */}
       <View style={styles.header}>
-        <MaterialIcons name="timer" size={24} color="#ffffff" />
-        <Text style={styles.headerTitle}>Temporizador Digital</Text>
+        <MaterialIcons name="timer" size={28} color="#ffffff" />
+        <Text style={styles.headerTitle}>Cuánto Esperar</Text>
       </View>
 
       {/* Display principal del tiempo */}
@@ -234,14 +232,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 25,
+    paddingVertical: 8,
   },
 
   headerTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#ffffff',
-    marginLeft: 8,
+    marginLeft: 10,
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 
   displayContainer: {
@@ -250,12 +254,16 @@ const styles = StyleSheet.create({
   },
 
   timeDisplay: {
-    fontSize: 48,
+    fontSize: 52,
     fontWeight: 'bold',
     color: '#ffffff',
     fontFamily: 'monospace',
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: 18,
+    letterSpacing: 2,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
   },
 
   progressBarContainer: {
@@ -286,9 +294,13 @@ const styles = StyleSheet.create({
   },
 
   statusText: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#ffffff',
-    fontWeight: '500',
+    fontWeight: '600',
+    letterSpacing: 0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 
   controlsContainer: {
@@ -328,40 +340,60 @@ const styles = StyleSheet.create({
   },
 
   presetsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
     color: '#ffffff',
-    marginBottom: 15,
+    marginBottom: 18,
     textAlign: 'center',
+    letterSpacing: 0.4,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 
   presetsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 10,
+    gap: 8,
+    maxWidth: '100%',
   },
 
   presetButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    minWidth: 70,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
 
   presetButtonActive: {
     backgroundColor: '#ffffff',
+    borderColor: '#ffffff',
+    shadowOpacity: 0.3,
+    elevation: 5,
   },
 
   presetButtonText: {
     color: '#ffffff',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
+    textAlign: 'center',
+    letterSpacing: 0.2,
   },
 
   presetButtonTextActive: {
     color: '#764BA2',
+    fontWeight: '800',
   },
 });
