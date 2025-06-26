@@ -1,25 +1,34 @@
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 /**
- * Componente de botón de comunicación reutilizable
+ * Componente de botón de comunicación reutilizable y optimizado
  *
  * Renderiza un botón grande y colorido para comunicación básica:
  * - Diseño consistente con colores personalizables
  * - Texto grande para fácil lectura
+ * - Pictogramas visuales para mejor comprensión
  * - Efectos de sombra y elevación
  * - Respuesta táctil con opacidad
  * - Accesibilidad optimizada
+ * - Memoizado con React.memo para prevenir renders innecesarios
+ *
+ * Optimizaciones de rendimiento:
+ * - React.memo para evitar renders cuando las props no cambian
+ * - Estilos optimizados para ambas plataformas (iOS/Android)
+ * - Props validadas para mejor debugging
  *
  * @param {Object} props - Propiedades del componente
  * @param {string} props.text - Texto a mostrar en el botón
  * @param {string} props.color - Color de fondo del botón
  * @param {string} props.id - Identificador único del botón
+ * @param {JSX.Element} props.icon - Componente de icono/pictograma a mostrar
  * @param {Function} props.onPress - Función a ejecutar al presionar el botón
  * @returns {JSX.Element} Componente de botón de comunicación
  * @author Damian
- * @version 1.0.0
+ * @version 2.0.0
  */
-const CommunicationButton = ({ text, color, id, onPress }) => {
+const CommunicationButton = React.memo(({ text, color, id, icon, onPress }) => {
   return (
     <TouchableOpacity
       style={[styles.communicationButton, { backgroundColor: color }]}
@@ -28,10 +37,16 @@ const CommunicationButton = ({ text, color, id, onPress }) => {
       accessibilityLabel={`Botón de comunicación: ${text}`}
       accessibilityHint={`Presiona para comunicar: ${text}`}
     >
-      <Text style={styles.buttonText}>{text}</Text>
+      <View style={styles.buttonContent}>
+        {icon && <View style={styles.iconContainer}>{icon}</View>}
+        <Text style={styles.buttonText}>{text}</Text>
+      </View>
     </TouchableOpacity>
   );
-};
+});
+
+// Establecer displayName para mejor debugging
+CommunicationButton.displayName = 'CommunicationButton';
 
 /**
  * Estilos del componente CommunicationButton
@@ -69,6 +84,33 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     // Elevación para Android
     elevation: 8,
+  },
+
+  /**
+   * Contenedor del contenido del botón
+   *
+   * Características:
+   * - Layout horizontal para icono y texto
+   * - Centrado vertical y horizontal
+   * - Espaciado entre icono y texto
+   */
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10, // Espaciado entre icono y texto
+  },
+
+  /**
+   * Contenedor del icono/pictograma
+   *
+   * Características:
+   * - Tamaño fijo para consistencia visual
+   * - Centrado del contenido
+   */
+  iconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   /**

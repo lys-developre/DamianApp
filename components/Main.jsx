@@ -1,78 +1,100 @@
+import React, { useState, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Alert } from 'react-native';
-import CommunicationButton from './CommunicationButton';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import CommunicationScreen from './CommunicationScreen';
+
+const { width } = Dimensions.get('window');
 
 /**
  * Componente Main de la aplicación Damian APP
  *
- * Renderiza la pantalla principal con diseño moderno que incluye:
- * - Fondo con gradiente morado-azul
- * - Tarjeta centrada con información de la app
- * - Badge con número de versión
- * - Botones de comunicación modulares y reutilizables
+ * Renderiza la pantalla principal con navegación simple y optimizada:
+ * - Pantalla inicial con card de bienvenida
+ * - Transición directa a pantalla de comunicación
+ * - Diseño moderno con gradiente de fondo
  * - Compatibilidad con dispositivos modernos (notch, etc.)
+ * - Funciones de navegación memoizadas para mejor rendimiento
  *
- * Arquitectura de componentes:
- * - Main: Componente contenedor principal
- * - CommunicationButton: Componente reutilizable para botones
+ * Estados de navegación:
+ * - Pantalla principal: Card de bienvenida
+ * - Pantalla de comunicación: Botones interactivos
  *
- * @returns {JSX.Element} Componente principal con el contenido de la aplicación
+ * Optimizaciones de rendimiento:
+ * - useCallback para funciones de navegación estables
+ * - Renderizado condicional eficiente
+ * - Estilos optimizados con StyleSheet
+ *
+ * @returns {JSX.Element} Componente principal con navegación simple
  * @author Damian
- * @version 1.0.0
+ * @version 3.0.0
  */
 export default function Main() {
-  /**
-   * Maneja el evento de clic en los botones de comunicación
-   *
-   * @param {string} message - El mensaje que se ha seleccionado
-   */
-  const handleButtonPress = message => {
-    Alert.alert('Botón Presionado', `Has seleccionado: "${message}"`, [
-      { text: 'OK', style: 'default' },
-    ]);
-  };
+  const [showCommunication, setShowCommunication] = useState(false);
 
   /**
-   * Configuración de los botones de comunicación
-   * Cada botón tiene un texto, color y función específica
+   * Maneja la navegación a la pantalla de comunicación
+   * Memoizado para optimizar el rendimiento
    */
-  const communicationButtons = [
-    { text: 'MAMÁ', color: '#FF6B6B', id: 'mama' },
-    { text: 'PAPÁ', color: '#4ECDC4', id: 'papa' },
-    { text: 'DAMIÁN', color: '#45B7D1', id: 'damian' },
-    { text: 'QUIERO', color: '#96CEB4', id: 'quiero' },
-    { text: 'ME DUELE', color: '#FFEAA7', id: 'duele' },
-    { text: 'NO ENTIENDO', color: '#DDA0DD', id: 'noentiendo' },
-    { text: 'ESPERAR', color: '#98D8C8', id: 'esperar' },
-  ];
+  const navigateToCommunication = useCallback(() => {
+    setShowCommunication(true);
+  }, []);
 
+  /**
+   * Maneja el regreso a la pantalla principal
+   * Memoizado para optimizar el rendimiento
+   */
+  const navigateBack = useCallback(() => {
+    setShowCommunication(false);
+  }, []);
+
+  // Renderizar pantalla de comunicación si está activa
+  if (showCommunication) {
+    return <CommunicationScreen onBack={navigateBack} />;
+  }
+
+  // Renderizar pantalla principal
   return (
     <View style={styles.container}>
       {/* Tarjeta principal con información de la app */}
-      <View style={styles.card}>
-        {/* Título principal de la aplicación */}
-        <Text style={styles.title}>Damian APP</Text>
+      <View style={styles.cardContainer}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={navigateToCommunication}
+          activeOpacity={0.9}
+          accessibilityLabel="Tarjeta de bienvenida"
+          accessibilityHint="Presiona para acceder a los botones de comunicación"
+        >
+          {/* Título principal de la aplicación */}
+          <Text style={styles.title}>Damian APP</Text>
 
-        {/* Subtítulo descriptivo */}
-        <Text style={styles.subtitle}>Comunicación fácil</Text>
+          {/* Subtítulo descriptivo */}
+          <Text style={styles.subtitle}>Comunicación fácil</Text>
 
-        {/* Badge con número de versión */}
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>v1.0</Text>
-        </View>
+          {/* Badge con número de versión */}
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>v3.0</Text>
+          </View>
+
+          {/* Icono y texto de llamada a la acción */}
+          <View style={styles.actionContainer}>
+            <MaterialIcons name="touch-app" size={32} color="#667eea" />
+            <Text style={styles.actionText}>Toca para comenzar</Text>
+          </View>
+        </TouchableOpacity>
       </View>
 
-      {/* Sección de botones de comunicación */}
-      <View style={styles.buttonsContainer}>
-        {communicationButtons.map(button => (
-          <CommunicationButton
-            key={button.id}
-            text={button.text}
-            color={button.color}
-            id={button.id}
-            onPress={handleButtonPress}
-          />
-        ))}
+      {/* Indicador visual en la parte inferior */}
+      <View style={styles.bottomIndicator}>
+        <Text style={styles.indicatorText}>
+          Aplicación de comunicación para Damián
+        </Text>
       </View>
 
       {/* Configuración de la barra de estado */}
@@ -89,117 +111,126 @@ export default function Main() {
  * - Colores y gradientes
  * - Tipografía y espaciado
  * - Sombras y efectos visuales
- * - Botones de comunicación
  */
 const styles = StyleSheet.create({
   /**
    * Contenedor principal de la aplicación
-   *
-   * Características:
-   * - Ocupa toda la pantalla (flex: 1)
-   * - Fondo con gradiente morado-azul
-   * - Centrado vertical y horizontal
-   * - Padding para separación de bordes
    */
   container: {
     flex: 1,
-    backgroundColor: '#667eea', // Color base del gradiente
-    backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', // Gradiente diagonal
+    backgroundColor: '#667eea',
+    backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     padding: 20,
-    paddingTop: 40,
+  },
+
+  /**
+   * Contenedor de la tarjeta principal
+   */
+  cardContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   /**
    * Tarjeta principal con contenido
-   *
-   * Características:
-   * - Fondo blanco semitransparente
-   * - Bordes redondeados para diseño moderno
-   * - Sombra para efecto de elevación
-   * - Padding interno generoso
-   * - Ancho mínimo para consistencia visual
    */
   card: {
     backgroundColor: '#ffffff',
-    borderRadius: 20, // Bordes muy redondeados
-    padding: 30, // Espaciado interno reducido
+    borderRadius: 25,
+    padding: 40,
     alignItems: 'center',
-    // Configuración de sombra para iOS
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 10, // Sombra proyectada hacia abajo
+      height: 15,
     },
-    shadowOpacity: 0.25, // Transparencia de la sombra
-    shadowRadius: 20, // Difuminado de la sombra
-    elevation: 15, // Elevación para Android
-    minWidth: 300, // Ancho mínimo garantizado
-    marginBottom: 30, // Separación con los botones
+    shadowOpacity: 0.3,
+    shadowRadius: 25,
+    elevation: 20,
+    minWidth: 320,
+    width: width * 0.85,
   },
 
   /**
-   * Estilo del título principal
-   *
-   * Tipografía grande y destacada para máximo impacto visual
+   * Título principal
    */
   title: {
-    fontSize: 28, // Tamaño reducido
-    fontWeight: 'bold', // Peso bold para destacar
-    color: '#2d3748', // Gris oscuro para buena legibilidad
-    marginBottom: 8, // Separación con el siguiente elemento
-    textAlign: 'center', // Centrado horizontal
-  },
-
-  /**
-   * Estilo del subtítulo
-   *
-   * Texto secundario con color más suave
-   */
-  subtitle: {
-    fontSize: 16, // Tamaño reducido
-    color: '#718096', // Gris medio para jerarquía visual
-    marginBottom: 15, // Mayor separación antes del badge
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#2d3748',
+    marginBottom: 10,
     textAlign: 'center',
   },
 
   /**
-   * Contenedor del badge de versión
-   *
-   * Elemento destacado con color verde para indicar estado activo
+   * Subtítulo
+   */
+  subtitle: {
+    fontSize: 18,
+    color: '#718096',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+
+  /**
+   * Badge de versión
    */
   badge: {
-    backgroundColor: '#48bb78', // Verde éxito
-    paddingHorizontal: 12, // Padding horizontal reducido
-    paddingVertical: 6, // Padding vertical reducido
-    borderRadius: 12, // Bordes redondeados tipo píldora
+    backgroundColor: '#48bb78',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 15,
+    marginBottom: 25,
   },
 
   /**
-   * Texto dentro del badge
-   *
-   * Texto blanco contrastante sobre fondo verde
+   * Texto del badge
    */
   badgeText: {
-    color: '#ffffff', // Blanco para contraste
-    fontSize: 12, // Tamaño pequeño para badge
-    fontWeight: '600', // Semi-bold para legibilidad
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 
   /**
-   * Contenedor de los botones de comunicación
-   *
-   * Características:
-   * - Flex para ocupar el espacio disponible
-   * - Ancho completo para botones grandes
-   * - Espaciado entre botones
+   * Contenedor de acción
    */
-  buttonsContainer: {
-    flex: 1,
-    width: '100%',
-    justifyContent: 'center',
+  actionContainer: {
     alignItems: 'center',
-    gap: 15, // Espaciado entre botones
+    justifyContent: 'center',
+  },
+
+  /**
+   * Texto de acción
+   */
+  actionText: {
+    fontSize: 16,
+    color: '#667eea',
+    fontWeight: '600',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+
+  /**
+   * Indicador inferior
+   */
+  bottomIndicator: {
+    position: 'absolute',
+    bottom: 40,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+
+  /**
+   * Texto del indicador
+   */
+  indicatorText: {
+    color: '#ffffff',
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.8,
+    fontWeight: '500',
   },
 });
