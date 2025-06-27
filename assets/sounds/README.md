@@ -12,6 +12,7 @@ Esta carpeta contiene el sistema híbrido de audio optimizado para usuarios con 
 ### 🎧 **Archivos de Audio Reales Creados**
 - `notification_soft.wav` - 400Hz, 0.8s (✅ Generado)
 - `almost_done.wav` - Tono progresivo 300-500Hz, 1.0s (✅ Generado)  
+- `phrase_change.wav` - Secuencia ascendente C-E-G-C, 0.6s (✅ Generado)
 - `celebration_epic.wav` - Acorde C-E-G, 2.0s (✅ Generado)
 
 ### 🎮 **Interfaz de Configuración**

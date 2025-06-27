@@ -249,6 +249,26 @@ const safeSounds = {
               safeHaptics.light();
             });
           break;
+        case 'phrase-change':
+          // Cambio de frase - secuencia ascendente llamativa
+          await Audio.Sound.createAsync(
+            require('../assets/sounds/phrase_change.wav'),
+            {
+              volume: options.volume || 0.6,
+              shouldPlay: true,
+              isLooping: false,
+            }
+          )
+            .then(({ sound }) => {
+              sound.playAsync();
+              // Liberar memoria después de reproducir
+              setTimeout(() => sound.unloadAsync(), 2000);
+            })
+            .catch(() => {
+              // Fallback: vibración suave
+              safeHaptics.light();
+            });
+          break;
         case 'celebration':
           // Celebración - secuencia de sonidos épicos
           for (let i = 0; i < 3; i++) {
@@ -320,6 +340,21 @@ const safeSounds = {
         if (__DEV__) {
           // eslint-disable-next-line no-console
           console.log('🔔 Simulación: sonido suave');
+        }
+        break;
+
+      case 'phrase-change':
+        if (__DEV__) {
+          // eslint-disable-next-line no-console
+          console.log('🎼 Simulación: cambio de frase ascendente...');
+        }
+        // Simular secuencia de 4 notas ascendentes
+        for (let i = 0; i < 4; i++) {
+          await new Promise(resolve => setTimeout(resolve, 120));
+          if (__DEV__) {
+            // eslint-disable-next-line no-console
+            console.log(`🎵 Nota ${i + 1}/4 (${['C5', 'E5', 'G5', 'C6'][i]})`);
+          }
         }
         break;
 
@@ -500,7 +535,7 @@ const safeSounds = {
    * Métodos de conveniencia para eventos específicos
    */
   async phraseChange() {
-    await this.playSound('soft', { volume: 0.5 });
+    await this.playSound('phrase-change', { volume: 0.6 });
   },
 
   async epicCelebration() {
@@ -516,16 +551,16 @@ const safeSounds = {
  * Frases motivacionales para TEA - Progresión lógica y refuerzo positivo
  */
 const motivationalPhrases = [
-  { minProgress: 0, maxProgress: 15, phrase: '⏰ Tenemos que esperar' },
-  { minProgress: 15, maxProgress: 25, phrase: '😌 Soy paciente' },
-  { minProgress: 25, maxProgress: 35, phrase: '🧘 Espero tranquilo' },
-  { minProgress: 35, maxProgress: 45, phrase: '👍 Lo estoy haciendo bien' },
-  { minProgress: 45, maxProgress: 55, phrase: '⭐ Ya queda poco' },
-  { minProgress: 55, maxProgress: 65, phrase: '✨ Muy bien hecho' },
-  { minProgress: 65, maxProgress: 75, phrase: '🎯 Ya casi termino' },
-  { minProgress: 75, maxProgress: 85, phrase: '🔥 Falta poquito' },
-  { minProgress: 85, maxProgress: 95, phrase: '🚀 Ya casi lo logras' },
-  { minProgress: 95, maxProgress: 100, phrase: '🎉 ¡Ya terminé!' },
+  { minProgress: 0, maxProgress: 15, phrase: 'Tenemos que esperar' },
+  { minProgress: 15, maxProgress: 25, phrase: 'Soy paciente' },
+  { minProgress: 25, maxProgress: 35, phrase: 'Espero tranquilo' },
+  { minProgress: 35, maxProgress: 45, phrase: 'Lo estoy haciendo bien' },
+  { minProgress: 45, maxProgress: 55, phrase: 'Ya queda poco' },
+  { minProgress: 55, maxProgress: 65, phrase: 'Muy bien hecho' },
+  { minProgress: 65, maxProgress: 75, phrase: 'Ya casi termino' },
+  { minProgress: 75, maxProgress: 85, phrase: 'Falta poquito' },
+  { minProgress: 85, maxProgress: 95, phrase: 'Ya casi lo logras' },
+  { minProgress: 95, maxProgress: 100, phrase: '¡Ya terminé!' },
 ];
 
 /**
@@ -717,8 +752,8 @@ export default function DigitalTimer() {
       // Vibración suave al cambiar de frase para feedback táctil
       safeHaptics.light();
 
-      // Sonido suave para el cambio de frase
-      safeSounds.phraseChange();
+      // Sonido suave para el cambio de frase - DESHABILITADO según requerimientos
+      // safeSounds.phraseChange();
 
       // Animación mejorada con múltiples efectos
       Animated.sequence([

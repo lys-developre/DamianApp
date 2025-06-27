@@ -101,6 +101,63 @@ try {
   }
   createWAVFile(almostDoneData, path.join(soundsDir, 'almost_done.wav'));
 
+  // 2.5. Phrase Change - Secuencia ascendente llamativa para cambio de frases
+  console.log('Generando phrase_change...');
+  const phraseChangeDuration = 0.6; // Corto pero memorable
+  const phraseChangeSamples = Math.floor(44100 * phraseChangeDuration);
+  const phraseChangeData = Buffer.alloc(phraseChangeSamples * 2);
+
+  for (let i = 0; i < phraseChangeSamples; i++) {
+    const time = i / 44100;
+    const progress = time / phraseChangeDuration;
+
+    // Envelope rápido con fade in/out
+    const envelope = Math.min(
+      1,
+      Math.min(i / (44100 * 0.05), (phraseChangeSamples - i) / (44100 * 0.1))
+    );
+
+    // Secuencia de 4 tonos ascendentes con timing preciso
+    let frequency;
+    let noteIntensity = 1.0;
+
+    if (progress < 0.25) {
+      // Nota 1: Do (C5) - 523.25 Hz
+      frequency = 523.25;
+      noteIntensity = 0.8;
+    } else if (progress < 0.5) {
+      // Nota 2: Mi (E5) - 659.25 Hz
+      frequency = 659.25;
+      noteIntensity = 0.9;
+    } else if (progress < 0.75) {
+      // Nota 3: Sol (G5) - 783.99 Hz
+      frequency = 783.99;
+      noteIntensity = 1.0;
+    } else {
+      // Nota 4: Do alto (C6) - 1046.50 Hz - Brillo final
+      frequency = 1046.5;
+      noteIntensity = 1.1;
+    }
+
+    // Efecto de campanilla con armónicos suaves
+    const fundamental = Math.sin(2 * Math.PI * frequency * time);
+    const harmonic2 = Math.sin(2 * Math.PI * frequency * 2 * time) * 0.3;
+    const harmonic3 = Math.sin(2 * Math.PI * frequency * 3 * time) * 0.15;
+
+    // Modulación sutil para dar "brillo"
+    const sparkle = Math.sin(2 * Math.PI * frequency * 4 * time) * 0.1;
+
+    const sample =
+      (fundamental + harmonic2 + harmonic3 + sparkle) *
+      envelope *
+      noteIntensity *
+      0.4; // Volumen controlado
+
+    const intSample = Math.floor(sample * 32767);
+    phraseChangeData.writeInt16LE(intSample, i * 2);
+  }
+  createWAVFile(phraseChangeData, path.join(soundsDir, 'phrase_change.wav'));
+
   // 3. Celebration Epic - Secuencia épica de triunfo con progresión de acordes
   console.log('Generando celebration_epic...');
   const celebrationDuration = 3.0; // Aumentado a 3 segundos para más épica
@@ -178,7 +235,14 @@ try {
   console.log('\n📝 Archivos creados:');
   console.log('   - notification_soft.wav (tono suave 400Hz)');
   console.log('   - almost_done.wav (tono progresivo 300-500Hz)');
+  console.log('   - phrase_change.wav (secuencia ascendente C-E-G-C, 0.6s)');
   console.log('   - celebration_epic.wav (progresión épica C-F-G-C, 3.0s)');
+  console.log('\n🎵 Phrase Change Features:');
+  console.log('   • Secuencia de 4 notas ascendentes: C5 → E5 → G5 → C6');
+  console.log('   • Duración corta pero memorable (0.6 segundos)');
+  console.log('   • Armónicos suaves para efecto "campanilla"');
+  console.log('   • Intensidad creciente para captar atención');
+  console.log('   • Optimizado para transiciones suaves entre frases');
   console.log('\n🎵 Celebration Epic Features:');
   console.log(
     '   • Progresión de acordes dramática: C Major → F Major → G Major → C Major'
