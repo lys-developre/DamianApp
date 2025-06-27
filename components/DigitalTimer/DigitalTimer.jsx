@@ -14,7 +14,7 @@ import CelebrationModal from './components/CelebrationModal';
 
 // Constantes y utilidades
 import { timePresets } from './constants/timePresets';
-import { calculateProgress } from './utils/timerUtils';
+import { calculateProgress, getProgressColor } from './utils/timerUtils';
 
 // Estilos
 import { timerStyles } from './styles/timerStyles';
@@ -92,25 +92,35 @@ const DigitalTimer = () => {
 
   return (
     <View style={timerStyles.container}>
+      {/* CAPAS DEL EFECTO GLASS */}
+      <View style={timerStyles.glassOverlay} />
+      <View style={timerStyles.innerGlassBorder} />
+
       {/* FONDO DE PROGRESO VISUAL MEJORADO */}
       <Animated.View
         style={[
           timerStyles.progressBackground,
           {
             height: `${progress}%`,
+            backgroundColor: getProgressColor(progress), // Color dinámico basado en progreso
             transform: [{ scale: progressPulse }],
             opacity: progressGlow.interpolate({
               inputRange: [0, 1],
-              outputRange: [0.6, 0.9],
+              outputRange: [0.8, 1.0], // Más opaco para mayor visibilidad
             }),
           },
         ]}
       >
+        {/* Efecto de brillo adicional */}
         <Animated.View
           style={[
             timerStyles.progressGlow,
             {
-              opacity: progressGlow,
+              opacity: progressGlow.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.3, 0.8],
+              }),
+              backgroundColor: getProgressColor(Math.min(progress + 10, 100)), // Color ligeramente más intenso
             },
           ]}
         />
@@ -120,6 +130,7 @@ const DigitalTimer = () => {
       <MotivationalHeader
         time={time}
         isRunning={isRunning}
+        initialTime={initialTime}
         getProgress={getProgress}
         textOpacity={textOpacity}
         phraseScale={phraseScale}

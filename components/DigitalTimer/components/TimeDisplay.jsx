@@ -63,11 +63,21 @@ const TimeDisplay = React.memo(
         <View
           style={[
             styles.statusIndicator,
-            { backgroundColor: isRunning ? '#00C853' : '#E91E63' },
+            {
+              backgroundColor: isRunning
+                ? '#00C853' // Verde cuando está corriendo
+                : time > 0
+                  ? '#2196F3' // Azul cuando está listo
+                  : '#E91E63', // Rosa/rojo cuando está detenido
+            },
           ]}
         />
         <Text style={styles.statusText}>
-          {isRunning ? 'Esperando...' : time > 0 ? 'Pausado' : 'Detenido'}
+          {isRunning
+            ? 'Esperando...'
+            : time > 0
+              ? 'Listo para iniciar'
+              : 'Detenido'}
         </Text>
       </View>
     </View>

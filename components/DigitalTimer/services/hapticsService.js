@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 // Nota: Los console.log están condicionados con __DEV__ para debugging en desarrollo
 
-import { Haptics } from 'expo-haptics';
+import * as Haptics from 'expo-haptics';
 
 /**
  * Servicio de Haptics mejorado para feedback táctil TEA
@@ -17,12 +17,56 @@ import { Haptics } from 'expo-haptics';
  */
 
 class HapticsService {
+  constructor() {
+    this.isSupported = true;
+    this.initialize();
+  }
+
+  /**
+   * Inicializa el servicio y verifica soporte de haptics
+   */
+  async initialize() {
+    try {
+      // Verificar si Haptics está disponible
+      if (!Haptics || !Haptics.impactAsync) {
+        this.isSupported = false;
+        if (__DEV__) {
+          console.warn(
+            '⚠️ Haptics no disponible - probablemente ejecutándose en simulador'
+          );
+        }
+        return;
+      }
+
+      // Hacer una prueba silenciosa
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      this.isSupported = true;
+
+      if (__DEV__) {
+        console.log('✅ HapticsService inicializado correctamente');
+      }
+    } catch (error) {
+      this.isSupported = false;
+      if (__DEV__) {
+        console.warn(
+          '⚠️ Haptics no soportado (normal en simulador):',
+          error.message
+        );
+      }
+    }
+  }
+
   /**
    * Ejecuta un haptic de forma segura con manejo de errores
    * @param {Function} hapticsFunction - Función de haptics a ejecutar
    * @param {string} type - Tipo de haptic para logging
    */
   async execute(hapticsFunction, type = 'haptic') {
+    // Si no hay soporte, salir silenciosamente
+    if (!this.isSupported) {
+      return;
+    }
+
     try {
       await hapticsFunction();
       if (__DEV__) {
@@ -33,6 +77,16 @@ class HapticsService {
         console.warn(`⚠️ Error ejecutando haptic ${type}:`, error);
       }
     }
+  }
+
+  /**
+   * Haptic suave para cada segundo del temporizador
+   * Optimizado para feedback constante sin ser molesto
+   */
+  async tick() {
+    await this.execute(async () => {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, 'Tick Segundo');
   }
 
   /**

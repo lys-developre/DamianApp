@@ -47,6 +47,7 @@ export const calculateProgress = (initialTime, currentTime) => {
 
 /**
  * Calcula el color de fondo dinámico basado en el progreso
+ * SISTEMA SEMÁFORO: Rojo → Amarillo → Verde
  *
  * @param {number} progress - Progreso actual (0-100)
  * @returns {string} Color RGB con opacidad
@@ -54,15 +55,16 @@ export const calculateProgress = (initialTime, currentTime) => {
 export const getProgressColor = progress => {
   let rgbColor;
 
-  if (progress < 50) {
-    rgbColor = '0, 229, 255'; // Cyan para inicio (0-50%)
-  } else if (progress < 80) {
-    rgbColor = '76, 175, 80'; // Verde para progreso medio (50-80%)
+  if (progress < 35) {
+    rgbColor = '220, 38, 38'; // Rojo - Empezando (como semáforo en rojo)
+  } else if (progress < 70) {
+    rgbColor = '245, 158, 11'; // Amarillo/Ámbar - Progreso medio (precaución)
   } else {
-    rgbColor = '255, 193, 7'; // Dorado para final (80-100%)
+    rgbColor = '34, 197, 94'; // Verde - Casi terminando (semáforo en verde)
   }
 
-  const opacity = 0.15 + (progress / 100) * 0.25; // Intensidad 15%-40%
+  // Opacidad glass: 50%-80% para mantener transparencia pero con buena visibilidad
+  const opacity = 0.5 + (progress / 100) * 0.3;
   return `rgba(${rgbColor}, ${opacity})`;
 };
 
@@ -72,11 +74,22 @@ export const getProgressColor = progress => {
  * @param {Array} phrases - Array de frases motivacionales
  * @param {number} progress - Progreso actual (0-100)
  * @param {boolean} isRunning - Si el temporizador está corriendo
+ * @param {number} initialTime - Tiempo inicial configurado
  * @returns {string} Frase motivacional apropiada
  */
-export const getCurrentPhrase = (phrases, progress, isRunning) => {
+export const getCurrentPhrase = (
+  phrases,
+  progress,
+  isRunning,
+  initialTime = 0
+) => {
   if (!isRunning) {
-    return 'Tenemos que esperar un poquito';
+    // Si hay tiempo configurado pero no está corriendo, mostrar mensaje de preparación
+    if (initialTime > 0) {
+      return 'Esperar';
+    }
+    // Si no hay tiempo configurado
+    return 'Selecciona un tiempo para empezar';
   }
 
   const currentPhrase = phrases.find(

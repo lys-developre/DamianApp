@@ -65,10 +65,9 @@ const CelebrationModal = React.memo(
           </Animated.View>
 
           {/* Mensaje de Felicitación */}
-          <Text style={styles.celebrationTitle}>¡INCREÍBLE!</Text>
+          <Text style={styles.celebrationTitle}>¡MUY BIEN DAMIAN!</Text>
           <Text style={styles.celebrationSubtitle}>
-            Muy bien Damian! Ya tienes mas puntos en paciencia{'\n'} ¡Ganador
-            Damian! 🌟
+            Ya tienes mas puntos en paciencia{'\n'} ¡Ganador Damian! 🌟
           </Text>
 
           {/* Medallas Giratorias */}

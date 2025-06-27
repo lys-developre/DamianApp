@@ -1,24 +1,70 @@
 /**
- * Frases motivacionales para TEA - Progresión lógica y refuerzo positivo
+ * Frases motivacionales para TEA - TEMA SEMÁFORO
  *
- * FUNCIONALIDAD:
- * - Frases que cambian según el progreso del temporizador
- * - Refuerzo positivo progresivo para mantener motivación
- * - Lenguaje optimizado para usuarios con TEA
+ * CARACTERÍSTICAS:
+ * - Mensajes relacionados con el concepto de semáforo
+ * - Progresión emocional: Rojo (espera) → Amarillo (prepárate) → Verde (avanza)
+ * - Lenguaje claro y asociativo con tráfico/semáforos
+ * - Refuerzo constante del progreso
  *
  * @author Damian App
- * @version 1.0.0
+ * @version 3.0.0 (Tema Semáforo)
  */
 
 export const motivationalPhrases = [
-  { minProgress: 0, maxProgress: 15, phrase: 'Tenemos que esperar' },
-  { minProgress: 15, maxProgress: 25, phrase: 'Hay que tener paciencia' },
-  { minProgress: 25, maxProgress: 35, phrase: 'Esperemos tranquilos' },
-  { minProgress: 35, maxProgress: 45, phrase: 'Lo estas haciendo bien' },
-  { minProgress: 45, maxProgress: 55, phrase: 'Ya queda poco' },
-  { minProgress: 55, maxProgress: 65, phrase: 'Muy bien damian!' },
-  { minProgress: 65, maxProgress: 75, phrase: 'Ya casi termino' },
-  { minProgress: 75, maxProgress: 85, phrase: 'Falta poquito' },
-  { minProgress: 85, maxProgress: 95, phrase: 'Ya casi lo logras' },
-  { minProgress: 95, maxProgress: 100, phrase: '¡Ya casi casi Damian!' },
+  // ZONA ROJA (0-35%): Espera/Detente
+  {
+    minProgress: 0,
+    maxProgress: 12,
+    phrase: '🔴 Semáforo en rojo, esperamos',
+  },
+  {
+    minProgress: 12,
+    maxProgress: 25,
+    phrase: '🔴 Debemos parar y esperar',
+  },
+  {
+    minProgress: 25,
+    maxProgress: 35,
+    phrase: '🔴 Tranquilo, aún es rojo',
+  },
+
+  // ZONA AMARILLA (35-70%): Prepárate/Precaución
+  {
+    minProgress: 35,
+    maxProgress: 45,
+    phrase: '🟡 ¡Amarillo! Prepárate Damián',
+  },
+  {
+    minProgress: 45,
+    maxProgress: 55,
+    phrase: '🟡 Casi cambia a verde',
+  },
+  {
+    minProgress: 55,
+    maxProgress: 70,
+    phrase: '🟡 ¡Muy bien! Ya casi verde',
+  },
+
+  // ZONA VERDE (70-100%): Avanza/¡Adelante!
+  {
+    minProgress: 70,
+    maxProgress: 80,
+    phrase: '🟢 ¡Ya casi!',
+  },
+  {
+    minProgress: 80,
+    maxProgress: 90,
+    phrase: '🟢 ¡Excelente progreso!',
+  },
+  {
+    minProgress: 90,
+    maxProgress: 95,
+    phrase: '🟢 ¡Ya casi llegaste al final!',
+  },
+  {
+    minProgress: 95,
+    maxProgress: 100,
+    phrase: '🟢 ¡Felicitaciones Damián!',
+  },
 ];

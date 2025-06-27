@@ -48,19 +48,21 @@ const TimePresets = React.memo(
         <View style={styles.presetsGrid}>
           {timePresets.map((preset, index) => {
             const isActive = activePresetIndex === index;
-            const isDisabled =
-              activePresetIndex !== null && activePresetIndex !== index;
+            // Permitir cambio entre presets en cualquier momento
+            const isDisabled = false; // Siempre permitir selección
+            const noActivePreset = activePresetIndex === null;
 
             return (
               <TouchableOpacity
                 key={index}
                 style={[
                   styles.presetButton,
+                  noActivePreset && styles.presetButtonNormal, // Tamaño normal si no hay activo
                   isActive && styles.presetButtonActive,
                   isDisabled && styles.presetButtonDisabled,
                 ]}
                 onPress={() => setPresetTime(preset.seconds, index)}
-                activeOpacity={isDisabled ? 1 : 0.8}
+                activeOpacity={0.8}
                 disabled={isDisabled}
                 accessibilityLabel={`Configurar temporizador a ${preset.label}`}
               >

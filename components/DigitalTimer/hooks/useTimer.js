@@ -17,11 +17,11 @@ import { audioService } from '../services/audioService';
  */
 
 export const useTimer = () => {
-  // Estados principales
-  const [time, setTime] = useState(0);
+  // Estados principales - Configuración por defecto: 1 hora
+  const [time, setTime] = useState(3600); // 1 hora = 3600 segundos
   const [isRunning, setIsRunning] = useState(false);
-  const [initialTime, setInitialTime] = useState(0);
-  const [activePresetIndex, setActivePresetIndex] = useState(null);
+  const [initialTime, setInitialTime] = useState(3600); // 1 hora por defecto
+  const [activePresetIndex, setActivePresetIndex] = useState(6); // Índice de "1 hora" en timePresets
   const [showCelebration, setShowCelebration] = useState(false);
 
   // Referencias
@@ -80,33 +80,41 @@ export const useTimer = () => {
 
   /**
    * Reinicia el temporizador a su estado inicial
+   * Mantiene el preset activo para facilitar repetir la misma duración
    */
   const resetTimer = useCallback(() => {
     setIsRunning(false);
     setTime(initialTime);
-    setActivePresetIndex(null);
+    // Mantener activePresetIndex para que siga mostrando el preset seleccionado
     hasTriggeredAlmostDone.current = false;
   }, [initialTime]);
 
   /**
    * Configura un nuevo tiempo usando un preset predefinido
+   * Permite cambiar entre presets en cualquier momento
    */
   const setPresetTime = useCallback((seconds, index) => {
+    // Detener temporizador si está corriendo
     setIsRunning(false);
+
+    // Configurar nuevo tiempo
     setTime(seconds);
     setInitialTime(seconds);
     setActivePresetIndex(index);
+
+    // Reset de estados auxiliares
     hasTriggeredAlmostDone.current = false;
   }, []);
 
   /**
    * Cierra el modal de celebración y reinicia
+   * Mantiene el preset activo para facilitar repetir la misma sesión
    */
   const closeCelebration = useCallback(() => {
     setShowCelebration(false);
     setTime(initialTime);
     setIsRunning(false);
-    setActivePresetIndex(null);
+    // Mantener activePresetIndex para facilitar repetir la misma duración
     hasTriggeredAlmostDone.current = false;
   }, [initialTime]);
 
@@ -115,13 +123,20 @@ export const useTimer = () => {
     if (isRunning && time > 0) {
       intervalRef.current = setInterval(() => {
         setTime(prevTime => {
-          if (prevTime <= 1) {
+          const newTime = prevTime - 1;
+
+          // Solo iniciar celebración cuando llegue exactamente a 0
+          if (newTime <= 0) {
             setIsRunning(false);
             startCelebration();
             return 0;
           }
-          return prevTime - 1;
+
+          return newTime;
         });
+
+        // Vibración cada segundo para feedback constante
+        hapticsService.tick();
       }, 1000);
     } else if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -143,9 +158,10 @@ export const useTimer = () => {
     }
   }, [getProgress, isRunning, triggerAlmostDoneEffect]);
 
-  // Inicializar servicios de audio al montar
+  // Inicializar servicios de audio y haptics al montar
   useEffect(() => {
     audioService.initialize();
+    hapticsService.initialize();
     return () => {
       audioService.cleanup();
     };

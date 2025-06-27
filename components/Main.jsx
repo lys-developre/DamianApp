@@ -255,11 +255,12 @@ export default function Main() {
  */
 const styles = StyleSheet.create({
   /**
-   * Contenedor principal scrollable
+   * Contenedor principal scrollable - FONDO MEJORADO
+   * Color que contrasta perfectamente con el efecto glass del DigitalTimer
    */
   container: {
     flex: 1,
-    backgroundColor: '#667eea',
+    backgroundColor: '#1E293B', // Azul gris oscuro elegante para contraste optimal
   },
 
   /**

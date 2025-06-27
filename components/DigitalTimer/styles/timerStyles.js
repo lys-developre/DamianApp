@@ -10,21 +10,50 @@ import { StyleSheet } from 'react-native';
 
 export const timerStyles = StyleSheet.create({
   // ==========================================================================
-  // CONTENEDOR PRINCIPAL
+  // CONTENEDOR PRINCIPAL - EFECTO GLASS MODERNO
   // ==========================================================================
 
   container: {
-    backgroundColor: '#1A237E', // Azul noche profundo
-    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)', // Fondo glass semitransparente
+    borderRadius: 24,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 4,
+    marginHorizontal: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)', // Borde sutil
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 10,
     position: 'relative',
     overflow: 'hidden',
+    // Efecto de backdrop blur simulado con overlay
+  },
+
+  // Capa de efecto glass adicional
+  glassOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 24,
+    zIndex: 0,
+  },
+
+  // Borde interno para mayor definición
+  innerGlassBorder: {
+    position: 'absolute',
+    top: 1,
+    left: 1,
+    right: 1,
+    bottom: 1,
+    borderRadius: 23,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    zIndex: 1,
   },
 
   // ==========================================================================
@@ -36,11 +65,19 @@ export const timerStyles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(138, 43, 226, 0.8)',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    backgroundColor: 'rgba(59, 130, 246, 0.4)', // Azul glass suave por defecto
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
     zIndex: 0,
     overflow: 'hidden',
+    // Efecto de borde para mayor visibilidad
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(59, 130, 246, 0.6)',
+    // Sombra interna suave
+    shadowColor: 'rgba(59, 130, 246, 0.3)',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
   },
 
   progressGlow: {
@@ -49,62 +86,87 @@ export const timerStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(147, 51, 234, 0.5)',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Brillo glass blanco
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    // Efecto de gradiente glass
+    shadowColor: 'rgba(255, 255, 255, 0.4)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
   },
 
   // ==========================================================================
-  // HEADER Y TÍTULO PRINCIPAL
+  // HEADER Y TÍTULO PRINCIPAL - DISEÑO MODERNO Y LIMPIO
   // ==========================================================================
 
   header: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 40,
-    paddingVertical: 25,
-    paddingHorizontal: 15,
+    marginBottom: 30,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
     zIndex: 1,
-    minHeight: 80,
   },
 
   motivationalFrame: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 32,
-    borderWidth: 2.5,
-    borderColor: 'rgba(0, 229, 255, 0.9)',
-    paddingVertical: 28,
-    paddingHorizontal: 32,
-    marginHorizontal: 12,
-    marginVertical: 8,
-    shadowColor: '#00E5FF',
+    backgroundColor: 'rgba(30, 30, 30, 0.9)', // Fondo oscuro tipo semáforo
+    borderRadius: 20,
+    borderWidth: 4,
+    borderColor: '#2D3748', // Marco grueso como semáforo real
+    paddingVertical: 22,
+    paddingHorizontal: 26,
+    marginHorizontal: 16,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.45,
-    shadowRadius: 20,
-    elevation: 15,
-    minWidth: '90%',
-    maxWidth: '98%',
-    minHeight: 88,
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    elevation: 12,
+    minWidth: '85%',
+    maxWidth: '95%',
     overflow: 'hidden',
     position: 'relative',
-    backdropFilter: 'blur(10px)',
   },
 
   headerTitle: {
-    fontSize: 34,
+    fontSize: 28,
     fontWeight: '700',
     fontFamily: 'System',
-    color: '#1A237E',
+    color: '#F7FAFC', // Texto blanco por defecto para contraste
     textAlign: 'center',
-    letterSpacing: 0.8,
-    lineHeight: 42,
+    letterSpacing: 0.5,
+    lineHeight: 36,
     maxWidth: '100%',
-    minHeight: 44,
-    textShadowColor: 'rgba(0, 229, 255, 0.3)',
-    textShadowOffset: { width: 1, height: 2 },
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)', // Sombra oscura para resaltar
+    textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
-    marginBottom: 2,
-    paddingHorizontal: 5,
+  },
+
+  // Estados del semáforo - COLORES BRILLANTES Y VISIBLES
+  headerTitleInitial: {
+    color: '#FF4D4D', // Rojo brillante tipo semáforo
+    fontWeight: '800',
+    textShadowColor: 'rgba(255, 77, 77, 0.6)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
+  },
+
+  headerTitleActive: {
+    color: '#FFD700', // Amarillo dorado brillante tipo semáforo
+    fontWeight: '800',
+    textShadowColor: 'rgba(255, 215, 0, 0.6)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
+  },
+
+  headerTitleAdvanced: {
+    color: '#00FF7F', // Verde brillante tipo semáforo
+    fontWeight: '800',
+    textShadowColor: 'rgba(0, 255, 127, 0.6)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
 
   motivationalFrameGlow: {
@@ -113,21 +175,20 @@ export const timerStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 32,
-    backgroundColor: 'rgba(0, 229, 255, 0.08)',
-    opacity: 0.7,
+    borderRadius: 16,
+    opacity: 0.4,
     zIndex: 1,
   },
 
   motivationalFrameInnerBorder: {
     position: 'absolute',
-    top: 2,
-    left: 2,
-    right: 2,
-    bottom: 2,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.7)',
+    top: 1,
+    left: 1,
+    right: 1,
+    bottom: 1,
+    borderRadius: 15,
+    borderWidth: 0.5,
+    borderColor: 'rgba(59, 130, 246, 0.3)', // Azul sutil para combinar con el theme
     zIndex: 2,
   },
 
@@ -137,8 +198,8 @@ export const timerStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 32,
-    backgroundColor: 'rgba(26, 35, 126, 0.03)',
+    borderRadius: 16,
+    backgroundColor: 'transparent',
     zIndex: 0,
   },
 
@@ -297,35 +358,49 @@ export const timerStyles = StyleSheet.create({
   },
 
   presetButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.6)',
-    minWidth: 80,
+    backgroundColor: 'rgba(71, 85, 105, 0.9)', // Fondo gris azulado oscuro
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: 'rgba(148, 163, 184, 0.8)', // Borde gris más claro
+    minWidth: 75, // Tamaño base más pequeño
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.15,
     shadowRadius: 3,
     elevation: 3,
     position: 'relative',
     overflow: 'hidden',
+    transform: [{ scale: 0.9 }], // Escala reducida cuando no está activo
+  },
+
+  // Estilo cuando no hay ningún preset activo (todos normales)
+  presetButtonNormal: {
+    transform: [{ scale: 1.0 }], // Tamaño normal cuando no hay activo
+    minWidth: 85,
   },
 
   presetButtonActive: {
-    backgroundColor: '#7C4DFF',
-    borderColor: '#673AB7',
-    transform: [{ scale: 1.1 }],
-    shadowOpacity: 0.4,
-    elevation: 6,
-    minWidth: 90,
+    backgroundColor: '#7C4DFF', // Morado brillante para el activo
+    borderColor: '#5E35B1',
+    borderWidth: 3,
+    transform: [{ scale: 1.2 }], // Escala más grande para el activo
+    shadowOpacity: 0.5,
+    elevation: 8,
+    minWidth: 100, // Ancho mayor para el activo
   },
 
   presetButtonDisabled: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    opacity: 0.6,
+    backgroundColor: 'rgba(45, 55, 72, 0.8)', // Fondo más oscuro
+    borderColor: 'rgba(45, 55, 72, 0.9)',
+    opacity: 0.9, // Menos transparencia
+    // Sombra más sutil para botones desactivados
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
   presetTextContainer: {
@@ -336,11 +411,11 @@ export const timerStyles = StyleSheet.create({
 
   presetButtonNumber: {
     color: '#ffffff',
-    fontSize: 18,
+    fontSize: 16, // Tamaño base más pequeño
     fontWeight: '900',
     textAlign: 'center',
     letterSpacing: 0.5,
-    lineHeight: 20,
+    lineHeight: 18,
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
@@ -348,41 +423,48 @@ export const timerStyles = StyleSheet.create({
 
   presetButtonNumberActive: {
     color: '#ffffff',
-    fontSize: 20,
+    fontSize: 22, // Tamaño más grande para el activo
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 3,
+    lineHeight: 24,
   },
 
   presetButtonNumberDisabled: {
-    color: 'rgba(255, 255, 255, 0.5)',
-    textShadowColor: 'transparent',
+    color: 'rgba(255, 255, 255, 0.85)', // Texto más visible
+    textShadowColor: 'rgba(0, 0, 0, 0.6)', // Sombra para mayor contraste
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 
   presetButtonUnit: {
     color: '#ffffff',
-    fontSize: 11,
+    fontSize: 10, // Tamaño base más pequeño para unidades
     fontWeight: '600',
     textAlign: 'center',
     letterSpacing: 0.2,
-    lineHeight: 12,
+    lineHeight: 11,
     marginTop: -2,
     opacity: 0.9,
   },
 
   presetButtonUnitActive: {
     color: '#ffffff',
-    fontSize: 12,
+    fontSize: 13, // Tamaño más grande para unidad activa
     fontWeight: '700',
     opacity: 1,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
+    lineHeight: 14,
   },
 
   presetButtonUnitDisabled: {
-    color: 'rgba(255, 255, 255, 0.4)',
-    opacity: 0.6,
+    color: 'rgba(255, 255, 255, 0.75)', // Texto más visible
+    opacity: 0.9, // Menos transparencia
+    textShadowColor: 'rgba(0, 0, 0, 0.5)', // Sombra para mayor contraste
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
 
   // ==========================================================================
