@@ -467,12 +467,15 @@ export default function DigitalTimer() {
         - Mensaje central que cambia automáticamente según el progreso del temporizador
         - Frases motivacionales progresivas para mantener el ánimo
         - Tipografía priorizada para máxima legibilidad y impacto visual
+        - Marco decorativo con fondo distintivo para mayor prominencia
         - Z-index elevado para mantenerse visible sobre el fondo de progreso
       */}
       <View style={styles.header}>
-        <Animated.Text style={[styles.headerTitle, { opacity: textOpacity }]}>
-          {getCurrentMotivationalPhrase()}
-        </Animated.Text>
+        <View style={styles.motivationalFrame}>
+          <Animated.Text style={[styles.headerTitle, { opacity: textOpacity }]}>
+            {getCurrentMotivationalPhrase()}
+          </Animated.Text>
+        </View>
       </View>
 
       {/* 
@@ -664,25 +667,49 @@ const styles = StyleSheet.create({
   },
 
   /**
+   * Marco decorativo para los mensajes motivacionales
+   *
+   * DISEÑO DISTINTIVO PARA TEA:
+   * - Fondo semi-transparente blanco para contraste suave
+   * - Borde decorativo con gradiente visual simulado
+   * - Esquinas redondeadas para apariencia amigable
+   * - Sombra suave para efecto de profundidad
+   * - Espaciado interno generoso para respiración del texto
+   */
+  motivationalFrame: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)', // Fondo blanco semi-transparente
+    borderRadius: 25, // Esquinas muy redondeadas para suavidad
+    borderWidth: 3, // Borde grueso para visibilidad
+    borderColor: '#FFE082', // Borde amarillo dorado suave
+    paddingVertical: 20, // Espaciado vertical generoso
+    paddingHorizontal: 25, // Espaciado horizontal amplio
+    marginHorizontal: 10, // Margen lateral para respiración
+    shadowColor: '#000', // Sombra para profundidad
+    shadowOffset: { width: 0, height: 4 }, // Sombra hacia abajo
+    shadowOpacity: 0.25, // Opacidad media para definición
+    shadowRadius: 8, // Radio de sombra suave
+    elevation: 6, // Elevación en Android para sombra
+    minWidth: '85%', // Ancho mínimo del marco
+    maxWidth: '95%', // Ancho máximo para adaptabilidad
+  },
+
+  /**
    * Título principal del temporizador con frases motivacionales dinámicas
    *
    * TIPOGRAFÍA OPTIMIZADA PARA TEA:
    * - Fuente sans-serif legible y amigable
    * - Tamaño aumentado en 15% para mayor impacto visual
    * - Peso medium para suavidad visual
-   * - Sombra suave para mejor legibilidad
+   * - Color oscuro para contraste con el fondo claro del marco
    * - Espaciado optimizado para comprensión
    */
   headerTitle: {
     fontSize: 32, // Aumentado de 28 a 32 (~15% más grande)
     fontWeight: '600', // Peso medium, más suave que bold
-    color: '#ffffff', // Blanco puro
+    color: '#2E3A47', // Color oscuro para contraste con fondo claro
     textAlign: 'center', // Centrado
     letterSpacing: 0.5, // Espaciado moderado para claridad
     lineHeight: 38, // Altura de línea ajustada proporcionalmente
-    textShadowColor: 'rgba(0, 0, 0, 0.4)', // Sombra suave
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3, // Radio de sombra suave
     maxWidth: '100%', // Ocupa todo el ancho disponible
     minHeight: 40, // Altura mínima ajustada proporcionalmente
     fontFamily: 'System', // Fuente del sistema, más legible
