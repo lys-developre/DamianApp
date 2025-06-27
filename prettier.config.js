@@ -53,8 +53,8 @@ module.exports = {
   arrowParens: 'avoid',
 
   /**
-   * Configuración de fin de línea automático
-   * Compatibilidad multiplataforma (Windows/Unix)
+   * Configuración de fin de línea usando LF (Unix)
+   * Evita problemas con caracteres CR/LF en sistemas mixtos
    */
-  endOfLine: 'auto',
+  endOfLine: 'lf',
 };

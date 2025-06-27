@@ -61,6 +61,9 @@ module.exports = defineConfig([
     languageOptions: {
       ecmaVersion: 2022, // Soporte para ES2022
       sourceType: 'module', // Uso de módulos ES6
+      globals: {
+        __DEV__: 'readonly', // Variable global de React Native para modo desarrollo
+      },
     },
 
     /**
@@ -82,13 +85,19 @@ module.exports = defineConfig([
           printWidth: 80, // Líneas máximo 80 caracteres
           bracketSpacing: true, // Espacios dentro de llaves { foo }
           arrowParens: 'avoid', // Sin paréntesis en arrow functions con un parámetro
+          endOfLine: 'lf', // Usar LF en lugar de CRLF para evitar problemas
         },
       ],
 
       /**
        * Reglas de calidad específicas para React Native
        */
-      'no-console': 'warn', // Advertir sobre console.log en producción
+      'no-console': [
+        'warn',
+        {
+          allow: ['warn', 'error'], // Permitir console.warn y console.error
+        },
+      ], // Advertir sobre console.log en producción
       'no-unused-vars': 'warn', // Detectar variables declaradas pero no utilizadas
       'no-undef': 'error', // Error por variables no definidas
     },
