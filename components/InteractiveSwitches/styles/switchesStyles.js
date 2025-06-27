@@ -1,37 +1,22 @@
 import { StyleSheet } from 'react-native';
 
 /**
- * Estilos del componente InteractiveSwitches - 40 switches estilo iOS/Moderno
- * Diseño EXACTO basado en la imagen de referencia con texto ON/OFF
+ * Estilos del componente InteractiveSwitches - 40 switches TIPO iOS
+ * Diseño exacto basado en la imagen iOS proporcionada (4 columnas)
  *
- * CARACTERÍSTICAS EXACTAS DE LA IMAGEN:
- * - Track ovalado más grande (32px alto, borderRadius 16px)
- * - Thumb circular blanco más grande (28px) que se desliza suavemente
- * - Texto "OFF" lado izquierdo (gris cuando desactivado)
- * - Texto "ON" lado derecho (blanco cuando activado)
- * - Color desactivado: #E0E0E0 (gris claro)
- * - Color activado: #4CAF50 (verde Material Design)
- * - Optimizado para Android con elevación y sombras
- *
- * ESPECIFICACIONES PARA ANDROID:
- * - Forma ovalada con texto integrado
- * - Thumb con zIndex alto para estar encima del texto
- * - Sombras más pronunciadas para Android (elevation)
- * - Borde definido para mejor contraste en Android
- * - Texto con transición de opacidad animada
- * - Proporciones ajustadas (aspect ratio 2.8)
- * - Área táctil ampliada para dedos
- *
- * PRINCIPIOS UX/UI APLICADOS:
- * - Diseño familiar tipo iOS pero optimizado para Android
- * - Feedback visual claro con texto y colores
- * - Accesibilidad mejorada con texto descriptivo
- * - Transiciones suaves y naturales
- * - Consistencia visual en todos los estados
- * - Affordance clara con texto explícito
+ * CARACTERÍSTICAS EXACTAS DE LA IMAGEN iOS:
+ * - 40 switches compactos tipo iOS (40 total)
+ * - Track súper redondeado (28px alto, borderRadius 14px)
+ * - Thumb circular grande (24px) como iOS nativo
+ * - Color desactivado: #E5E5EA (gris iOS claro)
+ * - Color activado: #007AFF (azul iOS exacto)
+ * - Distribución: 4 switches por fila (10 filas - 40 total)
+ * - Mayor espaciado entre switches
+ * - Sombras sutiles tipo iOS
+ * - Sin texto, solo estados visuales
  *
  * @author Damian App
- * @version 6.0.0 - iOS Style with ON/OFF Text (Android Optimized)
+ * @version 17.0.0 - 40 iOS Switches (4x10 grid)
  */
 
 export const switchesStyles = StyleSheet.create({
@@ -100,88 +85,56 @@ export const switchesStyles = StyleSheet.create({
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between', // Distribución uniforme mejorada
+    justifyContent: 'space-between', // Para 4 switches por fila con espaciado uniforme
     alignItems: 'flex-start',
-    paddingHorizontal: 8, // Padding reducido para switches más grandes
-    paddingVertical: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
     flex: 1,
-    gap: 8, // Gap reducido para mejor distribución con texto
+    gap: 16, // Espaciado ligeramente reducido para acomodar 10 filas
   },
 
   switchContainer: {
-    width: '22%', // Switches más anchos para mejor visibilidad
-    aspectRatio: 2.8, // Proporción más alargada como en la imagen
-    marginBottom: 14, // Separación vertical optimizada
+    width: '22%', // Para 4 switches por fila con espaciado
+    aspectRatio: 1.9, // Proporción iOS exacta
+    marginBottom: 16, // Espaciado vertical optimizado para 10 filas
     justifyContent: 'center',
     alignItems: 'center',
-    // Área táctil aumentada para mejor accesibilidad
-    minHeight: 42, // Altura aumentada para acomodar texto
-    minWidth: 60, // Ancho mínimo para switches con texto
-    // Padding interno para área táctil más amplia
-    paddingVertical: 8,
-    paddingHorizontal: 6,
   },
 
-  // Track del switch - DISEÑO EXACTO COMO EN LA IMAGEN CON TEXTO
+  // Track del switch - EXACTO COMO EN LA IMAGEN iOS
   switchTrack: {
-    width: '100%',
-    height: 32, // Altura mayor para acomodar el texto
-    borderRadius: 16, // Radio exacto para forma ovalada perfecta
+    width: 46, // Ancho fijo tipo iOS (46px)
+    height: 28, // Alto fijo tipo iOS (28px)
+    borderRadius: 14, // Radio completo para forma súper redondeada
+    backgroundColor: '#E5E5EA', // Color iOS desactivado exacto
     justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4, // Padding para el texto y thumb
-    // Sombras sutiles para Android
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
     elevation: 2,
-    // Borde sutil como en la imagen
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.12)',
     position: 'relative',
   },
 
-  // Thumb del switch - CÍRCULO PERFECTO COMO EN LA IMAGEN
+  // Track activado - Color iOS exacto
+  switchTrackActive: {
+    backgroundColor: '#007AFF', // Azul iOS exacto
+  },
+
+  // Thumb del switch - COMO EN LA IMAGEN iOS
   switchThumb: {
-    width: 28, // Tamaño más grande para que se vea bien en Android
-    height: 28,
-    borderRadius: 14, // Perfectamente circular
-    // Sombras más pronunciadas para Android
+    width: 24, // Thumb grande tipo iOS
+    height: 24,
+    borderRadius: 12, // Perfectamente circular
+    backgroundColor: '#FFFFFF',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowRadius: 3,
     elevation: 4,
-    // Propiedades para animaciones suaves
     position: 'absolute',
-    top: 2, // Centrado en el track de 32px
-    zIndex: 10, // Asegurar que esté encima del texto
-    // Borde blanco como en la imagen
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.9)',
-  },
-
-  // Texto dentro del switch - COMO EN LA IMAGEN
-  switchText: {
-    fontSize: 11, // Tamaño pequeño para caber en el switch
-    fontWeight: '600',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    position: 'absolute',
-    zIndex: 5, // Debajo del thumb pero visible
-  },
-
-  // Texto OFF (lado izquierdo)
-  switchTextOff: {
-    left: 8,
-    color: '#757575', // Gris para estado desactivado
-  },
-
-  // Texto ON (lado derecho)
-  switchTextOn: {
-    right: 8,
-    color: '#FFFFFF', // Blanco para estado activado
+    top: 2, // Centrado en el track de 28px
+    left: 2, // Posición inicial
   },
 
   // ==========================================================================

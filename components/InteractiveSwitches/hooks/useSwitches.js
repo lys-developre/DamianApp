@@ -15,11 +15,12 @@ import { useState, useCallback } from 'react';
  */
 
 export const useSwitches = () => {
-  // Estado inicial: 40 switches todos desactivados
+  // Estado inicial: 40 switches estilo iOS
   const [switches, setSwitches] = useState(
     Array.from({ length: 40 }, (_, index) => ({
-      id: index,
+      id: index + 1,
       isActive: false,
+      label: `Switch ${index + 1}`,
     }))
   );
 

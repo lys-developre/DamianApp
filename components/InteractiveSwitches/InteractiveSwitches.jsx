@@ -13,17 +13,20 @@ import SwitchesCelebrationModal from './components/SwitchesCelebrationModal';
 import { switchesStyles } from './styles/switchesStyles';
 
 /**
- * InteractiveSwitches - Componente de switches interactivos estilo Android
+ * InteractiveSwitches - Componente de switches interactivos estilo iOS
  *
  * CARACTERÍSTICAS:
- * - 40 switches interactivos estilo Android
- * - Efecto glass moderno similar a DigitalTimer
+ * - 40 switches interactivos estilo iOS nativo
+ * - Diseño exacto basado en imagen de referencia iOS
+ * - Track redondeado (#E5E5EA/#007AFF), thumb grande (24px)
+ * - Distribución: 4 switches por fila (10 filas, 40 total)
+ * - Espaciado optimizado para 10 filas completas
  * - Vibración al presionar y al completar todos
  * - Modal de celebración al completar todos los switches
  * - Arquitectura modular con hooks y componentes separados
  *
  * @author Damian App
- * @version 2.0.0
+ * @version 17.0.0 - 40 iOS Switches (4x10 grid)
  */
 
 const InteractiveSwitches = () => {
