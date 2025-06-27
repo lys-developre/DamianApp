@@ -16,6 +16,7 @@ import FoodModuleScreen from './FoodModuleScreen';
 import ReportsScreen from './ReportsScreen';
 import AdminScreen from './AdminScreen';
 import DigitalTimer from './DigitalTimer';
+import InteractiveSwitches from './InteractiveSwitches';
 
 const { width } = Dimensions.get('window');
 
@@ -143,6 +144,9 @@ export default function Main() {
 
       {/* Temporizador Digital */}
       <DigitalTimer />
+
+      {/* Switches Interactivos */}
+      <InteractiveSwitches />
 
       {/* Grid de módulos principales */}
       <View style={styles.modulesGrid}>
