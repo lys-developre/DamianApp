@@ -1,6 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Animated,
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+
+/**
+ * Frases motivacionales cortas diseñadas específicamente para TEA
+ *
+ * Características optimizadas:
+ * - Frases muy cortas y directas con emojis expresivos
+ * - Lenguaje simple y claro
+ * - Progresión lógica y predecible
+ * - Refuerzo positivo constante
+ * - Emojis que refuerzan el mensaje de cada etapa
+ *
+ * @type {Array<{minProgress: number, maxProgress: number, phrase: string}>}
+ */
+const motivationalPhrases = [
+  { minProgress: 0, maxProgress: 15, phrase: '⏰ Tenemos que esperar' },
+  { minProgress: 15, maxProgress: 25, phrase: '😌 Soy paciente' },
+  { minProgress: 25, maxProgress: 35, phrase: '🧘 Espero tranquilo' },
+  { minProgress: 35, maxProgress: 45, phrase: '👍 Lo estoy haciendo bien' },
+  { minProgress: 45, maxProgress: 55, phrase: '⭐ Ya queda poco' },
+  { minProgress: 55, maxProgress: 65, phrase: '✨ Muy bien hecho' },
+  { minProgress: 65, maxProgress: 75, phrase: '🎯 Ya casi termino' },
+  { minProgress: 75, maxProgress: 85, phrase: '🔥 Falta poquito' },
+  { minProgress: 85, maxProgress: 95, phrase: '🚀 Ya casi lo logras' },
+  { minProgress: 95, maxProgress: 100, phrase: '🎉 ¡Ya terminé!' },
+];
 
 /**
  * Componente DigitalTimer - "Yo tengo paciencia"
@@ -9,6 +41,8 @@ import { MaterialIcons } from '@expo/vector-icons';
  * enfocado en el desarrollo de la paciencia y autoafirmación personal.
  *
  * CARACTERÍSTICAS PRINCIPALES:
+ * - Frases motivacionales automáticas que cambian según el progreso del temporizador
+ * - Tipografía optimizada con máxima prioridad visual para el texto motivacional
  * - Mensaje de autoafirmación en primera persona para empoderamiento
  * - Refuerzo positivo continuo de la autoestima
  * - Display digital grande y de alto contraste para mejor legibilidad
@@ -16,14 +50,15 @@ import { MaterialIcons } from '@expo/vector-icons';
  * - Presets de tiempo predefinidos para diferentes actividades terapéuticas
  * - Indicadores visuales de estado del temporizador
  * - Feedback visual progresivo que llena el contenedor de abajo hacia arriba
- * - Íconos de corazón dorado para refuerzo emocional positivo
+ * - Animaciones suaves en el cambio de frases para mejor experiencia visual
+ * - Paleta de colores moderna y profesional
  * - Mensajes de felicitación personalizados al completar el tiempo
  *
  * ENFOQUE TERAPÉUTICO:
  * - Ayuda a desarrollar la capacidad de espera
- * - Fortalece la autoestima través de autoafirmaciones
+ * - Fortalece la autoestima través de autoafirmaciones progresivas
  * - Proporciona estructura visual clara y predecible
- * - Celebra los logros con refuerzo positivo
+ * - Celebra los logros con refuerzo positivo automático
  *
  * @component
  * @example
@@ -53,6 +88,12 @@ export default function DigitalTimer() {
 
   /** @type {React.MutableRefObject} Referencia al intervalo del temporizador para limpieza */
   const intervalRef = useRef(null);
+
+  /** @type {React.MutableRefObject} Valor animado para la opacidad del texto motivacional */
+  const textOpacity = useRef(new Animated.Value(1)).current;
+
+  /** @type {React.MutableRefObject} Frase anterior para detectar cambios */
+  const previousPhrase = useRef('😌 Esperar un poquito');
 
   // ============================================================================
   // CONFIGURACIÓN DE PRESETS
@@ -133,6 +174,39 @@ export default function DigitalTimer() {
       }
     };
   }, [isRunning, time]);
+
+  /**
+   * Efecto para animar el cambio de frases motivacionales
+   *
+   * FUNCIONALIDAD:
+   * - Detecta cuando cambia la frase motivacional
+   * - Aplica una animación suave de fade out/fade in
+   * - Mejora la experiencia visual y mantiene la atención
+   *
+   * @effect
+   * @dependency {string} getCurrentMotivationalPhrase() - Frase actual
+   */
+  useEffect(() => {
+    const currentPhrase = getCurrentMotivationalPhrase();
+
+    if (previousPhrase.current !== currentPhrase) {
+      // Animación más visible y suave para TEA
+      Animated.sequence([
+        Animated.timing(textOpacity, {
+          toValue: 0, // Fade out completo para transición más clara
+          duration: 400, // Duración más larga para mejor percepción
+          useNativeDriver: true,
+        }),
+        Animated.timing(textOpacity, {
+          toValue: 1,
+          duration: 600, // Fade in más lento para suavidad
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      previousPhrase.current = currentPhrase;
+    }
+  }, [time, isRunning, textOpacity, getCurrentMotivationalPhrase]);
 
   // ============================================================================
   // FUNCIONES AUXILIARES
@@ -273,10 +347,45 @@ export default function DigitalTimer() {
    * // Con 5 minutos inicial y 2 minutos restantes
    * getProgress() // returns 60 (60% completado)
    */
-  const getProgress = () => {
+  const getProgress = useCallback(() => {
     if (initialTime === 0) return 0;
     return ((initialTime - time) / initialTime) * 100;
-  };
+  }, [initialTime, time]);
+
+  /**
+   * Obtiene la frase motivacional apropiada según el progreso del temporizador
+   *
+   * LÓGICA DE SELECCIÓN:
+   * - Calcula el progreso actual como porcentaje
+   * - Encuentra la frase que corresponde al rango de progreso
+   * - Proporciona refuerzo positivo progresivo
+   *
+   * CASOS ESPECIALES:
+   * - Si no hay tiempo inicial: muestra mensaje de autoafirmación base
+   * - Si el temporizador no está corriendo: muestra mensaje estático
+   *
+   * @returns {string} Frase motivacional apropiada para el momento actual
+   *
+   * @example
+   * // Con 50% de progreso
+   * getCurrentMotivationalPhrase() // returns "Hay que esperar un poco más"
+   */
+  const getCurrentMotivationalPhrase = useCallback(() => {
+    // Si no hay tiempo configurado o no está corriendo, mostrar mensaje base
+    if (initialTime === 0 || !isRunning) {
+      return '😌 Esperar un poquito';
+    }
+
+    const progress = getProgress();
+
+    // Buscar la frase que corresponde al progreso actual
+    const currentPhrase = motivationalPhrases.find(
+      phrase => progress >= phrase.minProgress && progress < phrase.maxProgress
+    );
+
+    // Fallback al mensaje base si no se encuentra una frase
+    return currentPhrase ? currentPhrase.phrase : '😌 Esperar un poquito';
+  }, [initialTime, isRunning, getProgress]); // Dependencias del callback
 
   // ============================================================================
   // FUNCIONES DE RENDERIZADO
@@ -346,7 +455,7 @@ export default function DigitalTimer() {
         FONDO DE PROGRESO VISUAL
         - Se posiciona de forma absoluta para llenar el contenedor de abajo hacia arriba
         - La altura se calcula dinámicamente basada en el progreso del temporizador
-        - Color verde translúcido para no interferir con la legibilidad del contenido
+        - Color amarillo intenso para excelente contraste con el fondo azul
         - Z-index 0 para mantenerse detrás de todos los demás elementos
       */}
       <View
@@ -354,15 +463,16 @@ export default function DigitalTimer() {
       />
 
       {/* 
-        HEADER CON MENSAJE DE AUTOAFIRMACIÓN
-        - Corazones dorados a ambos lados para refuerzo emocional positivo
-        - Mensaje central "Yo tengo paciencia" en primera persona para empoderamiento
+        HEADER CON MENSAJE DE AUTOAFIRMACIÓN DINÁMICO
+        - Mensaje central que cambia automáticamente según el progreso del temporizador
+        - Frases motivacionales progresivas para mantener el ánimo
+        - Tipografía priorizada para máxima legibilidad y impacto visual
         - Z-index elevado para mantenerse visible sobre el fondo de progreso
       */}
       <View style={styles.header}>
-        <MaterialIcons name="favorite" size={32} color="#FFD700" />
-        <Text style={styles.headerTitle}>Yo tengo paciencia</Text>
-        <MaterialIcons name="favorite" size={32} color="#FFD700" />
+        <Animated.Text style={[styles.headerTitle, { opacity: textOpacity }]}>
+          {getCurrentMotivationalPhrase()}
+        </Animated.Text>
       </View>
 
       {/* 
@@ -379,7 +489,7 @@ export default function DigitalTimer() {
           <View
             style={[
               styles.statusIndicator,
-              { backgroundColor: isRunning ? '#48bb78' : '#e53e3e' },
+              { backgroundColor: isRunning ? '#74C69D' : '#F4A261' },
             ]}
           />
           <Text style={styles.statusText}>
@@ -471,11 +581,11 @@ export default function DigitalTimer() {
  * - Efectos de sombra para profundidad y definición
  * - Responsive design para diferentes tamaños de pantalla
  *
- * PALETA DE COLORES:
- * - Morado principal (#764BA2): Color base relajante y profesional
- * - Verde (#48bb78, #81C784): Estados activos y progreso positivo
- * - Rojo (#e53e3e): Estados de pausa/detención
- * - Dorado (#FFD700): Elementos de refuerzo positivo (corazones)
+ * PALETA DE COLORES AMIGABLE PARA TEA:
+ * - Azul principal (#4A90C2): Color base relajante que contrasta bien
+ * - Verde suave (#74C69D): Estados activos y botones de control
+ * - Naranja suave (#F4A261): Estados de pausa/reset, menos agresivo que el rojo
+ * - Amarillo intenso (#FFC107): Barra de progreso visible y positiva
  * - Blanco con transparencias: Elementos secundarios y overlays
  */
 const styles = StyleSheet.create({
@@ -486,23 +596,22 @@ const styles = StyleSheet.create({
   /**
    * Estilo del contenedor principal del temporizador
    *
-   * CARACTERÍSTICAS:
-   * - Fondo morado relajante apropiado para terapia
+   * CARACTERÍSTICAS AMIGABLES PARA TEA:
+   * - Fondo azul suave y relajante que contrasta con la barra amarilla
+   * - Colores cálidos que reducen la ansiedad
    * - Bordes redondeados para apariencia amigable
-   * - Sombra elevada para destacar del fondo
-   * - Overflow hidden para contener el progreso visual
-   * - Position relative para permitir elementos absolutos internos
+   * - Sombra suave para profundidad sin ser agresiva
    */
   container: {
-    backgroundColor: '#764BA2', // Morado base terapéutico
+    backgroundColor: '#4A90C2', // Azul suave que contrasta con la barra amarilla
     borderRadius: 20, // Esquinas suaves y amigables
     padding: 20, // Espaciado interno generoso
     marginBottom: 20, // Separación de otros componentes
     shadowColor: '#000', // Sombra para profundidad
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8, // Sombra en Android
+    shadowOffset: { width: 0, height: 2 }, // Sombra más suave
+    shadowOpacity: 0.15, // Opacidad reducida para menos contraste
+    shadowRadius: 6, // Radio más suave
+    elevation: 4, // Elevación reducida en Android
     position: 'relative', // Para elementos absolutamente posicionados
     overflow: 'hidden', // Contiene el fondo de progreso
   },
@@ -514,10 +623,10 @@ const styles = StyleSheet.create({
   /**
    * Fondo de progreso que se llena de abajo hacia arriba
    *
-   * FUNCIONALIDAD:
+   * FUNCIONALIDAD AMIGABLE PARA TEA:
    * - Se posiciona absolutamente en la parte inferior
    * - Altura dinámica basada en el progreso del temporizador
-   * - Color verde translúcido para no interferir con el contenido
+   * - Color amarillo más intenso para mejor contraste con el fondo azul
    * - Solo esquinas inferiores redondeadas para mejor ajuste
    */
   progressBackground: {
@@ -525,7 +634,7 @@ const styles = StyleSheet.create({
     bottom: 0, // Anclado en la parte inferior
     left: 0, // Ocupa todo el ancho
     right: 0,
-    backgroundColor: 'rgba(34, 197, 94, 0.3)', // Verde translúcido
+    backgroundColor: 'rgba(255, 193, 7, 0.6)', // Amarillo más intenso y visible
     borderBottomLeftRadius: 20, // Solo esquinas inferiores
     borderBottomRightRadius: 20,
     zIndex: 0, // Detrás de todo el contenido
@@ -536,45 +645,47 @@ const styles = StyleSheet.create({
   // ==========================================================================
 
   /**
-   * Contenedor del header con mensaje de autoafirmación
+   * Contenedor del header con mensaje de autoafirmación dinámico
    *
    * DISEÑO:
-   * - Layout horizontal con corazones a los lados
-   * - Centrado para máximo impacto visual
+   * - Layout centrado para máximo impacto del texto
    * - Espaciado generoso para respiración visual
+   * - Flexible para adaptarse a textos de diferente longitud
    * - Z-index elevado para visibilidad sobre progreso
    */
   header: {
-    flexDirection: 'row', // Diseño horizontal
-    alignItems: 'center', // Alineación vertical centrada
+    alignItems: 'center', // Alineación centrada
     justifyContent: 'center', // Centrado horizontal
-    marginBottom: 30, // Espaciado inferior
-    paddingVertical: 15, // Espaciado vertical interno
-    paddingHorizontal: 15, // Espaciado horizontal interno
-    gap: 12, // Espaciado entre elementos
+    marginBottom: 40, // Espaciado inferior aumentado
+    paddingVertical: 25, // Espaciado vertical interno aumentado
+    paddingHorizontal: 15, // Espaciado horizontal para el texto
     zIndex: 1, // Sobre el fondo de progreso
+    minHeight: 80, // Altura mínima para consistencia
   },
 
   /**
-   * Título principal del temporizador
+   * Título principal del temporizador con frases motivacionales dinámicas
    *
-   * TIPOGRAFÍA:
-   * - Tamaño grande para jerarquía visual
-   * - Peso bold para destacar importancia
-   * - Sombra de texto para legibilidad
-   * - Color blanco puro para máximo contraste
+   * TIPOGRAFÍA OPTIMIZADA PARA TEA:
+   * - Fuente sans-serif legible y amigable
+   * - Tamaño grande pero no abrumador
+   * - Peso medium para suavidad visual
+   * - Sombra suave para mejor legibilidad
+   * - Espaciado optimizado para comprensión
    */
   headerTitle: {
-    fontSize: 24, // Tamaño prominente
-    fontWeight: 'bold', // Peso fuerte
+    fontSize: 28, // Tamaño legible pero no intimidante
+    fontWeight: '600', // Peso medium, más suave que bold
     color: '#ffffff', // Blanco puro
     textAlign: 'center', // Centrado
-    letterSpacing: 1, // Espaciado entre letras
-    lineHeight: 28, // Altura de línea
-    textShadowColor: 'rgba(0, 0, 0, 0.5)', // Sombra de texto
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
-    flexShrink: 1, // Permite contracción si es necesario
+    letterSpacing: 0.5, // Espaciado moderado para claridad
+    lineHeight: 34, // Altura de línea cómoda
+    textShadowColor: 'rgba(0, 0, 0, 0.4)', // Sombra suave
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3, // Radio de sombra suave
+    maxWidth: '100%', // Ocupa todo el ancho disponible
+    minHeight: 36, // Altura mínima para consistencia visual
+    fontFamily: 'System', // Fuente del sistema, más legible
   },
 
   // ==========================================================================
@@ -704,11 +815,11 @@ const styles = StyleSheet.create({
   },
 
   playPauseButton: {
-    backgroundColor: '#48bb78',
+    backgroundColor: '#74C69D', // Verde suave para play/pause
   },
 
   resetButton: {
-    backgroundColor: '#e53e3e',
+    backgroundColor: '#F4A261', // Naranja suave para reset
   },
 
   presetsContainer: {
