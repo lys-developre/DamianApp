@@ -11,19 +11,509 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
+import * as DocumentPicker from 'expo-document-picker';
 import ConfettiCannon from 'react-native-confetti-cannon';
 
 /**
- * Frases motivacionales cortas diseñadas específicamente para TEA
- *
- * Características optimizadas:
- * - Frases muy cortas y directas con emojis expresivos
- * - Lenguaje simple y claro
- * - Progresión lógica y predecible
- * - Refuerzo positivo constante
- * - Emojis que refuerzan el mensaje de cada etapa
- *
- * @type {Array<{minProgress: number, maxProgress: number, phrase: string}>}
+ * Utilidad para manejar haptics de forma segura con diagnóstico
+ * Incluye vibraciones más potentes y duraderas para mejor feedback
+ */
+const safeHaptics = {
+  /**
+   * Ejecuta un haptic de forma segura con manejo de errores
+   * @param {Function} hapticsFunction - Función de haptics a ejecutar
+   * @param {string} type - Tipo de haptic para logging
+   */
+  async execute(hapticsFunction, type = 'haptic') {
+    try {
+      await hapticsFunction();
+      // Solo logging en desarrollo, sin console statements en producción
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log(`✅ Haptic ${type} ejecutado correctamente`);
+      }
+    } catch (error) {
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.warn(`⚠️ Error en haptic ${type}:`, error.message);
+        // eslint-disable-next-line no-console
+        console.warn('Posibles causas:');
+        // eslint-disable-next-line no-console
+        console.warn('1. Dispositivo sin soporte de vibración');
+        // eslint-disable-next-line no-console
+        console.warn('2. Haptics deshabilitados en configuración del sistema');
+        // eslint-disable-next-line no-console
+        console.warn(
+          '3. Ejecutándose en simulador (solo dispositivos físicos)'
+        );
+        // eslint-disable-next-line no-console
+        console.warn('4. Falta permiso VIBRATE en Android');
+      }
+    }
+  },
+
+  /**
+   * Haptic suave mejorado - múltiples pulsos para mayor duración
+   */
+  async light() {
+    await this.execute(async () => {
+      // Secuencia de pulsos suaves para mayor duración
+      for (let i = 0; i < 2; i++) {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        if (i < 1) await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }, 'Light Enhanced');
+  },
+
+  /**
+   * Haptic medio mejorado - más intenso y duradero
+   */
+  async medium() {
+    await this.execute(async () => {
+      // Combinación de medium + heavy para mayor potencia
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await new Promise(resolve => setTimeout(resolve, 150));
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }, 'Medium Enhanced');
+  },
+
+  /**
+   * Haptic fuerte mejorado - máxima potencia y duración
+   */
+  async heavy() {
+    await this.execute(async () => {
+      // Secuencia de vibraciones fuertes para máximo impacto
+      for (let i = 0; i < 3; i++) {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        if (i < 2) await new Promise(resolve => setTimeout(resolve, 200));
+      }
+    }, 'Heavy Enhanced');
+  },
+
+  /**
+   * Haptic de notificación de éxito potenciado
+   */
+  async success() {
+    await this.execute(async () => {
+      // Notificación de éxito seguida de vibración fuerte
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      await new Promise(resolve => setTimeout(resolve, 300));
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }, 'Success Enhanced');
+  },
+
+  /**
+   * Celebración épica - vibración de máxima potencia para completar temporizador
+   */
+  async celebration() {
+    await this.execute(async () => {
+      // Secuencia épica para celebración
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Múltiples pulsos fuertes con ritmo acelerado
+      const delays = [300, 250, 200, 150, 100];
+      for (let i = 0; i < 5; i++) {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        if (i < 4) await new Promise(resolve => setTimeout(resolve, delays[i]));
+      }
+    }, 'Celebration Epic');
+  },
+};
+
+/**
+ * Utilidad para manejar sonidos de forma segura en Android
+ * Sistema híbrido: tonos nativos de Android + archivos MP3 personalizados
+ */
+const safeSounds = {
+  /**
+   * Configuración de audio inicializada
+   */
+  isInitialized: false,
+  customSounds: new Map(), // Cache para sonidos personalizados
+
+  /**
+   * Inicializa el sistema de audio de forma segura
+   */
+  async initialize() {
+    if (this.isInitialized) return;
+
+    try {
+      // Configuración básica de audio compatible con Android
+      await Audio.setAudioModeAsync({
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+        staysActiveInBackground: false,
+      });
+
+      this.isInitialized = true;
+
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log('🔊 Sistema de audio inicializado');
+      }
+    } catch (error) {
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.warn('⚠️ Audio no disponible:', error.message);
+      }
+    }
+  },
+
+  /**
+   * Carga un archivo de audio personalizado
+   */
+  async loadCustomSound(type, uri) {
+    try {
+      const { sound } = await Audio.Sound.createAsync({ uri });
+      this.customSounds.set(type, sound);
+
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log(`✅ Sonido personalizado ${type} cargado`);
+      }
+
+      return true;
+    } catch (_error) {
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.warn(`⚠️ Error cargando sonido ${type}:`, _error.message);
+      }
+      return false;
+    }
+  },
+
+  /**
+   * Reproduce sonido usando archivo personalizado o tono nativo
+   */
+  async playSound(type, options = {}) {
+    try {
+      await this.initialize();
+
+      // Intentar reproducir sonido personalizado primero
+      if (this.customSounds.has(type)) {
+        const sound = this.customSounds.get(type);
+        await sound.setVolumeAsync(options.volume || 0.7);
+        await sound.replayAsync();
+
+        if (__DEV__) {
+          // eslint-disable-next-line no-console
+          console.log(`🎵 Sonido personalizado ${type} reproducido`);
+        }
+        return;
+      }
+
+      // Fallback a tonos nativos del sistema
+      await this.playNativeSound(type, options);
+    } catch (error) {
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.warn(`⚠️ Error reproduciendo sonido ${type}:`, error.message);
+      }
+
+      // Fallback final: solo vibración
+      if (type === 'celebration') {
+        safeHaptics.celebration();
+      } else {
+        safeHaptics.light();
+      }
+    }
+  },
+
+  /**
+   * Reproduce tonos nativos del sistema Android/iOS
+   */
+  async playNativeSound(type, options = {}) {
+    try {
+      // Android: Usar sonidos incluidos en assets
+      switch (type) {
+        case 'soft':
+          // Sonido suave - usar tono de notificación del sistema
+          await Audio.Sound.createAsync(
+            require('../assets/sounds/notification_soft.wav'),
+            {
+              volume: options.volume || 0.4,
+              shouldPlay: true,
+              isLooping: false,
+            }
+          )
+            .then(({ sound }) => {
+              sound.playAsync();
+              // Liberar memoria después de reproducir
+              setTimeout(() => sound.unloadAsync(), 2000);
+            })
+            .catch(() => {
+              // Fallback: vibración suave
+              safeHaptics.light();
+            });
+          break;
+        case 'celebration':
+          // Celebración - secuencia de sonidos épicos
+          for (let i = 0; i < 3; i++) {
+            await Audio.Sound.createAsync(
+              require('../assets/sounds/celebration_epic.wav'),
+              {
+                volume: Math.min((options.volume || 0.7) + i * 0.1, 1.0),
+                shouldPlay: true,
+                isLooping: false,
+              }
+            )
+              .then(({ sound }) => {
+                sound.playAsync();
+                // Liberar memoria después de reproducir
+                setTimeout(() => sound.unloadAsync(), 3000);
+              })
+              .catch(() => {
+                // Fallback: vibración de celebración
+                safeHaptics.celebration();
+              });
+
+            if (i < 2) await new Promise(resolve => setTimeout(resolve, 200));
+          }
+          break;
+        case 'almost-done':
+          // Casi listo - tono de atención positiva
+          await Audio.Sound.createAsync(
+            require('../assets/sounds/almost_done.wav'),
+            {
+              volume: options.volume || 0.6,
+              shouldPlay: true,
+              isLooping: false,
+            }
+          )
+            .then(({ sound }) => {
+              sound.playAsync();
+              // Liberar memoria después de reproducir
+              setTimeout(() => sound.unloadAsync(), 2000);
+            })
+            .catch(() => {
+              // Fallback: vibración suave
+              safeHaptics.light();
+            });
+          break;
+      }
+
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log(`🎵 Tono nativo Android ${type} reproducido`);
+      }
+    } catch (error) {
+      // Fallback: simulación temporal (como antes)
+      await this.playSimulatedSound(type);
+
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.warn(`Usando simulación para ${type}:`, error.message);
+      }
+    }
+  },
+
+  /**
+   * Fallback: simulación temporal (sistema anterior)
+   */
+  async playSimulatedSound(type) {
+    switch (type) {
+      case 'soft':
+        await new Promise(resolve => setTimeout(resolve, 100));
+        if (__DEV__) {
+          // eslint-disable-next-line no-console
+          console.log('🔔 Simulación: sonido suave');
+        }
+        break;
+
+      case 'celebration':
+        if (__DEV__) {
+          // eslint-disable-next-line no-console
+          console.log('🎵 Simulación: celebración épica...');
+        }
+
+        for (let i = 0; i < 3; i++) {
+          await new Promise(resolve => setTimeout(resolve, 150));
+          if (__DEV__) {
+            // eslint-disable-next-line no-console
+            console.log(`🎼 Simulación nota ${i + 1}/3`);
+          }
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        break;
+
+      default:
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+  },
+
+  /**
+   * Abre selector de archivos para subir audio personalizado
+   */
+  async uploadCustomSound(type) {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'audio/*',
+        copyToCacheDirectory: true,
+      });
+
+      if (result.type === 'success') {
+        // Copiar archivo a directorio permanente
+        const fileName = `custom_${type}.mp3`;
+        const localUri = `${FileSystem.documentDirectory}${fileName}`;
+
+        await FileSystem.copyAsync({
+          from: result.uri,
+          to: localUri,
+        });
+
+        // Cargar el sonido personalizado
+        const success = await this.loadCustomSound(type, localUri);
+
+        if (success) {
+          // Guardar configuración para persistencia
+          await this.saveCustomSoundConfig(type, localUri);
+
+          Alert.alert(
+            '✅ Sonido Personalizado',
+            `Archivo de audio para "${type}" cargado correctamente`,
+            [{ text: 'OK' }]
+          );
+
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      Alert.alert('❌ Error', 'No se pudo cargar el archivo de audio', [
+        { text: 'OK' },
+      ]);
+
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.error('Error subiendo sonido:', error);
+      }
+
+      return false;
+    }
+  },
+
+  /**
+   * Guarda configuración de sonidos personalizados
+   */
+  async saveCustomSoundConfig(type, uri) {
+    try {
+      const configPath = `${FileSystem.documentDirectory}custom_sounds_config.json`;
+      let config = {};
+
+      // Leer configuración existente
+      try {
+        const existingConfig = await FileSystem.readAsStringAsync(configPath);
+        config = JSON.parse(existingConfig);
+      } catch {
+        // Archivo no existe, usar configuración vacía
+      }
+
+      // Actualizar configuración
+      config[type] = uri;
+
+      // Guardar configuración actualizada
+      await FileSystem.writeAsStringAsync(configPath, JSON.stringify(config));
+
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log('💾 Configuración de sonidos guardada');
+      }
+    } catch (error) {
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.warn('Error guardando configuración:', error);
+      }
+    }
+  },
+
+  /**
+   * Carga sonidos personalizados al inicializar
+   */
+  async loadCustomSoundsFromConfig() {
+    try {
+      const configPath = `${FileSystem.documentDirectory}custom_sounds_config.json`;
+      const configString = await FileSystem.readAsStringAsync(configPath);
+      const config = JSON.parse(configString);
+
+      for (const [type, uri] of Object.entries(config)) {
+        await this.loadCustomSound(type, uri);
+      }
+
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log('📁 Sonidos personalizados cargados desde configuración');
+      }
+    } catch (_error) {
+      // No hay configuración guardada, usar tonos nativos
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log('📁 No hay sonidos personalizados, usando tonos nativos');
+      }
+    }
+  },
+
+  /**
+   * Elimina un sonido personalizado
+   */
+  async removeCustomSound(type) {
+    try {
+      if (this.customSounds.has(type)) {
+        const sound = this.customSounds.get(type);
+        await sound.unloadAsync();
+        this.customSounds.delete(type);
+      }
+
+      // Actualizar configuración
+      const configPath = `${FileSystem.documentDirectory}custom_sounds_config.json`;
+      try {
+        const configString = await FileSystem.readAsStringAsync(configPath);
+        const config = JSON.parse(configString);
+        delete config[type];
+        await FileSystem.writeAsStringAsync(configPath, JSON.stringify(config));
+      } catch {
+        // Configuración no existe
+      }
+
+      Alert.alert(
+        '🗑️ Sonido Eliminado',
+        `Se volverá a usar el tono nativo para "${type}"`,
+        [{ text: 'OK' }]
+      );
+
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log(`🗑️ Sonido personalizado ${type} eliminado`);
+      }
+    } catch (error) {
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.error('Error eliminando sonido:', error);
+      }
+    }
+  },
+
+  /**
+   * Métodos de conveniencia para eventos específicos
+   */
+  async phraseChange() {
+    await this.playSound('soft', { volume: 0.5 });
+  },
+
+  async epicCelebration() {
+    await this.playSound('celebration', { volume: 0.8 });
+  },
+
+  async almostDone() {
+    await this.playSound('almost-done', { volume: 0.6 });
+  },
+};
+
+/**
+ * Frases motivacionales para TEA - Progresión lógica y refuerzo positivo
  */
 const motivationalPhrases = [
   { minProgress: 0, maxProgress: 15, phrase: '⏰ Tenemos que esperar' },
@@ -39,124 +529,71 @@ const motivationalPhrases = [
 ];
 
 /**
- * Componente DigitalTimer - "Yo tengo paciencia"
- *
- * Temporizador digital personalizado diseñado específicamente para terapia de autismo,
- * enfocado en el desarrollo de la paciencia y autoafirmación personal.
- *
- * CARACTERÍSTICAS PRINCIPALES:
- * - Frases motivacionales automáticas que cambian según el progreso del temporizador
- * - Tipografía optimizada con máxima prioridad visual para el texto motivacional
- * - Mensaje de autoafirmación en primera persona para empoderamiento
- * - Refuerzo positivo continuo de la autoestima
- * - Display digital grande y de alto contraste para mejor legibilidad
- * - Botones de control accesibles con iconografía clara
- * - Presets de tiempo predefinidos para diferentes actividades terapéuticas
- * - Indicadores visuales de estado del temporizador
- * - Feedback visual progresivo que llena el contenedor de abajo hacia arriba
- * - Animaciones suaves en el cambio de frases para mejor experiencia visual
- * - Paleta de colores moderna y profesional
- * - Mensajes de felicitación personalizados al completar el tiempo
- *
- * ENFOQUE TERAPÉUTICO:
- * - Ayuda a desarrollar la capacidad de espera
- * - Fortalece la autoestima través de autoafirmaciones progresivas
- * - Proporciona estructura visual clara y predecible
- * - Celebra los logros con refuerzo positivo automático
- *
- * @component
- * @example
- * // Uso básico en una pantalla principal
- * <DigitalTimer />
- *
- * @author Desarrollado para Damián - App de apoyo terapéutico
- * @version 1.0.0
- * @since 2025-06-27
+ * DigitalTimer - Temporizador para terapia TEA
+ * Desarrolla paciencia con frases motivacionales progresivas
  */
 export default function DigitalTimer() {
-  // ============================================================================
-  // ESTADO DEL COMPONENTE
-  // ============================================================================
-
-  /** @type {number} Tiempo restante en el temporizador (en segundos) */
+  // Estado del componente
   const [time, setTime] = useState(0);
-
-  /** @type {boolean} Indica si el temporizador está actualmente en ejecución */
   const [isRunning, setIsRunning] = useState(false);
-
-  /** @type {number} Tiempo inicial configurado para el temporizador (en segundos) */
   const [initialTime, setInitialTime] = useState(0);
-
-  /** @type {number|null} Índice del preset de tiempo actualmente seleccionado */
   const [activePresetIndex, setActivePresetIndex] = useState(null);
-
-  /** @type {boolean} Controla la visibilidad del modal de celebración */
   const [showCelebration, setShowCelebration] = useState(false);
 
-  /** @type {React.MutableRefObject} Referencia al intervalo del temporizador para limpieza */
+  // Referencias y animaciones
   const intervalRef = useRef(null);
-
-  /** @type {React.MutableRefObject} Valor animado para la opacidad del texto motivacional */
   const textOpacity = useRef(new Animated.Value(1)).current;
-
-  /** @type {React.MutableRefObject} Frase anterior para detectar cambios */
   const previousPhrase = useRef('😌 Esperar un poquito');
 
-  // Animaciones para el modal de celebración
-  /** @type {React.MutableRefObject} Escala del trofeo principal */
+  // Animaciones para celebración
   const trophyScale = useRef(new Animated.Value(0)).current;
-
-  /** @type {React.MutableRefObject} Rotación de las medallas */
   const medallRotation = useRef(new Animated.Value(0)).current;
-
-  /** @type {React.MutableRefObject} Escala de los confetis */
   const confettiScale = useRef(new Animated.Value(0)).current;
-
-  /** @type {React.MutableRefObject} Opacidad del fondo del modal */
   const modalOpacity = useRef(new Animated.Value(0)).current;
 
-  // Animaciones mejoradas para las frases motivacionales
-  /** @type {React.MutableRefObject} Escala de la frase motivacional */
+  // Animaciones para frases
   const phraseScale = useRef(new Animated.Value(1)).current;
-
-  /** @type {React.MutableRefObject} Traslación Y de la frase */
   const phraseTranslateY = useRef(new Animated.Value(0)).current;
 
-  // Animaciones para la barra de progreso
-  /** @type {React.MutableRefObject} Pulsación de la barra de progreso */
+  // Animaciones para progreso
   const progressPulse = useRef(new Animated.Value(1)).current;
-
-  /** @type {React.MutableRefObject} Brillo de la barra de progreso */
   const progressGlow = useRef(new Animated.Value(0)).current;
 
-  // ============================================================================
-  // CONFIGURACIÓN DE PRESETS
-  // ============================================================================
-
-  /**
-   * Presets de tiempo predefinidos para diferentes actividades terapéuticas
-   *
-   * Cada preset está diseñado para diferentes tipos de actividades:
-   * - Tiempos cortos (1-5 min): Actividades de concentración, respiración
-   * - Tiempos medios (10-30 min): Tareas escolares, actividades creativas
-   * - Tiempos largos (1-2 horas): Períodos de descanso, actividades prolongadas
-   *
-   * @type {Array<{label: string, seconds: number}>}
-   */
+  // Presets de tiempo para actividades terapéuticas
   const timePresets = [
-    { label: '1 minuto', seconds: 60 }, // Ejercicios de respiración
-    { label: '2 minutos', seconds: 120 }, // Actividades de mindfulness
-    { label: '5 minutos', seconds: 300 }, // Descansos cortos
-    { label: '10 minutos', seconds: 600 }, // Tareas escolares básicas
-    { label: '15 minutos', seconds: 900 }, // Actividades creativas
-    { label: '30 minutos', seconds: 1800 }, // Sesiones de trabajo
-    { label: '1 hora', seconds: 3600 }, // Tiempo de estudio
-    { label: '2 horas', seconds: 7200 }, // Actividades prolongadas
+    { label: '1 minuto', seconds: 60 },
+    { label: '2 minutos', seconds: 120 },
+    { label: '5 minutos', seconds: 300 },
+    { label: '10 minutos', seconds: 600 },
+    { label: '15 minutos', seconds: 900 },
+    { label: '30 minutos', seconds: 1800 },
+    { label: '1 hora', seconds: 3600 },
+    { label: '2 horas', seconds: 7200 },
   ];
 
   // ============================================================================
   // EFECTOS Y LÓGICA DEL TEMPORIZADOR
   // ============================================================================
+
+  /**
+   * Efecto para inicializar el sistema de sonidos al cargar el componente
+   *
+   * FUNCIONALIDADES:
+   * - Inicializa el sistema de audio
+   * - Carga sonidos personalizados guardados
+   * - Configura el sistema híbrido (nativo + personalizado)
+   */
+  useEffect(() => {
+    const initializeSounds = async () => {
+      // Inicializar sistema base
+      await safeSounds.initialize();
+
+      // Cargar sonidos personalizados guardados
+      await safeSounds.loadCustomSoundsFromConfig();
+    };
+
+    initializeSounds();
+  }, []); // Solo ejecutar una vez al montar el componente
 
   /**
    * Efecto principal para manejar el countdown del temporizador
@@ -278,7 +715,10 @@ export default function DigitalTimer() {
 
     if (previousPhrase.current !== currentPhrase) {
       // Vibración suave al cambiar de frase para feedback táctil
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      safeHaptics.light();
+
+      // Sonido suave para el cambio de frase
+      safeSounds.phraseChange();
 
       // Animación mejorada con múltiples efectos
       Animated.sequence([
@@ -349,17 +789,11 @@ export default function DigitalTimer() {
   const startCelebration = useCallback(() => {
     setShowCelebration(true);
 
-    // Patrón de vibración rítmico y suave para TEA
-    const vibrationPattern = async () => {
-      for (let i = 0; i < 5; i++) {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        await new Promise(resolve => setTimeout(resolve, 200));
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
-    };
+    // Vibración épica de celebración con máxima potencia
+    safeHaptics.celebration();
 
-    vibrationPattern();
+    // Sonido épico de celebración
+    safeSounds.epicCelebration();
 
     // Secuencia de animaciones
     Animated.sequence([
@@ -415,13 +849,16 @@ export default function DigitalTimer() {
    * - Intensificación de animaciones de progreso
    */
   const triggerAlmostDoneEffect = useCallback(() => {
-    // Vibración especial para indicar que falta poco
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // Vibración potente para indicar que falta poco - usando heavy mejorado
+    safeHaptics.heavy();
 
-    // Pequeña ráfaga de confeti anticipada
+    // Sonido de "casi listo" para feedback auditivo
+    safeSounds.almostDone();
+
+    // Segunda vibración de confirmación más potente
     setTimeout(() => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }, 200);
+      safeHaptics.medium();
+    }, 400);
   }, []);
 
   // Efecto para detectar cuando se alcanza el 95%
@@ -433,7 +870,7 @@ export default function DigitalTimer() {
   }, [getProgress, isRunning, triggerAlmostDoneEffect]);
 
   /**
-   * Cierra el modal de celebración y resetea animaciones
+   * Cierra el modal de celebración, resetea animaciones y reinicia el temporizador
    */
   const closeCelebration = useCallback(() => {
     Animated.timing(modalOpacity, {
@@ -447,8 +884,13 @@ export default function DigitalTimer() {
       medallRotation.setValue(0);
       confettiScale.setValue(0);
       modalOpacity.setValue(0);
+
+      // Reiniciar automáticamente el temporizador
+      setTime(initialTime);
+      setIsRunning(false);
+      setActivePresetIndex(null);
     });
-  }, [modalOpacity, trophyScale, medallRotation, confettiScale]);
+  }, [modalOpacity, trophyScale, medallRotation, confettiScale, initialTime]);
 
   // ============================================================================
   // FUNCIONES AUXILIARES
@@ -578,20 +1020,30 @@ export default function DigitalTimer() {
    * CÁLCULO:
    * - Porcentaje = (tiempo transcurrido / tiempo total) * 100
    * - Tiempo transcurrido = tiempo inicial - tiempo restante
+   * - Cuando el tiempo llega a 0, se asegura que el progreso sea exactamente 100%
    *
    * CASOS ESPECIALES:
    * - Si no hay tiempo inicial configurado: retorna 0%
-   * - El resultado se usa para la altura del fondo de progreso verde
+   * - Si el tiempo restante es 0: retorna 100% (completado)
+   * - El resultado se usa para la altura del fondo de progreso
    *
    * @returns {number} Porcentaje de progreso (0-100)
    *
    * @example
    * // Con 5 minutos inicial y 2 minutos restantes
    * getProgress() // returns 60 (60% completado)
+   * // Con tiempo completado (0 segundos restantes)
+   * getProgress() // returns 100 (100% completado)
    */
   const getProgress = useCallback(() => {
     if (initialTime === 0) return 0;
-    return ((initialTime - time) / initialTime) * 100;
+
+    // Si el tiempo restante es 0, asegurar que el progreso sea 100%
+    if (time === 0) return 100;
+
+    const progress = ((initialTime - time) / initialTime) * 100;
+    // Asegurar que nunca exceda 100% y redondear para precisión
+    return Math.min(Math.round(progress * 100) / 100, 100);
   }, [initialTime, time]);
 
   /**
@@ -688,6 +1140,105 @@ export default function DigitalTimer() {
   };
 
   // ============================================================================
+  // COMPONENTES INTERNOS OPTIMIZADOS
+  // ============================================================================
+
+  /**
+   * Componente optimizado para el display del tiempo
+   * Separado para evitar re-renders innecesarios
+   */
+  const TimeDisplay = React.memo(({ time, isRunning }) => (
+    <View style={styles.displayContainer}>
+      <Text style={styles.timeDisplay}>{formatTime(time)}</Text>
+
+      <View style={styles.statusContainer}>
+        <View
+          style={[
+            styles.statusIndicator,
+            { backgroundColor: isRunning ? '#00C853' : '#E91E63' },
+          ]}
+        />
+        <Text style={styles.statusText}>
+          {isRunning ? 'Esperando...' : time > 0 ? 'Pausado' : 'Detenido'}
+        </Text>
+      </View>
+    </View>
+  ));
+  TimeDisplay.displayName = 'TimeDisplay';
+
+  /**
+   * Componente optimizado para botones de control
+   * Evita re-renders cuando solo cambia el tiempo
+   */
+  const ControlButtons = React.memo(
+    ({ isRunning, toggleTimer, resetTimer }) => (
+      <View style={styles.controlsContainer}>
+        <TouchableOpacity
+          style={[styles.controlButton, styles.playPauseButton]}
+          onPress={toggleTimer}
+          activeOpacity={0.8}
+          accessibilityLabel={
+            isRunning ? 'Pausar temporizador' : 'Iniciar temporizador'
+          }
+        >
+          <MaterialIcons
+            name={isRunning ? 'pause' : 'play-arrow'}
+            size={32}
+            color="#ffffff"
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.controlButton, styles.resetButton]}
+          onPress={resetTimer}
+          activeOpacity={0.8}
+          accessibilityLabel="Reiniciar temporizador"
+        >
+          <MaterialIcons name="stop" size={32} color="#ffffff" />
+        </TouchableOpacity>
+      </View>
+    )
+  );
+  ControlButtons.displayName = 'ControlButtons';
+
+  /**
+   * Componente optimizado para presets de tiempo
+   * Se renderiza solo cuando cambia el preset activo
+   */
+  const TimePresets = React.memo(
+    ({ timePresets, activePresetIndex, setPresetTime, renderPresetText }) => (
+      <View style={styles.presetsContainer}>
+        <Text style={styles.presetsTitle}>Cuánto esperar:</Text>
+        <View style={styles.presetsGrid}>
+          {timePresets.map((preset, index) => {
+            const isActive = activePresetIndex === index;
+            const isDisabled =
+              activePresetIndex !== null && activePresetIndex !== index;
+
+            return (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.presetButton,
+                  isActive && styles.presetButtonActive,
+                  isDisabled && styles.presetButtonDisabled,
+                ]}
+                onPress={() => setPresetTime(preset.seconds, index)}
+                activeOpacity={isDisabled ? 1 : 0.8}
+                disabled={isDisabled}
+                accessibilityLabel={`Configurar temporizador a ${preset.label}`}
+              >
+                {renderPresetText(preset.label, isActive, isDisabled)}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+    )
+  );
+  TimePresets.displayName = 'TimePresets';
+
+  // ============================================================================
   // RENDER PRINCIPAL DEL COMPONENTE
   // ============================================================================
 
@@ -758,22 +1309,7 @@ export default function DigitalTimer() {
         - Incluye indicador de estado visual con círculo de color
         - Texto descriptivo del estado actual del temporizador
       */}
-      <View style={styles.displayContainer}>
-        <Text style={styles.timeDisplay}>{formatTime(time)}</Text>
-
-        {/* Indicador de estado con círculo de color y texto descriptivo */}
-        <View style={styles.statusContainer}>
-          <View
-            style={[
-              styles.statusIndicator,
-              { backgroundColor: isRunning ? '#74C69D' : '#F4A261' },
-            ]}
-          />
-          <Text style={styles.statusText}>
-            {isRunning ? 'Esperando...' : time > 0 ? 'Pausado' : 'Detenido'}
-          </Text>
-        </View>
-      </View>
+      <TimeDisplay time={time} isRunning={isRunning} />
 
       {/* 
         BOTONES DE CONTROL PRINCIPAL
@@ -782,31 +1318,11 @@ export default function DigitalTimer() {
         - Iconografía universal para facilitar el reconocimiento
         - Colores diferenciados: verde para iniciar, rojo para detener
       */}
-      <View style={styles.controlsContainer}>
-        <TouchableOpacity
-          style={[styles.controlButton, styles.playPauseButton]}
-          onPress={toggleTimer}
-          activeOpacity={0.8}
-          accessibilityLabel={
-            isRunning ? 'Pausar temporizador' : 'Iniciar temporizador'
-          }
-        >
-          <MaterialIcons
-            name={isRunning ? 'pause' : 'play-arrow'}
-            size={32}
-            color="#ffffff"
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.controlButton, styles.resetButton]}
-          onPress={resetTimer}
-          activeOpacity={0.8}
-          accessibilityLabel="Reiniciar temporizador"
-        >
-          <MaterialIcons name="stop" size={32} color="#ffffff" />
-        </TouchableOpacity>
-      </View>
+      <ControlButtons
+        isRunning={isRunning}
+        toggleTimer={toggleTimer}
+        resetTimer={resetTimer}
+      />
 
       {/* 
         PRESETS DE TIEMPO
@@ -815,33 +1331,12 @@ export default function DigitalTimer() {
         - Deshabilitación visual de opciones no disponibles durante ejecución
         - Organización en grid responsive para diferentes tamaños de pantalla
       */}
-      <View style={styles.presetsContainer}>
-        <Text style={styles.presetsTitle}>Cuánto esperar:</Text>
-        <View style={styles.presetsGrid}>
-          {timePresets.map((preset, index) => {
-            const isActive = activePresetIndex === index;
-            const isDisabled =
-              activePresetIndex !== null && activePresetIndex !== index;
-
-            return (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.presetButton,
-                  isActive && styles.presetButtonActive,
-                  isDisabled && styles.presetButtonDisabled,
-                ]}
-                onPress={() => setPresetTime(preset.seconds, index)}
-                activeOpacity={isDisabled ? 1 : 0.8}
-                disabled={isDisabled}
-                accessibilityLabel={`Configurar temporizador a ${preset.label}`}
-              >
-                {renderPresetText(preset.label, isActive, isDisabled)}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
+      <TimePresets
+        timePresets={timePresets}
+        activePresetIndex={activePresetIndex}
+        setPresetTime={setPresetTime}
+        renderPresetText={renderPresetText}
+      />
 
       {/* 
         MODAL DE CELEBRACIÓN FANTÁSTICO
@@ -957,12 +1452,48 @@ export default function DigitalTimer() {
  * - Efectos de sombra para profundidad y definición
  * - Responsive design para diferentes tamaños de pantalla
  *
- * PALETA DE COLORES AMIGABLE PARA TEA:
- * - Azul principal (#4A90C2): Color base relajante que contrasta bien
- * - Verde suave (#74C69D): Estados activos y botones de control
- * - Naranja suave (#F4A261): Estados de pausa/reset, menos agresivo que el rojo
- * - Amarillo intenso (#FFC107): Barra de progreso visible y positiva
- * - Blanco con transparencias: Elementos secundarios y overlays
+ * PALETAS DE COLORES DISPONIBLES PARA TEA:
+ *
+ * PALETA ACTUAL - ATARDECER CÁLIDO: �
+ * - Fondo principal (#6A4C93): Morado suave y acogedor
+ * - Progreso (rgba(255, 183, 77, 0.7)): Dorado cálido y energizante
+ * - Marco (#E6E6FA): Lavanda suave para máximo contraste
+ * - Botón Play (#81C784): Verde salvia calmante
+ * - Botón Reset (#FFAB91): Melocotón suave y amigable
+ *
+ * OTRAS PALETAS DISPONIBLES:
+ * - BOSQUE TRANQUILO 🌲: Verdes naturales y relajantes
+ * - ATARDECER CÁLIDO 🌅: Morados y dorados acogedores
+ *
+ * ============================================================================
+ * INSTRUCCIONES PARA CAMBIAR PALETAS:
+ * ============================================================================
+ *
+ * PALETA 2 - BOSQUE TRANQUILO 🌲:
+ * - container.backgroundColor: '#2D5A27'
+ * - progressBackground.backgroundColor: 'rgba(139, 195, 74, 0.7)'
+ * - progressGlow.backgroundColor: 'rgba(156, 204, 101, 0.4)'
+ * - motivationalFrame.borderColor: '#98FB98'
+ * - motivationalFrame.shadowColor: '#90EE90'
+ * - playPauseButton.backgroundColor: '#4CAF50'
+ * - resetButton.backgroundColor: '#FFB74D'
+ * - presetButtonActive.backgroundColor: '#66BB6A'
+ * - presetButtonActive.borderColor: '#4CAF50'
+ * - statusIndicator (running): '#4CAF50'
+ * - statusIndicator (stopped): '#FFB74D'
+ *
+ * PALETA 3 - ATARDECER CÁLIDO 🌅:
+ * - container.backgroundColor: '#6A4C93'
+ * - progressBackground.backgroundColor: 'rgba(255, 183, 77, 0.7)'
+ * - progressGlow.backgroundColor: 'rgba(255, 206, 84, 0.4)'
+ * - motivationalFrame.borderColor: '#E6E6FA'
+ * - motivationalFrame.shadowColor: '#DDA0DD'
+ * - playPauseButton.backgroundColor: '#81C784'
+ * - resetButton.backgroundColor: '#FFAB91'
+ * - presetButtonActive.backgroundColor: '#BA68C8'
+ * - presetButtonActive.borderColor: '#9C27B0'
+ * - statusIndicator (running): '#81C784'
+ * - statusIndicator (stopped): '#FFAB91'
  */
 const styles = StyleSheet.create({
   // ==========================================================================
@@ -972,14 +1503,14 @@ const styles = StyleSheet.create({
   /**
    * Estilo del contenedor principal del temporizador
    *
-   * CARACTERÍSTICAS AMIGABLES PARA TEA:
-   * - Fondo azul suave y relajante que contrasta con la barra amarilla
-   * - Colores cálidos que reducen la ansiedad
+   * PALETA ATARDECER CÁLIDO �:
+   * - Fondo morado suave y acogedor que transmite calma
+   * - Colores inspirados en atardeceres para relajación
    * - Bordes redondeados para apariencia amigable
    * - Sombra suave para profundidad sin ser agresiva
    */
   container: {
-    backgroundColor: '#4A90C2', // Azul suave que contrasta con la barra amarilla
+    backgroundColor: '#1A237E', // Azul noche profundo
     borderRadius: 20, // Esquinas suaves y amigables
     padding: 20, // Espaciado interno generoso
     marginBottom: 20, // Separación de otros componentes
@@ -999,10 +1530,10 @@ const styles = StyleSheet.create({
   /**
    * Fondo de progreso que se llena de abajo hacia arriba
    *
-   * FUNCIONALIDAD AMIGABLE PARA TEA:
+   * PALETA ATARDECER CÁLIDO �:
    * - Se posiciona absolutamente en la parte inferior
    * - Altura dinámica basada en el progreso del temporizador
-   * - Color amarillo más intenso para mejor contraste con el fondo azul
+   * - Dorado suave para excelente contraste con el fondo morado
    * - Solo esquinas inferiores redondeadas para mejor ajuste
    * - Efectos de animación cuando está activo
    */
@@ -1011,7 +1542,7 @@ const styles = StyleSheet.create({
     bottom: 0, // Anclado en la parte inferior
     left: 0, // Ocupa todo el ancho
     right: 0,
-    backgroundColor: 'rgba(255, 193, 7, 0.6)', // Amarillo más intenso y visible
+    backgroundColor: 'rgba(138, 43, 226, 0.8)', // Violeta aurora brillante
     borderBottomLeftRadius: 20, // Solo esquinas inferiores
     borderBottomRightRadius: 20,
     zIndex: 0, // Detrás de todo el contenido
@@ -1021,8 +1552,8 @@ const styles = StyleSheet.create({
   /**
    * Capa de brillo adicional para la barra de progreso
    *
-   * EFECTOS VISUALES:
-   * - Gradiente dorado que se superpone al progreso
+   * EFECTOS VISUALES BOSQUE TRANQUILO:
+   * - Gradiente verde brillante que se superpone al progreso
    * - Animación de pulsación para feedback visual
    * - Intensidad variable según el estado del temporizador
    */
@@ -1032,7 +1563,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 215, 0, 0.4)', // Dorado brillante
+    backgroundColor: 'rgba(147, 51, 234, 0.5)', // Violeta más intenso
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
@@ -1063,9 +1594,9 @@ const styles = StyleSheet.create({
   /**
    * Marco decorativo para los mensajes motivacionales
    *
-   * DISEÑO DISTINTIVO PARA TEA MEJORADO:
+   * PALETA ATARDECER CÁLIDO �:
    * - Fondo semi-transparente blanco para contraste suave
-   * - Gradiente sutil en el borde para mayor atractivo visual
+   * - Borde dorado para armonía con el tema cálido
    * - Esquinas redondeadas para apariencia amigable
    * - Múltiples capas de sombra para efecto de profundidad
    * - Espaciado interno generoso para respiración del texto
@@ -1074,11 +1605,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.95)', // Fondo blanco semi-transparente
     borderRadius: 25, // Esquinas muy redondeadas para suavidad
     borderWidth: 3, // Borde grueso para visibilidad
-    borderColor: '#FFE082', // Borde amarillo dorado suave
+    borderColor: '#00E5FF', // Cyan eléctrico
     paddingVertical: 20, // Espaciado vertical generoso
     paddingHorizontal: 25, // Espaciado horizontal amplio
     marginHorizontal: 10, // Margen lateral para respiración
-    shadowColor: '#FFD700', // Sombra dorada para mayor calidez
+    shadowColor: '#00BCD4', // Sombra cyan
     shadowOffset: { width: 0, height: 4 }, // Sombra hacia abajo
     shadowOpacity: 0.3, // Opacidad aumentada para mejor definición
     shadowRadius: 12, // Radio de sombra más amplio
@@ -1236,11 +1767,11 @@ const styles = StyleSheet.create({
   },
 
   playPauseButton: {
-    backgroundColor: '#74C69D', // Verde suave para play/pause
+    backgroundColor: '#00C853', // Verde esmeralda
   },
 
   resetButton: {
-    backgroundColor: '#F4A261', // Naranja suave para reset
+    backgroundColor: '#E91E63', // Rosa aurora
   },
 
   presetsContainer: {
@@ -1289,8 +1820,8 @@ const styles = StyleSheet.create({
   },
 
   presetButtonActive: {
-    backgroundColor: '#81C784', // Verde claro
-    borderColor: '#66BB6A',
+    backgroundColor: '#7C4DFF', // Violeta intenso
+    borderColor: '#673AB7', // Borde violeta más profundo
     transform: [{ scale: 1.1 }], // Aumenta el tamaño
     shadowOpacity: 0.4,
     elevation: 6,
@@ -1541,32 +2072,6 @@ const styles = StyleSheet.create({
   },
 });
 
-/**
- * ============================================================================
- * NOTAS TÉCNICAS Y DE IMPLEMENTACIÓN
- * ============================================================================
- *
- * OPTIMIZACIONES APLICADAS:
- * - useEffect con dependencias específicas para evitar re-renders innecesarios
- * - Cleanup del interval en el useEffect para prevenir memory leaks
- * - Z-index estratégico para superposición correcta de elementos
- * - Border-radius selectivo en el progreso para mejor integración visual
- *
- * ACCESIBILIDAD:
- * - Labels descriptivos en todos los elementos interactivos
- * - Contraste de colores cumple con estándares WCAG 2.1
- * - Tamaños de texto apropiados para lectura fácil
- * - Espaciado táctil adecuado para interacción móvil
- *
- * COMPATIBILIDAD:
- * - Optimizado para Android y iOS
- * - Responsive design para diferentes tamaños de pantalla
- * - Degradación elegante en dispositivos menos potentes
- * - Compatible con screen readers y tecnologías asistivas
- *
- * MANTENIMIENTO:
- * - Código modular con funciones separadas por responsabilidad
- * - Comentarios exhaustivos para facilitar modificaciones futuras
- * - Constantes de tiempo configurables en el array timePresets
- * - Estilos organizados por secciones lógicas
- */
+// ============================================================================
+// INICIALIZACIÓN DE SONIDOS
+// ============================================================================
