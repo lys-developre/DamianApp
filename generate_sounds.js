@@ -6,7 +6,7 @@ const path = require('path');
 
 /**
  * Generador de sonidos para personas con TEA
- * Crea archivos WAV que serán convertidos a MP3
+ * Crea archivos WAV de alta calidad optimizados para Android
  */
 
 // Función para generar un tono puro
@@ -101,26 +101,74 @@ try {
   }
   createWAVFile(almostDoneData, path.join(soundsDir, 'almost_done.wav'));
 
-  // 3. Celebration Epic - Secuencia de acordes alegres (C-E-G, 2 segundos)
+  // 3. Celebration Epic - Secuencia épica de triunfo con progresión de acordes
   console.log('Generando celebration_epic...');
-  const celebrationDuration = 2.0;
+  const celebrationDuration = 3.0; // Aumentado a 3 segundos para más épica
   const celebrationSamples = Math.floor(44100 * celebrationDuration);
   const celebrationData = Buffer.alloc(celebrationSamples * 2);
 
   for (let i = 0; i < celebrationSamples; i++) {
     const time = i / 44100;
-    const envelope = Math.min(
+    const progress = time / celebrationDuration;
+
+    // Envelope más dinámico con múltiples picos
+    let envelope = Math.min(
       1,
-      Math.min(i / (44100 * 0.02), (celebrationSamples - i) / (44100 * 0.02))
+      Math.min(i / (44100 * 0.05), (celebrationSamples - i) / (44100 * 0.1))
     );
 
-    // Acorde C-E-G con ritmo
-    const rhythm = Math.sin(2 * Math.PI * 2 * time) * 0.1 + 0.9; // Ritmo suave
-    const c = Math.sin(2 * Math.PI * 523.25 * time); // C5
-    const e = Math.sin(2 * Math.PI * 659.25 * time); // E5
-    const g = Math.sin(2 * Math.PI * 783.99 * time); // G5
+    // Añadir pulsaciones épicas que se intensifican
+    const epicPulse = Math.sin(2 * Math.PI * 4 * time) * 0.3 * progress + 0.7;
+    envelope *= epicPulse;
 
-    const sample = (c + e * 0.8 + g * 0.6) * envelope * rhythm * 0.2;
+    // Progresión de acordes épica: C Major -> F Major -> G Major -> C Major
+    let chord1, chord2, chord3, bass;
+
+    if (progress < 0.25) {
+      // C Major (C-E-G) - Inicio triunfal
+      chord1 = Math.sin(2 * Math.PI * 523.25 * time); // C5
+      chord2 = Math.sin(2 * Math.PI * 659.25 * time); // E5
+      chord3 = Math.sin(2 * Math.PI * 783.99 * time); // G5
+      bass = Math.sin(2 * Math.PI * 261.63 * time); // C4 (octava baja)
+    } else if (progress < 0.5) {
+      // F Major (F-A-C) - Elevación dramática
+      chord1 = Math.sin(2 * Math.PI * 698.46 * time); // F5
+      chord2 = Math.sin(2 * Math.PI * 880.0 * time); // A5
+      chord3 = Math.sin(2 * Math.PI * 1046.5 * time); // C6
+      bass = Math.sin(2 * Math.PI * 349.23 * time); // F4
+    } else if (progress < 0.75) {
+      // G Major (G-B-D) - Clímax épico
+      chord1 = Math.sin(2 * Math.PI * 783.99 * time); // G5
+      chord2 = Math.sin(2 * Math.PI * 987.77 * time); // B5
+      chord3 = Math.sin(2 * Math.PI * 1174.66 * time); // D6
+      bass = Math.sin(2 * Math.PI * 392.0 * time); // G4
+    } else {
+      // C Major final - Resolución victoriosa con armónicos
+      chord1 = Math.sin(2 * Math.PI * 523.25 * time); // C5
+      chord2 = Math.sin(2 * Math.PI * 659.25 * time); // E5
+      chord3 = Math.sin(2 * Math.PI * 783.99 * time); // G5
+      bass = Math.sin(2 * Math.PI * 261.63 * time); // C4
+
+      // Agregar octava alta para mayor brillo en el final
+      const highC = Math.sin(2 * Math.PI * 1046.5 * time); // C6
+      chord3 += highC * 0.4;
+    }
+
+    // Ritmo épico que se acelera hacia el final
+    const tempoMultiplier = 1 + progress * 2; // Se acelera gradualmente
+    const epicRhythm =
+      Math.sin(2 * Math.PI * 3 * tempoMultiplier * time) * 0.2 + 0.8;
+
+    // Combinar todos los elementos con volúmenes balanceados
+    const sample =
+      (bass * 0.4 + // Línea de bajo sólida
+        chord1 * 0.8 + // Melodía principal
+        chord2 * 0.6 + // Armonía media
+        chord3 * 0.5) * // Armonía alta
+      envelope *
+      epicRhythm *
+      0.25; // Volumen final controlado
+
     const intSample = Math.floor(sample * 32767);
     celebrationData.writeInt16LE(intSample, i * 2);
   }
@@ -130,8 +178,16 @@ try {
   console.log('\n📝 Archivos creados:');
   console.log('   - notification_soft.wav (tono suave 400Hz)');
   console.log('   - almost_done.wav (tono progresivo 300-500Hz)');
-  console.log('   - celebration_epic.wav (acorde C-E-G)');
-  console.log('\n🔄 Ahora convirtiendo a MP3...');
+  console.log('   - celebration_epic.wav (progresión épica C-F-G-C, 3.0s)');
+  console.log('\n🎵 Celebration Epic Features:');
+  console.log(
+    '   • Progresión de acordes dramática: C Major → F Major → G Major → C Major'
+  );
+  console.log('   • Línea de bajo sólida con armonías en capas');
+  console.log('   • Ritmo que se acelera gradualmente');
+  console.log('   • Pulsaciones épicas que se intensifican');
+  console.log('   • Octava alta final para máximo brillo');
+  console.log('\n🔄 Sistema optimizado para máximo impacto emocional en TEA!');
 } catch (error) {
   console.error('❌ Error generando archivos:', error);
 }
