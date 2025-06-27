@@ -15,10 +15,10 @@ Esta carpeta contiene el sistema híbrido de audio optimizado para usuarios con 
 - `phrase_change.wav` - Secuencia ascendente C-E-G-C, 0.6s (✅ Generado)
 - `celebration_epic.wav` - Acorde C-E-G, 2.0s (✅ Generado)
 
-### 🎮 **Interfaz de Configuración**
-- Pantalla dedicada para gestionar sonidos (`SoundConfigScreen.jsx`)
-- Botones para probar, subir, cambiar y eliminar sonidos
-- Estado visual de qué tipo de sonido está activo
+### 🎮 **Sistema de Sonidos Integrado**
+- Sistema integrado directamente en el temporizador
+- Uso automático de sonidos nativos optimizados para TEA
+- Feedback auditivo calibrado para no causar sobrecarga sensorial
 
 ## 🎵 **Tipos de Sonidos**
 
@@ -43,11 +43,9 @@ Esta carpeta contiene el sistema híbrido de audio optimizado para usuarios con 
 ## 📱 **Cómo Usar**
 
 ### Para Usuarios
-1. Abre la app TEA Timer
-2. Ve a Configuración → Sonidos
-3. Prueba los sonidos actuales con "Probar"
-4. Sube archivos MP3 personalizados con "Subir MP3"
-5. Elimina sonidos personalizados para volver a nativos
+1. Los sonidos se activan automáticamente durante el uso del temporizador
+2. Diseñados específicamente para usuarios con TEA
+3. No requieren configuración adicional - funcionan de inmediato
 
 ### Para Desarrolladores
 1. El sistema se inicializa automáticamente en `DigitalTimer.jsx`
@@ -76,15 +74,15 @@ Esta carpeta contiene el sistema híbrido de audio optimizado para usuarios con 
 
 ### Archivos Principales
 - `components/DigitalTimer.jsx` - Integración de sonidos en el temporizador
-- `components/SoundConfigScreen.jsx` - Interfaz de configuración
-- `assets/sounds/` - Almacenamiento de archivos MP3 personalizados
+- `assets/sounds/` - Almacenamiento de archivos WAV nativos optimizados
+- `generate_sounds.js` - Script para generar sonidos de alta calidad
 
 ### Sistema de Fallback
-1. **Primer intento**: Archivo MP3 personalizado
-2. **Segundo intento**: Tono nativo del sistema
-3. **Fallback final**: Simulación temporal + vibración
+1. **Primer intento**: Archivo WAV nativo de alta calidad
+2. **Segundo intento**: Tono del sistema Android
+3. **Fallback final**: Vibración táctil solamente
 
 ### Persistencia
-- Configuración guardada en `FileSystem.documentDirectory`
-- Carga automática al inicializar la app
-- Gestión de cache para rendimiento
+- Sonidos incorporados en la aplicación
+- Carga instantánea sin gestión de archivos externos
+- Rendimiento optimizado para dispositivos de gama baja

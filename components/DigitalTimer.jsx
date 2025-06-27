@@ -594,6 +594,11 @@ export default function DigitalTimer() {
   const progressPulse = useRef(new Animated.Value(1)).current;
   const progressGlow = useRef(new Animated.Value(0)).current;
 
+  // Animaciones para "pulso de vida" - feedback visual cada segundo
+  const heartbeatScale = useRef(new Animated.Value(1)).current;
+  const sparkleOpacity = useRef(new Animated.Value(0.3)).current;
+  const secondTickOpacity = useRef(new Animated.Value(0)).current;
+
   // Presets de tiempo para actividades terapéuticas
   const timePresets = [
     { label: '1 minuto', seconds: 60 },
@@ -662,6 +667,9 @@ export default function DigitalTimer() {
           // Decrementar el tiempo en 1 segundo
           return prevTime - 1;
         });
+
+        // PULSO DE VIDA - Animaciones cada segundo para feedback visual inmediato
+        triggerSecondTick();
       }, 1000); // Ejecutar cada 1000ms (1 segundo)
     } else if (intervalRef.current) {
       // Limpiar el intervalo si el temporizador no está corriendo
@@ -675,7 +683,7 @@ export default function DigitalTimer() {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isRunning, time, startCelebration]);
+  }, [isRunning, time, startCelebration, triggerSecondTick]);
 
   /**
    * Efecto para animar la barra de progreso con pulsación y brillo
@@ -807,6 +815,66 @@ export default function DigitalTimer() {
     phraseTranslateY,
     getCurrentMotivationalPhrase,
   ]);
+
+  // ============================================================================
+  // FUNCIONES DE FEEDBACK VISUAL INMEDIATO
+  // ============================================================================
+
+  /**
+   * Función que ejecuta animaciones de "pulso de vida" cada segundo
+   *
+   * CARACTERÍSTICAS:
+   * - Se ejecuta cada segundo independientemente del progreso global
+   * - Proporciona feedback visual inmediato y dinámico
+   * - Múltiples elementos animados para máximo impacto visual
+   * - Especialmente útil en temporizadores largos
+   */
+  const triggerSecondTick = useCallback(() => {
+    // 1. Heartbeat del número del temporizador
+    Animated.sequence([
+      Animated.timing(heartbeatScale, {
+        toValue: 1.1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(heartbeatScale, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // 2. Destello de partículas
+    Animated.sequence([
+      Animated.timing(sparkleOpacity, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(sparkleOpacity, {
+        toValue: 0.3,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // 3. Indicador visual de "tick" cada segundo
+    Animated.sequence([
+      Animated.timing(secondTickOpacity, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(secondTickOpacity, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Vibración suave para feedback táctil
+    safeHaptics.light();
+  }, [heartbeatScale, sparkleOpacity, secondTickOpacity]);
 
   // ============================================================================
   // FUNCIONES DE CELEBRACIÓN
@@ -1082,6 +1150,26 @@ export default function DigitalTimer() {
   }, [initialTime, time]);
 
   /**
+   * Calcula el color de fondo dinámico basado en el progreso
+   * Se extrae como función separada para mejorar el rendimiento
+   */
+  const getProgressColor = useCallback(() => {
+    const progress = getProgress();
+    let rgbColor;
+
+    if (progress < 50) {
+      rgbColor = '0, 229, 255'; // Cyan para inicio (0-50%)
+    } else if (progress < 80) {
+      rgbColor = '76, 175, 80'; // Verde para progreso medio (50-80%)
+    } else {
+      rgbColor = '255, 193, 7'; // Dorado para final (80-100%)
+    }
+
+    const opacity = 0.15 + (progress / 100) * 0.25; // Intensidad 15%-40%
+    return `rgba(${rgbColor}, ${opacity})`;
+  }, [getProgress]);
+
+  /**
    * Obtiene la frase motivacional apropiada según el progreso del temporizador
    *
    * LÓGICA DE SELECCIÓN:
@@ -1184,7 +1272,44 @@ export default function DigitalTimer() {
    */
   const TimeDisplay = React.memo(({ time, isRunning }) => (
     <View style={styles.displayContainer}>
-      <Text style={styles.timeDisplay}>{formatTime(time)}</Text>
+      {/* Display principal del tiempo con heartbeat */}
+      <Animated.View
+        style={[
+          styles.timeContainer,
+          {
+            transform: [{ scale: heartbeatScale }],
+          },
+        ]}
+      >
+        <Text style={styles.timeDisplay}>{formatTime(time)}</Text>
+      </Animated.View>
+
+      {/* Partículas de vida que destellan */}
+      <Animated.View
+        style={[
+          styles.sparkleContainer,
+          {
+            opacity: sparkleOpacity,
+          },
+        ]}
+      >
+        <Text style={[styles.sparkle, styles.sparkle1]}>✨</Text>
+        <Text style={[styles.sparkle, styles.sparkle2]}>💫</Text>
+        <Text style={[styles.sparkle, styles.sparkle3]}>🌟</Text>
+        <Text style={[styles.sparkle, styles.sparkle4]}>⭐</Text>
+      </Animated.View>
+
+      {/* Indicador de tick cada segundo */}
+      <Animated.View
+        style={[
+          styles.secondTick,
+          {
+            opacity: secondTickOpacity,
+          },
+        ]}
+      >
+        <Text style={styles.tickIcon}>🔹</Text>
+      </Animated.View>
 
       <View style={styles.statusContainer}>
         <View
@@ -1321,8 +1446,15 @@ export default function DigitalTimer() {
       */}
       <View style={styles.header}>
         <View style={styles.motivationalFrame}>
-          {/* Efecto de brillo interno sutil */}
-          <View style={styles.motivationalFrameGlow} />
+          {/* Efecto de brillo interno dinámico que evoluciona con el progreso */}
+          <View
+            style={[
+              styles.motivationalFrameGlow,
+              {
+                backgroundColor: getProgressColor(),
+              },
+            ]}
+          />
 
           {/* Borde interno brillante */}
           <View style={styles.motivationalFrameInnerBorder} />
@@ -1339,6 +1471,8 @@ export default function DigitalTimer() {
                   { scale: phraseScale },
                   { translateY: phraseTranslateY },
                 ],
+                zIndex: 10, // Asegurar que el texto esté por encima de todos los efectos
+                position: 'relative',
               },
             ]}
           >
@@ -1458,16 +1592,16 @@ export default function DigitalTimer() {
             {/* Efectos Adicionales */}
             <Animated.View
               style={[
-                styles.sparkleContainer,
+                styles.celebrationSparkleContainer,
                 {
                   transform: [{ scale: confettiScale }],
                 },
               ]}
             >
-              <Text style={styles.sparkle}>✨</Text>
-              <Text style={styles.sparkle}>🌟</Text>
-              <Text style={styles.sparkle}>💫</Text>
-              <Text style={styles.sparkle}>⭐</Text>
+              <Text style={styles.celebrationSparkle}>✨</Text>
+              <Text style={styles.celebrationSparkle}>🌟</Text>
+              <Text style={styles.celebrationSparkle}>💫</Text>
+              <Text style={styles.celebrationSparkle}>⭐</Text>
             </Animated.View>
 
             {/* Botón de Continuar */}
@@ -1585,42 +1719,45 @@ const styles = StyleSheet.create({
    * Marco decorativo para los mensajes motivacionales - DISEÑO PREMIUM
    *
    * ESTILO MODERNO MEJORADO 🎨:
-   * - Gradiente sutil de fondo para profundidad visual
-   * - Borde degradado con efectos de brillo
-   * - Múltiples capas de sombra para efecto flotante
-   * - Espaciado interno optimizado para legibilidad
-   * - Efectos de glass morphism para modernidad
+   * - Gradiente dinámico que evoluciona con el progreso
+   * - Fondo cristal con efecto glass morphism avanzado
+   * - Borde brillante con múltiples capas de luz
+   * - Sistema de sombras flotantes para profundidad 3D
+   * - Efectos de resplandor que se intensifican con el progreso
    */
   motivationalFrame: {
-    // Gradiente de fondo sutil
-    backgroundColor: 'rgba(255, 255, 255, 0.98)', // Fondo casi opaco para mejor contraste
+    // Fondo base con transparencia cristalina
+    backgroundColor: 'rgba(255, 255, 255, 0.95)', // Base cristalina
 
-    // Bordes y forma
-    borderRadius: 30, // Esquinas más redondeadas para modernidad
-    borderWidth: 2, // Borde más fino pero definido
-    borderColor: 'rgba(0, 229, 255, 0.8)', // Cyan con transparencia
+    // Bordes y forma premium
+    borderRadius: 32, // Esquinas ultra-redondeadas para suavidad máxima
+    borderWidth: 2.5, // Borde ligeramente más grueso para definición
+    borderColor: 'rgba(0, 229, 255, 0.9)', // Cyan intenso pero elegante
 
-    // Espaciado interno mejorado
-    paddingVertical: 24, // Espaciado vertical aumentado
-    paddingHorizontal: 30, // Espaciado horizontal más generoso
-    marginHorizontal: 15, // Márgenes laterales aumentados
-    marginVertical: 10, // Margen vertical para respiración
+    // Espaciado interno premium
+    paddingVertical: 28, // Espaciado vertical más generoso
+    paddingHorizontal: 32, // Espaciado horizontal amplio
+    marginHorizontal: 12, // Márgenes equilibrados
+    marginVertical: 8, // Margen vertical óptimo
 
-    // Sistema de sombras múltiples para efecto flotante
+    // Sistema de sombras múltiples para efecto flotante 3D
     shadowColor: '#00E5FF', // Sombra principal cyan brillante
-    shadowOffset: { width: 0, height: 6 }, // Sombra más pronunciada
-    shadowOpacity: 0.4, // Opacidad aumentada para mayor definición
-    shadowRadius: 16, // Radio de difuminado más amplio
-    elevation: 12, // Elevación máxima en Android
+    shadowOffset: { width: 0, height: 8 }, // Sombra más elevada
+    shadowOpacity: 0.45, // Opacidad intensa para mayor presencia
+    shadowRadius: 20, // Radio amplio para difuminado suave
+    elevation: 15, // Elevación máxima en Android
 
-    // Dimensiones responsivas
-    minWidth: '88%', // Ancho mínimo aumentado
-    maxWidth: '96%', // Ancho máximo para mejor uso del espacio
-    minHeight: 85, // Altura mínima para consistencia visual
+    // Dimensiones responsivas optimizadas
+    minWidth: '90%', // Ancho mínimo más amplio
+    maxWidth: '98%', // Aprovechamiento máximo del espacio
+    minHeight: 88, // Altura mínima aumentada para presencia
 
-    // Efectos adicionales
-    overflow: 'hidden', // Para contener efectos internos
-    position: 'relative', // Para efectos posicionales
+    // Efectos avanzados para glass morphism
+    overflow: 'hidden', // Contiene efectos internos
+    position: 'relative', // Para superposición de efectos
+
+    // Backdrop filter simulation para efecto cristal
+    backdropFilter: 'blur(10px)', // Desenfoque de fondo (iOS)
   },
 
   /**
@@ -1678,6 +1815,99 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Centrado horizontal
     marginBottom: 25, // Espaciado inferior
     zIndex: 1, // Sobre el fondo de progreso
+    position: 'relative', // Para posicionamiento absoluto de elementos hijos
+  },
+
+  // ==========================================================================
+  // ELEMENTOS DEL PULSO DE VIDA
+  // ==========================================================================
+
+  /**
+   * Contenedor del tiempo con efecto heartbeat
+   */
+  timeContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /**
+   * Contenedor de partículas que destellan
+   *
+   * CARACTERÍSTICAS:
+   * - Posicionadas alrededor del display de tiempo
+   * - Aparecen y desaparecen cada segundo
+   * - Múltiples partículas para efecto dinámico
+   */
+  sparkleContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    pointerEvents: 'none', // No interfiere con la interacción
+    zIndex: 5,
+  },
+
+  /**
+   * Estilo base para partículas
+   */
+  sparkle: {
+    position: 'absolute',
+    fontSize: 20,
+    color: '#FFD700',
+    textShadowColor: 'rgba(255, 215, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+
+  /**
+   * Posiciones específicas de cada partícula
+   */
+  sparkle1: {
+    top: 10,
+    left: 20,
+  },
+
+  sparkle2: {
+    top: 15,
+    right: 25,
+  },
+
+  sparkle3: {
+    bottom: 20,
+    left: 15,
+  },
+
+  sparkle4: {
+    bottom: 25,
+    right: 20,
+  },
+
+  /**
+   * Indicador de tick cada segundo
+   *
+   * CARACTERÍSTICAS:
+   * - Aparece brevemente cada segundo
+   * - Posicionado en el centro-izquierda
+   * - Feedback visual inmediato de progreso temporal
+   */
+  secondTick: {
+    position: 'absolute',
+    left: -25,
+    top: '50%',
+    marginTop: -10,
+    zIndex: 8,
+  },
+
+  /**
+   * Icono del tick
+   */
+  tickIcon: {
+    fontSize: 20,
+    color: '#00E5FF', // Cyan brillante
+    textShadowColor: 'rgba(0, 229, 255, 0.8)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
 
   /**
@@ -2040,9 +2270,9 @@ const styles = StyleSheet.create({
   },
 
   /**
-   * Contenedor de efectos de brillo y estrellas
+   * Contenedor de efectos de brillo y estrellas para celebración
    */
-  sparkleContainer: {
+  celebrationSparkleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -2051,9 +2281,9 @@ const styles = StyleSheet.create({
   },
 
   /**
-   * Estilo individual de cada efecto de brillo
+   * Estilo individual de cada efecto de brillo para celebración
    */
-  sparkle: {
+  celebrationSparkle: {
     fontSize: 30,
     marginHorizontal: 5,
   },
@@ -2101,9 +2331,9 @@ const styles = StyleSheet.create({
    * Efecto de brillo interno para el marco motivacional
    *
    * CARACTERÍSTICAS:
-   * - Gradiente sutil que simula luz interna
-   * - Posicionamiento absoluto para superposición
-   * - Opacidad baja para efecto sutil
+   * - Gradiente dinámico que evoluciona con el progreso del temporizador
+   * - Colores que van de azul suave a dorado brillante
+   * - Intensidad que aumenta según el avance
    */
   motivationalFrameGlow: {
     position: 'absolute',
@@ -2111,9 +2341,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 30,
-    backgroundColor: 'rgba(0, 229, 255, 0.1)', // Brillo cyan muy sutil
-    opacity: 0.6,
+    borderRadius: 32,
+    // El gradiente cambiará dinámicamente desde el JSX según el progreso
+    backgroundColor: 'rgba(0, 229, 255, 0.08)', // Base cyan muy sutil
+    opacity: 0.7,
+    zIndex: 1, // Base de efectos
   },
 
   /**
@@ -2126,13 +2358,14 @@ const styles = StyleSheet.create({
    */
   motivationalFrameInnerBorder: {
     position: 'absolute',
-    top: 1,
-    left: 1,
-    right: 1,
-    bottom: 1,
-    borderRadius: 29,
+    top: 2, // Ajustado para coincidir con borderWidth del contenedor
+    left: 2,
+    right: 2,
+    bottom: 2,
+    borderRadius: 30, // Ajustado para coincidir con el contenedor (32-2=30)
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.7)', // Borde blanco semi-transparente
+    zIndex: 2, // Encima del glow
   },
 
   /**
@@ -2149,8 +2382,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 25,
-    backgroundColor: 'rgba(26, 35, 126, 0.05)', // Azul muy sutil
+    borderRadius: 32, // Coincide con el contenedor principal
+    backgroundColor: 'rgba(26, 35, 126, 0.03)', // Azul muy sutil, más transparente
+    zIndex: 0, // Fondo de todo
   },
 });
 
