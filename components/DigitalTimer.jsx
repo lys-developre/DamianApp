@@ -6,8 +6,12 @@ import {
   StyleSheet,
   Alert,
   Animated,
+  Modal,
+  Dimensions,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import ConfettiCannon from 'react-native-confetti-cannon';
 
 /**
  * Frases motivacionales cortas diseñadas específicamente para TEA
@@ -86,6 +90,9 @@ export default function DigitalTimer() {
   /** @type {number|null} Índice del preset de tiempo actualmente seleccionado */
   const [activePresetIndex, setActivePresetIndex] = useState(null);
 
+  /** @type {boolean} Controla la visibilidad del modal de celebración */
+  const [showCelebration, setShowCelebration] = useState(false);
+
   /** @type {React.MutableRefObject} Referencia al intervalo del temporizador para limpieza */
   const intervalRef = useRef(null);
 
@@ -94,6 +101,19 @@ export default function DigitalTimer() {
 
   /** @type {React.MutableRefObject} Frase anterior para detectar cambios */
   const previousPhrase = useRef('😌 Esperar un poquito');
+
+  // Animaciones para el modal de celebración
+  /** @type {React.MutableRefObject} Escala del trofeo principal */
+  const trophyScale = useRef(new Animated.Value(0)).current;
+
+  /** @type {React.MutableRefObject} Rotación de las medallas */
+  const medallRotation = useRef(new Animated.Value(0)).current;
+
+  /** @type {React.MutableRefObject} Escala de los confetis */
+  const confettiScale = useRef(new Animated.Value(0)).current;
+
+  /** @type {React.MutableRefObject} Opacidad del fondo del modal */
+  const modalOpacity = useRef(new Animated.Value(0)).current;
 
   // ============================================================================
   // CONFIGURACIÓN DE PRESETS
@@ -149,12 +169,8 @@ export default function DigitalTimer() {
           // Cuando el tiempo llega a 1 segundo o menos, finalizar
           if (prevTime <= 1) {
             setIsRunning(false);
-            // Mostrar mensaje de felicitación personalizado
-            Alert.alert(
-              '¡Muy bien!',
-              'Has esperado con paciencia. ¡Excelente trabajo!',
-              [{ text: 'Gracias', style: 'default' }]
-            );
+            // Iniciar celebración fantástica
+            startCelebration();
             return 0;
           }
           // Decrementar el tiempo en 1 segundo
@@ -173,7 +189,7 @@ export default function DigitalTimer() {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isRunning, time]);
+  }, [isRunning, time, startCelebration]);
 
   /**
    * Efecto para animar el cambio de frases motivacionales
@@ -207,6 +223,97 @@ export default function DigitalTimer() {
       previousPhrase.current = currentPhrase;
     }
   }, [time, isRunning, textOpacity, getCurrentMotivationalPhrase]);
+
+  // ============================================================================
+  // FUNCIONES DE CELEBRACIÓN
+  // ============================================================================
+
+  /**
+   * Inicia la secuencia de celebración fantástica
+   *
+   * CARACTERÍSTICAS:
+   * - Vibración en patrones rítmicos
+   * - Animaciones secuenciales de elementos
+   * - Confeti y efectos visuales
+   * - Sonidos de celebración (si están disponibles)
+   */
+  const startCelebration = useCallback(() => {
+    setShowCelebration(true);
+
+    // Patrón de vibración rítmico y suave para TEA
+    const vibrationPattern = async () => {
+      for (let i = 0; i < 5; i++) {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        await new Promise(resolve => setTimeout(resolve, 200));
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+    };
+
+    vibrationPattern();
+
+    // Secuencia de animaciones
+    Animated.sequence([
+      // 1. Fade in del modal
+      Animated.timing(modalOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      // 2. Aparecer trofeo con efecto bounce
+      Animated.spring(trophyScale, {
+        toValue: 1,
+        tension: 50,
+        friction: 5,
+        useNativeDriver: true,
+      }),
+      // 3. Rotación de medallas
+      Animated.timing(medallRotation, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      }),
+      // 4. Confeti explosion
+      Animated.spring(confettiScale, {
+        toValue: 1,
+        tension: 80,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Rotación continua de medallas
+    const rotateAnimation = () => {
+      medallRotation.setValue(0);
+      Animated.loop(
+        Animated.timing(medallRotation, {
+          toValue: 1,
+          duration: 3000,
+          useNativeDriver: true,
+        })
+      ).start();
+    };
+
+    setTimeout(rotateAnimation, 1000);
+  }, [modalOpacity, trophyScale, medallRotation, confettiScale]);
+
+  /**
+   * Cierra el modal de celebración y resetea animaciones
+   */
+  const closeCelebration = useCallback(() => {
+    Animated.timing(modalOpacity, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowCelebration(false);
+      // Reset de todas las animaciones
+      trophyScale.setValue(0);
+      medallRotation.setValue(0);
+      confettiScale.setValue(0);
+      modalOpacity.setValue(0);
+    });
+  }, [modalOpacity, trophyScale, medallRotation, confettiScale]);
 
   // ============================================================================
   // FUNCIONES AUXILIARES
@@ -568,6 +675,105 @@ export default function DigitalTimer() {
           })}
         </View>
       </View>
+
+      {/* 
+        MODAL DE CELEBRACIÓN FANTÁSTICO
+        - Aparece cuando se completa el temporizador
+        - Incluye trofeos, medallas, confeti y animaciones
+        - Vibración rítmica para feedback táctil
+        - Colores vibrantes y efectos visuales espectaculares
+      */}
+      <Modal
+        visible={showCelebration}
+        transparent={true}
+        animationType="none"
+        onRequestClose={closeCelebration}
+      >
+        <Animated.View
+          style={[styles.celebrationModal, { opacity: modalOpacity }]}
+        >
+          <ConfettiCannon
+            count={200}
+            origin={{ x: Dimensions.get('window').width / 2, y: 0 }}
+            fadeOut={true}
+            autoStart={showCelebration}
+            colors={[
+              '#FFD700',
+              '#FF6B6B',
+              '#4ECDC4',
+              '#45B7D1',
+              '#96CEB4',
+              '#FFEAA7',
+            ]}
+          />
+
+          <View style={styles.celebrationContent}>
+            {/* Trofeo Principal Animado */}
+            <Animated.View
+              style={[
+                styles.trophyContainer,
+                {
+                  transform: [{ scale: trophyScale }],
+                },
+              ]}
+            >
+              <Text style={styles.trophyIcon}>🏆</Text>
+              <Text style={styles.numberOne}>#1</Text>
+            </Animated.View>
+
+            {/* Mensaje de Felicitación */}
+            <Text style={styles.celebrationTitle}>¡INCREÍBLE!</Text>
+            <Text style={styles.celebrationSubtitle}>
+              Has esperado con paciencia{'\n'}¡Eres un campeón! 🌟
+            </Text>
+
+            {/* Medallas Giratorias */}
+            <Animated.View
+              style={[
+                styles.medallContainer,
+                {
+                  transform: [
+                    {
+                      rotate: medallRotation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '360deg'],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <Text style={styles.medal}>🥇</Text>
+              <Text style={styles.medal}>🎖️</Text>
+              <Text style={styles.medal}>🏅</Text>
+            </Animated.View>
+
+            {/* Efectos Adicionales */}
+            <Animated.View
+              style={[
+                styles.sparkleContainer,
+                {
+                  transform: [{ scale: confettiScale }],
+                },
+              ]}
+            >
+              <Text style={styles.sparkle}>✨</Text>
+              <Text style={styles.sparkle}>🌟</Text>
+              <Text style={styles.sparkle}>💫</Text>
+              <Text style={styles.sparkle}>⭐</Text>
+            </Animated.View>
+
+            {/* Botón de Continuar */}
+            <TouchableOpacity
+              style={styles.celebrationButton}
+              onPress={closeCelebration}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.celebrationButtonText}>¡Continuar! 🚀</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      </Modal>
     </View>
   );
 }
@@ -964,6 +1170,186 @@ const styles = StyleSheet.create({
   presetButtonUnitDisabled: {
     color: 'rgba(255, 255, 255, 0.4)',
     opacity: 0.6,
+  },
+
+  // ==========================================================================
+  // MODAL DE CELEBRACIÓN FANTÁSTICO
+  // ==========================================================================
+
+  /**
+   * Modal de celebración que aparece al completar el temporizador
+   *
+   * DISEÑO ESPECTACULAR:
+   * - Fondo semi-transparente con gradiente vibrante
+   * - Ocupa toda la pantalla para máximo impacto
+   * - Efectos visuales llamativos pero no agresivos
+   */
+  celebrationModal: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+
+  /**
+   * Contenedor principal del contenido de celebración
+   *
+   * ORGANIZACIÓN:
+   * - Centrado vertical y horizontal
+   * - Espaciado generoso entre elementos
+   * - Fondo decorativo con gradiente
+   */
+  celebrationContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 30,
+    padding: 40,
+    marginHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 4,
+    borderColor: '#FFD700',
+  },
+
+  /**
+   * Contenedor del trofeo principal animado
+   *
+   * CARACTERÍSTICAS:
+   * - Trofeo grande como elemento central
+   * - Número 1 superpuesto
+   * - Efectos de escala y bounce
+   */
+  trophyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    position: 'relative',
+  },
+
+  /**
+   * Icono del trofeo principal
+   */
+  trophyIcon: {
+    fontSize: 80,
+    textAlign: 'center',
+  },
+
+  /**
+   * Número 1 superpuesto en el trofeo
+   */
+  numberOne: {
+    position: 'absolute',
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#FF6B6B',
+    textShadowColor: '#FFF',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+
+  /**
+   * Título principal de la celebración
+   */
+  celebrationTitle: {
+    fontSize: 42,
+    fontWeight: '900',
+    color: '#FF6B6B',
+    textAlign: 'center',
+    marginBottom: 10,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+    letterSpacing: 2,
+  },
+
+  /**
+   * Subtítulo con mensaje motivacional
+   */
+  celebrationSubtitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2E3A47',
+    textAlign: 'center',
+    marginBottom: 30,
+    lineHeight: 24,
+  },
+
+  /**
+   * Contenedor de medallas giratorias
+   */
+  medallContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginBottom: 20,
+    width: 200,
+  },
+
+  /**
+   * Estilo individual de cada medalla
+   */
+  medal: {
+    fontSize: 40,
+    marginHorizontal: 10,
+  },
+
+  /**
+   * Contenedor de efectos de brillo y estrellas
+   */
+  sparkleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginBottom: 30,
+    width: 250,
+  },
+
+  /**
+   * Estilo individual de cada efecto de brillo
+   */
+  sparkle: {
+    fontSize: 30,
+    marginHorizontal: 5,
+  },
+
+  /**
+   * Botón para cerrar la celebración
+   *
+   * DISEÑO:
+   * - Botón grande y atractivo
+   * - Colores vibrantes pero amigables
+   * - Fácil de tocar para usuarios con TEA
+   */
+  celebrationButton: {
+    backgroundColor: '#4ECDC4',
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+    borderWidth: 2,
+    borderColor: '#45B7D1',
+  },
+
+  /**
+   * Texto del botón de celebración
+   */
+  celebrationButtonText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#ffffff',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 });
 
