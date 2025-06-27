@@ -668,23 +668,23 @@ const styles = StyleSheet.create({
    *
    * TIPOGRAFÍA OPTIMIZADA PARA TEA:
    * - Fuente sans-serif legible y amigable
-   * - Tamaño grande pero no abrumador
+   * - Tamaño aumentado en 15% para mayor impacto visual
    * - Peso medium para suavidad visual
    * - Sombra suave para mejor legibilidad
    * - Espaciado optimizado para comprensión
    */
   headerTitle: {
-    fontSize: 28, // Tamaño legible pero no intimidante
+    fontSize: 32, // Aumentado de 28 a 32 (~15% más grande)
     fontWeight: '600', // Peso medium, más suave que bold
     color: '#ffffff', // Blanco puro
     textAlign: 'center', // Centrado
     letterSpacing: 0.5, // Espaciado moderado para claridad
-    lineHeight: 34, // Altura de línea cómoda
+    lineHeight: 38, // Altura de línea ajustada proporcionalmente
     textShadowColor: 'rgba(0, 0, 0, 0.4)', // Sombra suave
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3, // Radio de sombra suave
     maxWidth: '100%', // Ocupa todo el ancho disponible
-    minHeight: 36, // Altura mínima para consistencia visual
+    minHeight: 40, // Altura mínima ajustada proporcionalmente
     fontFamily: 'System', // Fuente del sistema, más legible
   },
 
