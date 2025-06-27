@@ -552,15 +552,15 @@ const safeSounds = {
  */
 const motivationalPhrases = [
   { minProgress: 0, maxProgress: 15, phrase: 'Tenemos que esperar' },
-  { minProgress: 15, maxProgress: 25, phrase: 'Soy paciente' },
-  { minProgress: 25, maxProgress: 35, phrase: 'Espero tranquilo' },
-  { minProgress: 35, maxProgress: 45, phrase: 'Lo estoy haciendo bien' },
+  { minProgress: 15, maxProgress: 25, phrase: 'Hay que tener paciencia' },
+  { minProgress: 25, maxProgress: 35, phrase: 'Esperemos tranquilos' },
+  { minProgress: 35, maxProgress: 45, phrase: 'Lo estas haciendo bien' },
   { minProgress: 45, maxProgress: 55, phrase: 'Ya queda poco' },
-  { minProgress: 55, maxProgress: 65, phrase: 'Muy bien hecho' },
+  { minProgress: 55, maxProgress: 65, phrase: 'Muy bien damian!' },
   { minProgress: 65, maxProgress: 75, phrase: 'Ya casi termino' },
   { minProgress: 75, maxProgress: 85, phrase: 'Falta poquito' },
   { minProgress: 85, maxProgress: 95, phrase: 'Ya casi lo logras' },
-  { minProgress: 95, maxProgress: 100, phrase: '¡Ya terminé!' },
+  { minProgress: 95, maxProgress: 100, phrase: '¡Ya casi casi Damian!' },
 ];
 
 /**
@@ -578,7 +578,7 @@ export default function DigitalTimer() {
   // Referencias y animaciones
   const intervalRef = useRef(null);
   const textOpacity = useRef(new Animated.Value(1)).current;
-  const previousPhrase = useRef('😌 Esperar un poquito');
+  const previousPhrase = useRef('Tenemos que esperar un poquito');
 
   // Animaciones para celebración
   const trophyScale = useRef(new Animated.Value(0)).current;
@@ -1102,7 +1102,7 @@ export default function DigitalTimer() {
   const getCurrentMotivationalPhrase = useCallback(() => {
     // Si no hay tiempo configurado o no está corriendo, mostrar mensaje base
     if (initialTime === 0 || !isRunning) {
-      return '😌 Esperar un poquito';
+      return 'Tenemos que esperar un poquito';
     }
 
     const progress = getProgress();
@@ -1321,6 +1321,15 @@ export default function DigitalTimer() {
       */}
       <View style={styles.header}>
         <View style={styles.motivationalFrame}>
+          {/* Efecto de brillo interno sutil */}
+          <View style={styles.motivationalFrameGlow} />
+
+          {/* Borde interno brillante */}
+          <View style={styles.motivationalFrameInnerBorder} />
+
+          {/* Fondo con gradiente para el texto */}
+          <View style={styles.headerTitleBackground} />
+
           <Animated.Text
             style={[
               styles.headerTitle,
@@ -1421,7 +1430,8 @@ export default function DigitalTimer() {
             {/* Mensaje de Felicitación */}
             <Text style={styles.celebrationTitle}>¡INCREÍBLE!</Text>
             <Text style={styles.celebrationSubtitle}>
-              Has esperado con paciencia{'\n'}¡Eres un campeón! 🌟
+              Muy bien Damian! Ya tienes mas puntos en paciencia{'\n'} ¡Ganador
+              Damian! 🌟
             </Text>
 
             {/* Medallas Giratorias */}
@@ -1475,61 +1485,6 @@ export default function DigitalTimer() {
   );
 }
 
-/**
- * ============================================================================
- * ESTILOS DEL COMPONENTE DIGITALTIMER
- * ============================================================================
- *
- * Diseño centrado en accesibilidad y experiencia terapéutica:
- * - Colores de alto contraste para mejor visibilidad
- * - Espaciado generoso para facilitar la interacción táctil
- * - Jerarquía visual clara con diferentes tamaños de fuente
- * - Efectos de sombra para profundidad y definición
- * - Responsive design para diferentes tamaños de pantalla
- *
- * PALETAS DE COLORES DISPONIBLES PARA TEA:
- *
- * PALETA ACTUAL - ATARDECER CÁLIDO: �
- * - Fondo principal (#6A4C93): Morado suave y acogedor
- * - Progreso (rgba(255, 183, 77, 0.7)): Dorado cálido y energizante
- * - Marco (#E6E6FA): Lavanda suave para máximo contraste
- * - Botón Play (#81C784): Verde salvia calmante
- * - Botón Reset (#FFAB91): Melocotón suave y amigable
- *
- * OTRAS PALETAS DISPONIBLES:
- * - BOSQUE TRANQUILO 🌲: Verdes naturales y relajantes
- * - ATARDECER CÁLIDO 🌅: Morados y dorados acogedores
- *
- * ============================================================================
- * INSTRUCCIONES PARA CAMBIAR PALETAS:
- * ============================================================================
- *
- * PALETA 2 - BOSQUE TRANQUILO 🌲:
- * - container.backgroundColor: '#2D5A27'
- * - progressBackground.backgroundColor: 'rgba(139, 195, 74, 0.7)'
- * - progressGlow.backgroundColor: 'rgba(156, 204, 101, 0.4)'
- * - motivationalFrame.borderColor: '#98FB98'
- * - motivationalFrame.shadowColor: '#90EE90'
- * - playPauseButton.backgroundColor: '#4CAF50'
- * - resetButton.backgroundColor: '#FFB74D'
- * - presetButtonActive.backgroundColor: '#66BB6A'
- * - presetButtonActive.borderColor: '#4CAF50'
- * - statusIndicator (running): '#4CAF50'
- * - statusIndicator (stopped): '#FFB74D'
- *
- * PALETA 3 - ATARDECER CÁLIDO 🌅:
- * - container.backgroundColor: '#6A4C93'
- * - progressBackground.backgroundColor: 'rgba(255, 183, 77, 0.7)'
- * - progressGlow.backgroundColor: 'rgba(255, 206, 84, 0.4)'
- * - motivationalFrame.borderColor: '#E6E6FA'
- * - motivationalFrame.shadowColor: '#DDA0DD'
- * - playPauseButton.backgroundColor: '#81C784'
- * - resetButton.backgroundColor: '#FFAB91'
- * - presetButtonActive.backgroundColor: '#BA68C8'
- * - presetButtonActive.borderColor: '#9C27B0'
- * - statusIndicator (running): '#81C784'
- * - statusIndicator (stopped): '#FFAB91'
- */
 const styles = StyleSheet.create({
   // ==========================================================================
   // CONTENEDOR PRINCIPAL
@@ -1627,52 +1582,84 @@ const styles = StyleSheet.create({
   },
 
   /**
-   * Marco decorativo para los mensajes motivacionales
+   * Marco decorativo para los mensajes motivacionales - DISEÑO PREMIUM
    *
-   * PALETA ATARDECER CÁLIDO �:
-   * - Fondo semi-transparente blanco para contraste suave
-   * - Borde dorado para armonía con el tema cálido
-   * - Esquinas redondeadas para apariencia amigable
-   * - Múltiples capas de sombra para efecto de profundidad
-   * - Espaciado interno generoso para respiración del texto
+   * ESTILO MODERNO MEJORADO 🎨:
+   * - Gradiente sutil de fondo para profundidad visual
+   * - Borde degradado con efectos de brillo
+   * - Múltiples capas de sombra para efecto flotante
+   * - Espaciado interno optimizado para legibilidad
+   * - Efectos de glass morphism para modernidad
    */
   motivationalFrame: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)', // Fondo blanco semi-transparente
-    borderRadius: 25, // Esquinas muy redondeadas para suavidad
-    borderWidth: 3, // Borde grueso para visibilidad
-    borderColor: '#00E5FF', // Cyan eléctrico
-    paddingVertical: 20, // Espaciado vertical generoso
-    paddingHorizontal: 25, // Espaciado horizontal amplio
-    marginHorizontal: 10, // Margen lateral para respiración
-    shadowColor: '#00BCD4', // Sombra cyan
-    shadowOffset: { width: 0, height: 4 }, // Sombra hacia abajo
-    shadowOpacity: 0.3, // Opacidad aumentada para mejor definición
-    shadowRadius: 12, // Radio de sombra más amplio
-    elevation: 8, // Elevación aumentada en Android
-    minWidth: '85%', // Ancho mínimo del marco
-    maxWidth: '95%', // Ancho máximo para adaptabilidad
+    // Gradiente de fondo sutil
+    backgroundColor: 'rgba(255, 255, 255, 0.98)', // Fondo casi opaco para mejor contraste
+
+    // Bordes y forma
+    borderRadius: 30, // Esquinas más redondeadas para modernidad
+    borderWidth: 2, // Borde más fino pero definido
+    borderColor: 'rgba(0, 229, 255, 0.8)', // Cyan con transparencia
+
+    // Espaciado interno mejorado
+    paddingVertical: 24, // Espaciado vertical aumentado
+    paddingHorizontal: 30, // Espaciado horizontal más generoso
+    marginHorizontal: 15, // Márgenes laterales aumentados
+    marginVertical: 10, // Margen vertical para respiración
+
+    // Sistema de sombras múltiples para efecto flotante
+    shadowColor: '#00E5FF', // Sombra principal cyan brillante
+    shadowOffset: { width: 0, height: 6 }, // Sombra más pronunciada
+    shadowOpacity: 0.4, // Opacidad aumentada para mayor definición
+    shadowRadius: 16, // Radio de difuminado más amplio
+    elevation: 12, // Elevación máxima en Android
+
+    // Dimensiones responsivas
+    minWidth: '88%', // Ancho mínimo aumentado
+    maxWidth: '96%', // Ancho máximo para mejor uso del espacio
+    minHeight: 85, // Altura mínima para consistencia visual
+
+    // Efectos adicionales
+    overflow: 'hidden', // Para contener efectos internos
+    position: 'relative', // Para efectos posicionales
   },
 
   /**
-   * Título principal del temporizador con frases motivacionales dinámicas
+   * Título principal del temporizador con frases motivacionales dinámicas - TIPOGRAFÍA PREMIUM
    *
-   * TIPOGRAFÍA OPTIMIZADA PARA TEA:
-   * - Fuente sans-serif legible y amigable
-   * - Tamaño aumentado en 15% para mayor impacto visual
-   * - Peso medium para suavidad visual
-   * - Color oscuro para contraste con el fondo claro del marco
-   * - Espaciado optimizado para comprensión
+   * DISEÑO TIPOGRÁFICO OPTIMIZADO PARA TEA 📝:
+   * - Fuente system con fallback para máxima compatibilidad
+   * - Tamaño jerárquico prominente para captar atención
+   * - Gradiente de color sutil para mayor atractivo visual
+   * - Espaciado interletras optimizado para legibilidad
+   * - Sombra de texto múltiple para efecto de profundidad
+   * - Altura de línea calculada para mejor comprensión
    */
   headerTitle: {
-    fontSize: 32, // Aumentado de 28 a 32 (~15% más grande)
-    fontWeight: '600', // Peso medium, más suave que bold
-    color: '#2E3A47', // Color oscuro para contraste con fondo claro
-    textAlign: 'center', // Centrado
-    letterSpacing: 0.5, // Espaciado moderado para claridad
-    lineHeight: 38, // Altura de línea ajustada proporcionalmente
+    // Tipografía base
+    fontSize: 34, // Aumentado para mayor prominencia
+    fontWeight: '700', // Peso bold para mayor impacto
+    fontFamily: 'System', // Fuente del sistema para compatibilidad
+
+    // Color y efectos de texto
+    color: '#1A237E', // Azul profundo que contrasta con el fondo blanco
+    textAlign: 'center', // Centrado perfecto
+
+    // Espaciado y dimensiones
+    letterSpacing: 0.8, // Espaciado entre letras aumentado para claridad
+    lineHeight: 42, // Altura de línea proporcionalmente ajustada
+
+    // Dimensiones responsivas
     maxWidth: '100%', // Ocupa todo el ancho disponible
-    minHeight: 40, // Altura mínima ajustada proporcionalmente
-    fontFamily: 'System', // Fuente del sistema, más legible
+    minHeight: 44, // Altura mínima para consistencia
+
+    // Efectos de sombra múltiple para profundidad
+    textShadowColor: 'rgba(0, 229, 255, 0.3)', // Sombra cyan suave
+    textShadowOffset: { width: 1, height: 2 }, // Desplazamiento sutil
+    textShadowRadius: 4, // Radio de difuminado
+
+    // Espaciado externo
+    marginBottom: 2, // Margen inferior mínimo para balance
+    paddingHorizontal: 5, // Padding horizontal para respiración
   },
 
   // ==========================================================================
@@ -2104,6 +2091,66 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
+  },
+
+  // ==========================================================================
+  // EFECTOS ADICIONALES PARA MENSAJES MOTIVACIONALES
+  // ==========================================================================
+
+  /**
+   * Efecto de brillo interno para el marco motivacional
+   *
+   * CARACTERÍSTICAS:
+   * - Gradiente sutil que simula luz interna
+   * - Posicionamiento absoluto para superposición
+   * - Opacidad baja para efecto sutil
+   */
+  motivationalFrameGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 30,
+    backgroundColor: 'rgba(0, 229, 255, 0.1)', // Brillo cyan muy sutil
+    opacity: 0.6,
+  },
+
+  /**
+   * Efecto de borde interno brillante
+   *
+   * CARACTERÍSTICAS:
+   * - Borde interno con gradiente
+   * - Efecto de neon suave
+   * - Mejora la percepción de profundidad
+   */
+  motivationalFrameInnerBorder: {
+    position: 'absolute',
+    top: 1,
+    left: 1,
+    right: 1,
+    bottom: 1,
+    borderRadius: 29,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.7)', // Borde blanco semi-transparente
+  },
+
+  /**
+   * Efecto de gradiente de fondo para el texto
+   *
+   * CARACTERÍSTICAS:
+   * - Gradiente sutil detrás del texto
+   * - Mejora la legibilidad
+   * - Efecto de profundidad adicional
+   */
+  headerTitleBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 25,
+    backgroundColor: 'rgba(26, 35, 126, 0.05)', // Azul muy sutil
   },
 });
 
