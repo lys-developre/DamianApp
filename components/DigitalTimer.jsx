@@ -115,6 +115,20 @@ export default function DigitalTimer() {
   /** @type {React.MutableRefObject} Opacidad del fondo del modal */
   const modalOpacity = useRef(new Animated.Value(0)).current;
 
+  // Animaciones mejoradas para las frases motivacionales
+  /** @type {React.MutableRefObject} Escala de la frase motivacional */
+  const phraseScale = useRef(new Animated.Value(1)).current;
+
+  /** @type {React.MutableRefObject} Traslación Y de la frase */
+  const phraseTranslateY = useRef(new Animated.Value(0)).current;
+
+  // Animaciones para la barra de progreso
+  /** @type {React.MutableRefObject} Pulsación de la barra de progreso */
+  const progressPulse = useRef(new Animated.Value(1)).current;
+
+  /** @type {React.MutableRefObject} Brillo de la barra de progreso */
+  const progressGlow = useRef(new Animated.Value(0)).current;
+
   // ============================================================================
   // CONFIGURACIÓN DE PRESETS
   // ============================================================================
@@ -192,12 +206,69 @@ export default function DigitalTimer() {
   }, [isRunning, time, startCelebration]);
 
   /**
+   * Efecto para animar la barra de progreso con pulsación y brillo
+   *
+   * FUNCIONALIDADES:
+   * - Animación de pulsación cuando el temporizador está activo
+   * - Efecto de brillo que se intensifica con el progreso
+   * - Feedback visual dinámico del estado del temporizador
+   */
+  useEffect(() => {
+    if (isRunning && time > 0) {
+      // Animación de pulsación continua para la barra de progreso
+      const pulseAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(progressPulse, {
+            toValue: 1.02,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(progressPulse, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+      // Animación de brillo que se intensifica con el progreso
+      const glowAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(progressGlow, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(progressGlow, {
+            toValue: 0.3,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+      pulseAnimation.start();
+      glowAnimation.start();
+
+      return () => {
+        pulseAnimation.stop();
+        glowAnimation.stop();
+      };
+    } else {
+      // Resetear animaciones cuando no está corriendo
+      progressPulse.setValue(1);
+      progressGlow.setValue(0);
+    }
+  }, [isRunning, time, progressPulse, progressGlow]);
+
+  /**
    * Efecto para animar el cambio de frases motivacionales
    *
-   * FUNCIONALIDAD:
+   * FUNCIONALIDAD MEJORADA:
    * - Detecta cuando cambia la frase motivacional
-   * - Aplica una animación suave de fade out/fade in
-   * - Mejora la experiencia visual y mantiene la atención
+   * - Aplica animaciones múltiples: fade, escala y traslación
+   * - Efectos de entrada más dinámicos y atractivos
+   * - Feedback táctil suave al cambiar frases
    *
    * @effect
    * @dependency {string} getCurrentMotivationalPhrase() - Frase actual
@@ -206,23 +277,61 @@ export default function DigitalTimer() {
     const currentPhrase = getCurrentMotivationalPhrase();
 
     if (previousPhrase.current !== currentPhrase) {
-      // Animación más visible y suave para TEA
+      // Vibración suave al cambiar de frase para feedback táctil
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+      // Animación mejorada con múltiples efectos
       Animated.sequence([
-        Animated.timing(textOpacity, {
-          toValue: 0, // Fade out completo para transición más clara
-          duration: 400, // Duración más larga para mejor percepción
-          useNativeDriver: true,
-        }),
-        Animated.timing(textOpacity, {
-          toValue: 1,
-          duration: 600, // Fade in más lento para suavidad
-          useNativeDriver: true,
-        }),
+        // Fase 1: Salida con fade, escala y traslación hacia arriba
+        Animated.parallel([
+          Animated.timing(textOpacity, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(phraseScale, {
+            toValue: 0.8,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(phraseTranslateY, {
+            toValue: -20,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Fase 2: Entrada con bounce y traslación desde abajo
+        Animated.parallel([
+          Animated.timing(textOpacity, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.spring(phraseScale, {
+            toValue: 1,
+            tension: 80,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.spring(phraseTranslateY, {
+            toValue: 0,
+            tension: 80,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+        ]),
       ]).start();
 
       previousPhrase.current = currentPhrase;
     }
-  }, [time, isRunning, textOpacity, getCurrentMotivationalPhrase]);
+  }, [
+    time,
+    isRunning,
+    textOpacity,
+    phraseScale,
+    phraseTranslateY,
+    getCurrentMotivationalPhrase,
+  ]);
 
   // ============================================================================
   // FUNCIONES DE CELEBRACIÓN
@@ -296,6 +405,32 @@ export default function DigitalTimer() {
 
     setTimeout(rotateAnimation, 1000);
   }, [modalOpacity, trophyScale, medallRotation, confettiScale]);
+
+  /**
+   * Efecto especial cuando se alcanza el 95% del progreso
+   *
+   * CARACTERÍSTICAS:
+   * - Activación de confeti anticipado
+   * - Vibración especial de "casi listo"
+   * - Intensificación de animaciones de progreso
+   */
+  const triggerAlmostDoneEffect = useCallback(() => {
+    // Vibración especial para indicar que falta poco
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    // Pequeña ráfaga de confeti anticipada
+    setTimeout(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, 200);
+  }, []);
+
+  // Efecto para detectar cuando se alcanza el 95%
+  useEffect(() => {
+    const progress = getProgress();
+    if (progress >= 95 && progress < 100 && isRunning) {
+      triggerAlmostDoneEffect();
+    }
+  }, [getProgress, isRunning, triggerAlmostDoneEffect]);
 
   /**
    * Cierra el modal de celebración y resetea animaciones
@@ -559,15 +694,36 @@ export default function DigitalTimer() {
   return (
     <View style={styles.container}>
       {/* 
-        FONDO DE PROGRESO VISUAL
+        FONDO DE PROGRESO VISUAL MEJORADO
         - Se posiciona de forma absoluta para llenar el contenedor de abajo hacia arriba
         - La altura se calcula dinámicamente basada en el progreso del temporizador
-        - Color amarillo intenso para excelente contraste con el fondo azul
+        - Efectos de pulsación y brillo cuando está activo
+        - Gradiente dinámico que cambia con el progreso
         - Z-index 0 para mantenerse detrás de todos los demás elementos
       */}
-      <View
-        style={[styles.progressBackground, { height: `${getProgress()}%` }]}
-      />
+      <Animated.View
+        style={[
+          styles.progressBackground,
+          {
+            height: `${getProgress()}%`,
+            transform: [{ scale: progressPulse }],
+            opacity: progressGlow.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.6, 0.9],
+            }),
+          },
+        ]}
+      >
+        {/* Capa de brillo adicional para efecto más dinámico */}
+        <Animated.View
+          style={[
+            styles.progressGlow,
+            {
+              opacity: progressGlow,
+            },
+          ]}
+        />
+      </Animated.View>
 
       {/* 
         HEADER CON MENSAJE DE AUTOAFIRMACIÓN DINÁMICO
@@ -579,7 +735,18 @@ export default function DigitalTimer() {
       */}
       <View style={styles.header}>
         <View style={styles.motivationalFrame}>
-          <Animated.Text style={[styles.headerTitle, { opacity: textOpacity }]}>
+          <Animated.Text
+            style={[
+              styles.headerTitle,
+              {
+                opacity: textOpacity,
+                transform: [
+                  { scale: phraseScale },
+                  { translateY: phraseTranslateY },
+                ],
+              },
+            ]}
+          >
             {getCurrentMotivationalPhrase()}
           </Animated.Text>
         </View>
@@ -837,6 +1004,7 @@ const styles = StyleSheet.create({
    * - Altura dinámica basada en el progreso del temporizador
    * - Color amarillo más intenso para mejor contraste con el fondo azul
    * - Solo esquinas inferiores redondeadas para mejor ajuste
+   * - Efectos de animación cuando está activo
    */
   progressBackground: {
     position: 'absolute', // Posicionamiento absoluto
@@ -847,6 +1015,26 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20, // Solo esquinas inferiores
     borderBottomRightRadius: 20,
     zIndex: 0, // Detrás de todo el contenido
+    overflow: 'hidden', // Para contener el efecto de brillo
+  },
+
+  /**
+   * Capa de brillo adicional para la barra de progreso
+   *
+   * EFECTOS VISUALES:
+   * - Gradiente dorado que se superpone al progreso
+   * - Animación de pulsación para feedback visual
+   * - Intensidad variable según el estado del temporizador
+   */
+  progressGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 215, 0, 0.4)', // Dorado brillante
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
 
   // ==========================================================================
@@ -875,11 +1063,11 @@ const styles = StyleSheet.create({
   /**
    * Marco decorativo para los mensajes motivacionales
    *
-   * DISEÑO DISTINTIVO PARA TEA:
+   * DISEÑO DISTINTIVO PARA TEA MEJORADO:
    * - Fondo semi-transparente blanco para contraste suave
-   * - Borde decorativo con gradiente visual simulado
+   * - Gradiente sutil en el borde para mayor atractivo visual
    * - Esquinas redondeadas para apariencia amigable
-   * - Sombra suave para efecto de profundidad
+   * - Múltiples capas de sombra para efecto de profundidad
    * - Espaciado interno generoso para respiración del texto
    */
   motivationalFrame: {
@@ -890,11 +1078,11 @@ const styles = StyleSheet.create({
     paddingVertical: 20, // Espaciado vertical generoso
     paddingHorizontal: 25, // Espaciado horizontal amplio
     marginHorizontal: 10, // Margen lateral para respiración
-    shadowColor: '#000', // Sombra para profundidad
+    shadowColor: '#FFD700', // Sombra dorada para mayor calidez
     shadowOffset: { width: 0, height: 4 }, // Sombra hacia abajo
-    shadowOpacity: 0.25, // Opacidad media para definición
-    shadowRadius: 8, // Radio de sombra suave
-    elevation: 6, // Elevación en Android para sombra
+    shadowOpacity: 0.3, // Opacidad aumentada para mejor definición
+    shadowRadius: 12, // Radio de sombra más amplio
+    elevation: 8, // Elevación aumentada en Android
     minWidth: '85%', // Ancho mínimo del marco
     maxWidth: '95%', // Ancho máximo para adaptabilidad
   },
