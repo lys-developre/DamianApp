@@ -30,18 +30,37 @@ const MotivationalHeader = React.memo(
   }) => {
     // Estado para mostrar el pictograma inicial
     const [showInitialPictogram, setShowInitialPictogram] = useState(true);
+    // Estado para controlar si debe reproducir audio (solo al presionar PLAY)
+    const [shouldPlayAudio, setShouldPlayAudio] = useState(false);
+    // Estado para trackear si ya se reprodujo audio en esta sesión
+    const [hasPlayedAudio, setHasPlayedAudio] = useState(false);
 
     // Efecto para manejar el cambio de estado del pictograma
     useEffect(() => {
       // Si el timer está corriendo, ocultar el pictograma y mostrar frases
       if (isRunning && showInitialPictogram) {
         setShowInitialPictogram(false);
+        // Marcar que ya se reprodujo audio en esta sesión
+        setHasPlayedAudio(true);
+        // Desactivar audio después de reproducir
+        setShouldPlayAudio(false);
       }
       // Al parar el timer (reset), volver a mostrar el pictograma
       if (!isRunning && time === initialTime) {
         setShowInitialPictogram(true);
+        // Solo reproducir audio si no se ha reproducido en esta sesión
+        if (!hasPlayedAudio) {
+          setShouldPlayAudio(true);
+        }
       }
-    }, [isRunning, showInitialPictogram, time, initialTime]);
+    }, [isRunning, showInitialPictogram, time, initialTime, hasPlayedAudio]);
+
+    // Efecto para resetear el estado de audio cuando se cambia de preset
+    useEffect(() => {
+      // Resetear cuando cambia el tiempo inicial (nuevo preset seleccionado)
+      setHasPlayedAudio(false);
+      setShouldPlayAudio(false);
+    }, [initialTime]);
 
     const progress = getProgress();
     const currentPhrase = getCurrentPhrase(
@@ -62,7 +81,7 @@ const MotivationalHeader = React.memo(
               audioSource={require('../../../assets/pictogramas/esperar/esperar.mp3')}
               text="Esperar"
               textColor="#FFFFFF"
-              shouldPlayAudio={true}
+              shouldPlayAudio={shouldPlayAudio}
               styles={styles}
               textOpacity={textOpacity}
               phraseScale={phraseScale}
