@@ -1,0 +1,33 @@
+📋 SCRIPTS DISPONIBLES EN DAMIANAPP - REFERENCIA RÁPIDA
+
+🚀 DESARROLLO Y EJECUCIÓN:
+npm start           → Inicia servidor de desarrollo Expo (modo normal)
+npm run android     → Inicia y abre automáticamente en emulador Android
+npm run ios         → Inicia y abre automáticamente en simulador iOS (solo Mac)
+npm run web         → Inicia y abre automáticamente en navegador web
+
+🔍 CALIDAD Y FORMATEO DE CÓDIGO:
+npm run lint        → Analiza código buscando errores y problemas de estilo
+npm run lint:fix    → Corrige automáticamente errores de ESLint que puede arreglar
+npm run format      → Formatea TODO el código según reglas de Prettier
+npm run format:check → Solo VERIFICA formato sin cambiar nada (para CI/CD)
+npm run check       → Ejecuta lint + format:check juntos (verificación completa)
+
+💡 COMANDOS ADICIONALES ÚTILES:
+npx expo start --clear    → Inicia limpiando caché de Metro Bundler
+npx expo start --tunnel   → Inicia con túnel público (para redes problemáticas)
+npx prettier --write archivo.jsx → Formatea archivo específico
+npx eslint archivo.jsx --fix     → Corrige ESLint en archivo específico
+
+🎯 FLUJO DE TRABAJO RECOMENDADO:
+1. Desarrollo diario: npm start
+2. Antes de commit: npm run check → npm run lint:fix → npm run format
+3. Testing rápido: npm run web
+4. Testing móvil: npm run android / npm run ios
+5. Problemas de red: npx expo start --tunnel
+
+⚠️ NOTAS:
+- Los scripts con "_comment_" son solo documentación, no se ejecutan
+- "check" falla si hay errores de lint o formato
+- "format" modifica archivos, "format:check" solo verifica
+- iOS solo funciona en macOS
