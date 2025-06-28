@@ -15,16 +15,16 @@ export const timerStyles = StyleSheet.create({
 
   container: {
     backgroundColor: 'rgba(255, 255, 255, 0.15)', // Fondo glass semitransparente
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 20,
-    marginHorizontal: 8,
+    borderRadius: 22, // 10% más pequeño (24 * 0.9)
+    padding: 18, // 10% más pequeño (20 * 0.9)
+    marginBottom: 18, // 10% más pequeño (20 * 0.9)
+    marginHorizontal: 7, // 10% más pequeño (8 * 0.9)
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)', // Borde sutil
     shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 7 }, // 10% más pequeño (8 * 0.9)
     shadowOpacity: 0.25,
-    shadowRadius: 24,
+    shadowRadius: 22, // 10% más pequeño (24 * 0.9)
     elevation: 10,
     position: 'relative',
     overflow: 'hidden',
@@ -39,7 +39,7 @@ export const timerStyles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 24,
+    borderRadius: 22, // 10% más pequeño (24 * 0.9)
     zIndex: 0,
   },
 
@@ -50,7 +50,7 @@ export const timerStyles = StyleSheet.create({
     left: 1,
     right: 1,
     bottom: 1,
-    borderRadius: 23,
+    borderRadius: 21, // 10% más pequeño (23 * 0.9)
     borderWidth: 0.5,
     borderColor: 'rgba(255, 255, 255, 0.3)',
     zIndex: 1,
@@ -103,42 +103,44 @@ export const timerStyles = StyleSheet.create({
   header: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 30,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
+    marginBottom: 27, // 10% más pequeño (30 * 0.9)
+    paddingVertical: 18, // 10% más pequeño (20 * 0.9)
+    paddingHorizontal: 18, // 10% más pequeño (20 * 0.9)
     zIndex: 1,
+    // El header ocupa más espacio para pictograma - 150% más alto
+    height: 270, // 150% más alto que los 120 originales (120 * 2.5 = 300, pero ajustado para balance)
   },
 
   motivationalFrame: {
     backgroundColor: 'rgba(30, 30, 30, 0.9)', // Fondo oscuro tipo semáforo
-    borderRadius: 20,
+    borderRadius: 18, // 10% más pequeño (20 * 0.9)
     borderWidth: 4,
     borderColor: '#2D3748', // Marco grueso como semáforo real
-    paddingVertical: 22,
-    paddingHorizontal: 26,
-    marginHorizontal: 16,
+    paddingVertical: 20, // 10% más pequeño (22 * 0.9)
+    paddingHorizontal: 23, // 10% más pequeño (26 * 0.9)
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 7 }, // 10% más pequeño (8 * 0.9)
     shadowOpacity: 0.3,
-    shadowRadius: 15,
+    shadowRadius: 14, // 10% más pequeño (15 * 0.9)
     elevation: 12,
-    minWidth: '85%',
-    maxWidth: '95%',
     overflow: 'hidden',
     position: 'relative',
+    // Ajustes para ocupar todo el header cuando sea necesario
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   headerTitle: {
-    fontSize: 28,
+    fontSize: 25, // 10% más pequeño (28 * 0.9)
     fontWeight: '700',
     fontFamily: 'System',
     color: '#F7FAFC', // Texto blanco por defecto para contraste
     textAlign: 'center',
     letterSpacing: 0.5,
-    lineHeight: 36,
+    lineHeight: 32, // 10% más pequeño (36 * 0.9)
     maxWidth: '100%',
-    paddingHorizontal: 8,
-    paddingVertical: 8,
+    paddingHorizontal: 7, // 10% más pequeño (8 * 0.9)
+    paddingVertical: 7, // 10% más pequeño (8 * 0.9)
     textShadowColor: 'rgba(0, 0, 0, 0.8)', // Sombra oscura para resaltar
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
@@ -167,6 +169,151 @@ export const timerStyles = StyleSheet.create({
     textShadowColor: 'rgba(0, 255, 127, 0.6)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
+  },
+
+  // ==========================================================================
+  // ESTILOS PARA PICTOGRAMA DE ESPERAR - VERSIÓN COMPACTA (20-25% del espacio)
+  // ==========================================================================
+
+  // Sección del pictograma - Ocupa el 100% del header
+  pictogramSection: {
+    height: '100%', // Ocupa todo el alto del header (25% del timer total)
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+    position: 'relative', // Para posicionamiento absoluto del texto
+  },
+
+  // Frame específico para el pictograma - Ocupa todo el header aumentado
+  pictogramFrame: {
+    backgroundColor: 'rgba(30, 30, 30, 0.85)', // Fondo más transparente
+    borderRadius: 18, // Igual que el motivationalFrame para consistencia
+    borderWidth: 2, // Borde más fino
+    borderColor: '#2D3748',
+    paddingVertical: 0, // Sin padding vertical para ocupar todo el espacio
+    paddingHorizontal: 0, // Sin padding horizontal para ocupar todo el espacio
+    marginHorizontal: 0, // Sin margen para ocupar todo el ancho
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 }, // Sombra más pronunciada para la altura extra
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 10,
+    width: '100%', // Ocupa todo el ancho del header
+    height: '100%', // Ocupa toda la altura del header aumentada
+    overflow: 'hidden',
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'flex-end', // Alinea el contenido hacia abajo para el texto
+  },
+
+  // Glow para el frame del pictograma
+  pictogramFrameGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 18, // Igual que el pictogramFrame
+    backgroundColor: 'rgba(100, 181, 246, 0.15)',
+    opacity: 0.6,
+    zIndex: 1,
+  },
+
+  // Contenedor del pictograma - Ahora ocupa todo el espacio
+  pictogramCompactContainer: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+    position: 'relative',
+  },
+
+  // Imagen del pictograma - Ocupa todo el fondo con mejor resolución
+  pictogramCompactImage: {
+    width: '100%', // Ocupa todo el ancho
+    height: '100%', // Ocupa toda la altura aumentada
+    position: 'absolute', // Posición absoluta como fondo
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.95,
+    borderRadius: 16, // Mantiene consistencia visual
+    // Mantener la imagen clara y completa en el espacio aumentado
+  },
+
+  // Texto del pictograma - Superpuesto en la parte inferior con mejor visibilidad
+  pictogramCompactText: {
+    fontSize: 28, // Tamaño más grande para la altura aumentada
+    fontWeight: '800', // Más bold para mejor visibilidad
+    fontFamily: 'System',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    letterSpacing: 0.8,
+    lineHeight: 34,
+    textShadowColor: 'rgba(0, 0, 0, 0.95)', // Sombra más intensa para contraste
+    textShadowOffset: { width: 0, height: 3 },
+    textShadowRadius: 8,
+    zIndex: 15,
+    position: 'absolute', // Posición absoluta sobre la imagen
+    bottom: 20, // Un poco más arriba para mejor posicionamiento
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 10, // Más padding vertical para el tamaño aumentado
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo más opaco para legibilidad
+    borderRadius: 12, // Radio más grande
+    marginHorizontal: 20, // Margen lateral para que no toque los bordes
+  },
+
+  // Estilos antiguos del pictograma (mantenidos para compatibilidad)
+  headerTitleWaiting: {
+    color: '#FFFFFF', // Blanco para contraste sobre imagen
+    fontWeight: '800', // Más bold para visibilidad
+    fontSize: 25, // 10% más pequeño (28 * 0.9)
+    textShadowColor: 'rgba(0, 0, 0, 0.8)', // Sombra oscura para contraste
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    lineHeight: 32, // 10% más pequeño (36 * 0.9)
+    position: 'absolute', // Posición absoluta sobre la imagen
+    bottom: 10, // En la parte inferior
+    left: 0,
+    right: 0,
+    zIndex: 20, // Por encima de la imagen
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+
+  pictogramContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    paddingVertical: 18, // 10% más pequeño
+    minHeight: 126, // 10% más pequeño (140 * 0.9)
+    width: '100%',
+    position: 'relative', // Para posicionar texto sobre imagen
+  },
+
+  pictogramImage: {
+    width: '100%', // Ocupa todo el ancho del contenedor
+    height: '100%', // Ocupa toda la altura del contenedor
+    position: 'absolute', // Posición absoluta para que el texto vaya encima
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.95,
+    borderRadius: 16, // Mantiene el radio del motivationalFrame
+    // Sombra sutil para la imagen
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 6,
   },
 
   motivationalFrameGlow: {
@@ -209,7 +356,7 @@ export const timerStyles = StyleSheet.create({
 
   displayContainer: {
     alignItems: 'center',
-    marginBottom: 25,
+    marginBottom: 23, // 10% más pequeño (25 * 0.9)
     zIndex: 1,
     position: 'relative',
   },
@@ -220,12 +367,12 @@ export const timerStyles = StyleSheet.create({
   },
 
   timeDisplay: {
-    fontSize: 52,
+    fontSize: 47, // 10% más pequeño (52 * 0.9)
     fontWeight: 'bold',
     color: '#ffffff',
     fontFamily: 'monospace',
     textAlign: 'center',
-    marginBottom: 18,
+    marginBottom: 16, // 10% más pequeño (18 * 0.9)
     letterSpacing: 2,
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 2, height: 2 },
@@ -302,15 +449,15 @@ export const timerStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 25,
-    gap: 20,
+    marginBottom: 23, // 10% más pequeño (25 * 0.9)
+    gap: 18, // 10% más pequeño (20 * 0.9)
     zIndex: 1,
   },
 
   controlButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 63, // 10% más pequeño (70 * 0.9)
+    height: 63, // 10% más pequeño (70 * 0.9)
+    borderRadius: 32, // 10% más pequeño (35 * 0.9)
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -338,10 +485,10 @@ export const timerStyles = StyleSheet.create({
   },
 
   presetsTitle: {
-    fontSize: 20,
+    fontSize: 18, // 10% más pequeño (20 * 0.9)
     fontWeight: '700',
     color: '#ffffff',
-    marginBottom: 20,
+    marginBottom: 18, // 10% más pequeño (20 * 0.9)
     textAlign: 'center',
     letterSpacing: 0.6,
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
@@ -353,18 +500,18 @@ export const timerStyles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 8,
+    gap: 7, // 10% más pequeño (8 * 0.9)
     maxWidth: '100%',
   },
 
   presetButton: {
     backgroundColor: 'rgba(71, 85, 105, 0.9)', // Fondo gris azulado oscuro
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 22,
+    paddingHorizontal: 13, // 10% más pequeño (14 * 0.9)
+    paddingVertical: 9, // 10% más pequeño (10 * 0.9)
+    borderRadius: 20, // 10% más pequeño (22 * 0.9)
     borderWidth: 2,
     borderColor: 'rgba(148, 163, 184, 0.8)', // Borde gris más claro
-    minWidth: 75, // Tamaño base más pequeño
+    minWidth: 68, // 10% más pequeño (75 * 0.9)
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
@@ -378,7 +525,7 @@ export const timerStyles = StyleSheet.create({
   // Estilo cuando no hay ningún preset activo (todos normales)
   presetButtonNormal: {
     transform: [{ scale: 1.0 }], // Tamaño normal cuando no hay activo
-    minWidth: 85,
+    minWidth: 77, // 10% más pequeño (85 * 0.9)
   },
 
   presetButtonActive: {
@@ -388,7 +535,7 @@ export const timerStyles = StyleSheet.create({
     transform: [{ scale: 1.2 }], // Escala más grande para el activo
     shadowOpacity: 0.5,
     elevation: 8,
-    minWidth: 100, // Ancho mayor para el activo
+    minWidth: 90, // 10% más pequeño (100 * 0.9)
   },
 
   presetButtonDisabled: {
