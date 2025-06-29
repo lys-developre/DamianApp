@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Animated } from 'react-native';
+import { View, Animated, TouchableOpacity, Text } from 'react-native';
 
 // Hooks personalizados
 import { useTimer } from './hooks/useTimer';
@@ -28,11 +28,14 @@ import { timerStyles } from './styles/timerStyles';
  * - Servicios separados para audio/haptics
  * - Utilidades y constantes organizadas
  *
+ * @param {Object} props - Propiedades del componente
+ * @param {boolean} props.hideMotivationalHeader - Si true, oculta el header motivacional
+ * @param {Function} props.onClose - Función callback para cerrar el timer (opcional)
  * @author Damian App
  * @version 2.0.0 (Refactorizado)
  */
 
-const DigitalTimer = () => {
+const DigitalTimer = ({ hideMotivationalHeader = false, onClose = null }) => {
   // Hook principal del temporizador
   const {
     time,
@@ -127,16 +130,29 @@ const DigitalTimer = () => {
       </Animated.View>
 
       {/* HEADER CON MENSAJE MOTIVACIONAL */}
-      <MotivationalHeader
-        time={time}
-        isRunning={isRunning}
-        initialTime={initialTime}
-        getProgress={getProgress}
-        textOpacity={textOpacity}
-        phraseScale={phraseScale}
-        phraseTranslateY={phraseTranslateY}
-        styles={timerStyles}
-      />
+      {!hideMotivationalHeader && (
+        <MotivationalHeader
+          time={time}
+          isRunning={isRunning}
+          initialTime={initialTime}
+          getProgress={getProgress}
+          textOpacity={textOpacity}
+          phraseScale={phraseScale}
+          phraseTranslateY={phraseTranslateY}
+          styles={timerStyles}
+        />
+      )}
+
+      {/* BOTÓN DE CERRAR (solo si se proporciona onClose) */}
+      {onClose && (
+        <TouchableOpacity
+          style={timerStyles.closeButton}
+          onPress={onClose}
+          activeOpacity={0.7}
+        >
+          <Text style={timerStyles.closeButtonText}>✕</Text>
+        </TouchableOpacity>
+      )}
 
       {/* DISPLAY PRINCIPAL DEL TIEMPO */}
       <TimeDisplay

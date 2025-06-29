@@ -15,16 +15,16 @@ export const timerStyles = StyleSheet.create({
 
   container: {
     backgroundColor: 'rgba(255, 255, 255, 0.15)', // Fondo glass semitransparente
-    borderRadius: 22, // 10% más pequeño (24 * 0.9)
-    padding: 18, // 10% más pequeño (20 * 0.9)
-    marginBottom: 18, // 10% más pequeño (20 * 0.9)
-    marginHorizontal: 7, // 10% más pequeño (8 * 0.9)
+    borderRadius: 24, // Estandarizado con otros componentes
+    padding: 20, // Estandarizado con otros componentes
+    marginBottom: 20, // Estandarizado con otros componentes
+    marginHorizontal: 8, // Estandarizado con otros componentes
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)', // Borde sutil
     shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOffset: { width: 0, height: 7 }, // 10% más pequeño (8 * 0.9)
+    shadowOffset: { width: 0, height: 8 }, // Estandarizado con otros componentes
     shadowOpacity: 0.25,
-    shadowRadius: 22, // 10% más pequeño (24 * 0.9)
+    shadowRadius: 24, // Estandarizado con otros componentes
     elevation: 10,
     position: 'relative',
     overflow: 'hidden',
@@ -39,7 +39,7 @@ export const timerStyles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 22, // 10% más pequeño (24 * 0.9)
+    borderRadius: 24, // Estandarizado con otros componentes
     zIndex: 0,
   },
 
@@ -50,7 +50,7 @@ export const timerStyles = StyleSheet.create({
     left: 1,
     right: 1,
     bottom: 1,
-    borderRadius: 21, // 10% más pequeño (23 * 0.9)
+    borderRadius: 23, // Estandarizado con otros componentes
     borderWidth: 0.5,
     borderColor: 'rgba(255, 255, 255, 0.3)',
     zIndex: 1,
@@ -730,6 +730,34 @@ export const timerStyles = StyleSheet.create({
     fontWeight: '700',
     color: '#ffffff',
     textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+
+  // ==========================================================================
+  // BOTÓN DE CERRAR
+  // ==========================================================================
+
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+
+  closeButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ffffff',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
