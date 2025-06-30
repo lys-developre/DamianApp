@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
 import DigitalTimer from './DigitalTimer';
 import InteractiveSwitches from './InteractiveSwitches';
 import MainButtons from './MainButtons';
+import AdminConfigScreen from './AdminConfigScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -37,14 +38,16 @@ const { width } = Dimensions.get('window');
  * @version 4.0.0
  */
 export default function Main() {
+  const [showConfig, setShowConfig] = useState(false);
+
   const mainButtons = [
     {
       key: 'admin',
       icon: 'settings',
       title: 'Configuración',
       description: 'Modo familia',
-      onPress: () => {},
-      style: styles.adminCard,
+      onPress: () => setShowConfig(true),
+      style: { backgroundColor: '#45B7D1' }, // Azul
       accessibilityLabel: 'Modo familia/terapeuta',
       accessibilityHint: 'Configuración y personalización',
     },
@@ -54,13 +57,17 @@ export default function Main() {
       title: 'Configuración b',
       description: 'Modo familia b',
       onPress: () => {},
-      style: styles.adminCard,
+      style: { backgroundColor: '#F59E42' }, // Naranja
       accessibilityLabel: 'Modo familia/terapeuta',
       accessibilityHint: 'Configuración y personalización',
     },
   ];
 
   // Renderizar hub principal
+  if (showConfig) {
+    return <AdminConfigScreen onBack={() => setShowConfig(false)} />;
+  }
+
   return (
     <ScrollView
       style={styles.container}
