@@ -1,17 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Dimensions,
-  ScrollView,
-} from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import AdminScreen from './AdminScreen';
+import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
 import DigitalTimer from './DigitalTimer';
 import InteractiveSwitches from './InteractiveSwitches';
+import MainButtons from './MainButtons';
 
 const { width } = Dimensions.get('window');
 
@@ -45,27 +37,28 @@ const { width } = Dimensions.get('window');
  * @version 4.0.0
  */
 export default function Main() {
-  // Estados de navegación especializada
-  const [currentScreen, setCurrentScreen] = useState('home');
-
-  /**
-   * Navega al modo familia/terapeuta
-   */
-  const navigateToAdmin = useCallback(() => {
-    setCurrentScreen('admin');
-  }, []);
-
-  /**
-   * Regresa al hub principal
-   */
-  const navigateToHome = useCallback(() => {
-    setCurrentScreen('home');
-  }, []);
-
-  // Renderizado condicional de pantallas especializadas
-  if (currentScreen === 'admin') {
-    return <AdminScreen onBack={navigateToHome} />;
-  }
+  const mainButtons = [
+    {
+      key: 'admin',
+      icon: 'settings',
+      title: 'Configuración',
+      description: 'Modo familia',
+      onPress: () => {},
+      style: styles.adminCard,
+      accessibilityLabel: 'Modo familia/terapeuta',
+      accessibilityHint: 'Configuración y personalización',
+    },
+    {
+      key: 'admin-b',
+      icon: 'settings',
+      title: 'Configuración b',
+      description: 'Modo familia b',
+      onPress: () => {},
+      style: styles.adminCard,
+      accessibilityLabel: 'Modo familia/terapeuta',
+      accessibilityHint: 'Configuración y personalización',
+    },
+  ];
 
   // Renderizar hub principal
   return (
@@ -89,20 +82,7 @@ export default function Main() {
       <InteractiveSwitches />
 
       {/* Grid de módulos principales (solo Admin) */}
-      <View style={styles.modulesGrid}>
-        {/* Módulo de Admin/Familia */}
-        <TouchableOpacity
-          style={[styles.moduleCard, styles.adminCard]}
-          onPress={navigateToAdmin}
-          activeOpacity={0.8}
-          accessibilityLabel="Modo familia/terapeuta"
-          accessibilityHint="Configuración y personalización"
-        >
-          <MaterialIcons name="settings" size={40} color="#ffffff" />
-          <Text style={styles.moduleTitle}>Configuración</Text>
-          <Text style={styles.moduleDescription}>Modo familia</Text>
-        </TouchableOpacity>
-      </View>
+      <MainButtons buttons={mainButtons} styles={styles} />
 
       {/* Indicador visual en la parte inferior */}
       <View style={styles.bottomIndicator}>
@@ -203,7 +183,7 @@ const styles = StyleSheet.create({
   modulesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: 5,
   },
 
@@ -211,7 +191,7 @@ const styles = StyleSheet.create({
    * Card base para módulos
    */
   moduleCard: {
-    width: width * 0.42,
+    width: width * 0.42, // Aproximadamente 42% del ancho de la pantalla
     height: 140,
     borderRadius: 20,
     padding: 20,
@@ -226,13 +206,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+    marginHorizontal: 'auto',
   },
 
   /**
    * Card de admin/familia
    */
   adminCard: {
-    backgroundColor: '#FFC107',
+    backgroundColor: '#45B7D1',
   },
 
   /**
