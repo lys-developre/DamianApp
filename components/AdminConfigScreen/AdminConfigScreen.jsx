@@ -1,11 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import TimerImageButtonsManager from '../TimerImageButtons/TimerImageButtonsManager';
 
-export default function AdminConfigScreen({ onBack }) {
+const AdminConfigScreen = ({
+  onBack,
+  timerImageButtons,
+  setTimerImageButtons,
+}) => {
+  const [showTimerImageManager, setShowTimerImageManager] = useState(false);
+
+  if (showTimerImageManager) {
+    return (
+      <TimerImageButtonsManager
+        onBack={() => setShowTimerImageManager(false)}
+        timerImageButtons={timerImageButtons}
+        setTimerImageButtons={setTimerImageButtons}
+      />
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Configuración</Text>
-      <TouchableOpacity style={styles.configButton}>
+      <TouchableOpacity
+        style={styles.configButton}
+        onPress={() => setShowTimerImageManager(true)}
+      >
         <Text style={styles.buttonText}>Imagenes con temporizador</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.configButton}>
@@ -19,7 +39,7 @@ export default function AdminConfigScreen({ onBack }) {
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -61,3 +81,5 @@ const styles = StyleSheet.create({
     textAlign: 'center', // Centrado para varias líneas
   },
 });
+
+export default AdminConfigScreen;

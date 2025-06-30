@@ -10,8 +10,8 @@ import MainButton from './MainButton';
 export default function MainButtons({ buttons, styles }) {
   return (
     <View style={styles.modulesGrid}>
-      {buttons.map(btn => (
-        <MainButton key={btn.key} {...btn} styles={styles} />
+      {buttons.map(({ key, ...btn }) => (
+        <MainButton key={key} {...btn} styles={styles} />
       ))}
     </View>
   );

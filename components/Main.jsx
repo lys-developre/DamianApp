@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
 import DigitalTimer from './DigitalTimer';
 import InteractiveSwitches from './InteractiveSwitches';
 import MainButtons from './MainButtons';
 import AdminConfigScreen from './AdminConfigScreen';
+import TimerImageButton from './TimerImageButtons';
 
 const { width } = Dimensions.get('window');
 
@@ -40,6 +41,72 @@ const { width } = Dimensions.get('window');
 export default function Main() {
   const [showConfig, setShowConfig] = useState(false);
 
+  // Estado de temporizadores con imagen: tiempo en segundos y formateado
+  const [timerImageButtons, setTimerImageButtons] = useState([
+    {
+      id: '1',
+      image: 'https://placekitten.com/300/300',
+      timer: '02:30:00',
+      seconds: 2 * 3600 + 30 * 60, // 2h 30m
+      isActive: true,
+    },
+    {
+      id: '2',
+      image: 'https://placekitten.com/301/301',
+      timer: '00:00:00',
+      seconds: 0,
+      isActive: false,
+    },
+  ]);
+
+  // Referencia para evitar problemas de cierre sobre el estado
+  const intervalRef = useRef();
+
+  // Formatea segundos a HH:mm:ss
+  const formatSeconds = totalSeconds => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return (
+      String(hours).padStart(2, '0') +
+      ':' +
+      String(minutes).padStart(2, '0') +
+      ':' +
+      String(seconds).padStart(2, '0')
+    );
+  };
+
+  // Efecto: cuenta regresiva para todos los temporizadores activos
+  useEffect(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setTimerImageButtons(prev =>
+        prev.map(btn => {
+          if (btn.isActive && btn.seconds > 0) {
+            const newSeconds = btn.seconds - 1;
+            if (newSeconds === 0) {
+              // Finaliza: cambia a verde
+              return {
+                ...btn,
+                seconds: 0,
+                timer: formatSeconds(0),
+                isActive: false,
+              };
+            }
+            return {
+              ...btn,
+              seconds: newSeconds,
+              timer: formatSeconds(newSeconds),
+            };
+          }
+          return btn;
+        })
+      );
+    }, 1000);
+    return () => clearInterval(intervalRef.current);
+  }, []);
+
+  // Definición de mainButtons (restaurada tras el cambio de posición)
   const mainButtons = [
     {
       key: 'admin',
@@ -65,7 +132,13 @@ export default function Main() {
 
   // Renderizar hub principal
   if (showConfig) {
-    return <AdminConfigScreen onBack={() => setShowConfig(false)} />;
+    return (
+      <AdminConfigScreen
+        onBack={() => setShowConfig(false)}
+        timerImageButtons={timerImageButtons}
+        setTimerImageButtons={setTimerImageButtons}
+      />
+    );
   }
 
   return (
@@ -87,6 +160,24 @@ export default function Main() {
 
       {/* Switches Interactivos */}
       <InteractiveSwitches />
+
+      {/* Temporizadores con imagen */}
+      <View style={{ width: '100%', marginBottom: 18 }}>
+        {timerImageButtons.map(btn => (
+          <View
+            key={btn.id}
+            style={{ width: '100%', alignItems: 'center', marginBottom: 12 }}
+          >
+            <TimerImageButton
+              image={btn.image}
+              timer={btn.timer}
+              isActive={btn.isActive}
+              onPress={() => {}}
+              style={{ width: width * 0.92 }}
+            />
+          </View>
+        ))}
+      </View>
 
       {/* Grid de módulos principales (solo Admin) */}
       <MainButtons buttons={mainButtons} styles={styles} />
