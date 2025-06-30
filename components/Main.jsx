@@ -173,7 +173,7 @@ export default function Main() {
               timer={btn.timer}
               isActive={btn.isActive}
               onPress={() => {}}
-              style={{ width: width * 0.92 }}
+              style={{ width: width * 0.82, height: width * 0.82 }}
             />
           </View>
         ))}
