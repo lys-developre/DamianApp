@@ -9,11 +9,6 @@ import {
   ScrollView,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import CommunicationScreen from './CommunicationScreen';
-import EmotionalRegulationScreen from './EmotionalRegulationScreen';
-import VisualScheduleScreen from './VisualScheduleScreen';
-import FoodModuleScreen from './FoodModuleScreen';
-import ReportsScreen from './ReportsScreen';
 import AdminScreen from './AdminScreen';
 import DigitalTimer from './DigitalTimer';
 import InteractiveSwitches from './InteractiveSwitches';
@@ -54,41 +49,6 @@ export default function Main() {
   const [currentScreen, setCurrentScreen] = useState('home');
 
   /**
-   * Navega a la pantalla de comunicación básica
-   */
-  const navigateToCommunication = useCallback(() => {
-    setCurrentScreen('communication');
-  }, []);
-
-  /**
-   * Navega a la pantalla de regulación emocional
-   */
-  const navigateToEmotionalRegulation = useCallback(() => {
-    setCurrentScreen('emotional');
-  }, []);
-
-  /**
-   * Navega a la agenda visual diaria
-   */
-  const navigateToVisualSchedule = useCallback(() => {
-    setCurrentScreen('schedule');
-  }, []);
-
-  /**
-   * Navega al módulo de alimentación
-   */
-  const navigateToFoodModule = useCallback(() => {
-    setCurrentScreen('food');
-  }, []);
-
-  /**
-   * Navega a los reportes y análisis
-   */
-  const navigateToReports = useCallback(() => {
-    setCurrentScreen('reports');
-  }, []);
-
-  /**
    * Navega al modo familia/terapeuta
    */
   const navigateToAdmin = useCallback(() => {
@@ -103,26 +63,6 @@ export default function Main() {
   }, []);
 
   // Renderizado condicional de pantallas especializadas
-  if (currentScreen === 'communication') {
-    return <CommunicationScreen onBack={navigateToHome} />;
-  }
-
-  if (currentScreen === 'emotional') {
-    return <EmotionalRegulationScreen onBack={navigateToHome} />;
-  }
-
-  if (currentScreen === 'schedule') {
-    return <VisualScheduleScreen onBack={navigateToHome} />;
-  }
-
-  if (currentScreen === 'food') {
-    return <FoodModuleScreen onBack={navigateToHome} />;
-  }
-
-  if (currentScreen === 'reports') {
-    return <ReportsScreen onBack={navigateToHome} />;
-  }
-
   if (currentScreen === 'admin') {
     return <AdminScreen onBack={navigateToHome} />;
   }
@@ -148,77 +88,8 @@ export default function Main() {
       {/* Switches Interactivos */}
       <InteractiveSwitches />
 
-      {/* Grid de módulos principales */}
+      {/* Grid de módulos principales (solo Admin) */}
       <View style={styles.modulesGrid}>
-        {/* Módulo de Comunicación */}
-        <TouchableOpacity
-          style={[styles.moduleCard, styles.communicationCard]}
-          onPress={navigateToCommunication}
-          activeOpacity={0.8}
-          accessibilityLabel="Módulo de comunicación"
-          accessibilityHint="Accede a botones de comunicación con pictogramas"
-        >
-          <MaterialIcons name="chat" size={40} color="#ffffff" />
-          <Text style={styles.moduleTitle}>Comunicación</Text>
-          <Text style={styles.moduleDescription}>Frases y pictogramas</Text>
-        </TouchableOpacity>
-
-        {/* Módulo de Regulación Emocional */}
-        <TouchableOpacity
-          style={[styles.moduleCard, styles.emotionalCard]}
-          onPress={navigateToEmotionalRegulation}
-          activeOpacity={0.8}
-          accessibilityLabel="Módulo de regulación emocional"
-          accessibilityHint="Herramientas para manejar emociones y ansiedad"
-        >
-          <MaterialIcons
-            name="sentiment-satisfied-alt"
-            size={40}
-            color="#ffffff"
-          />
-          <Text style={styles.moduleTitle}>Regulación</Text>
-          <Text style={styles.moduleDescription}>Semáforo emocional</Text>
-        </TouchableOpacity>
-
-        {/* Módulo de Agenda Visual */}
-        <TouchableOpacity
-          style={[styles.moduleCard, styles.scheduleCard]}
-          onPress={navigateToVisualSchedule}
-          activeOpacity={0.8}
-          accessibilityLabel="Módulo de agenda visual"
-          accessibilityHint="Rutinas diarias con pictogramas"
-        >
-          <MaterialIcons name="schedule" size={40} color="#ffffff" />
-          <Text style={styles.moduleTitle}>Agenda</Text>
-          <Text style={styles.moduleDescription}>Rutinas diarias</Text>
-        </TouchableOpacity>
-
-        {/* Módulo de Alimentación */}
-        <TouchableOpacity
-          style={[styles.moduleCard, styles.foodCard]}
-          onPress={navigateToFoodModule}
-          activeOpacity={0.8}
-          accessibilityLabel="Módulo de alimentación"
-          accessibilityHint="Gamificación para probar nuevos alimentos"
-        >
-          <MaterialIcons name="restaurant" size={40} color="#ffffff" />
-          <Text style={styles.moduleTitle}>Alimentación</Text>
-          <Text style={styles.moduleDescription}>Nuevos sabores</Text>
-        </TouchableOpacity>
-
-        {/* Módulo de Reportes */}
-        <TouchableOpacity
-          style={[styles.moduleCard, styles.reportsCard]}
-          onPress={navigateToReports}
-          activeOpacity={0.8}
-          accessibilityLabel="Módulo de reportes"
-          accessibilityHint="Análisis de progreso para familia y terapeutas"
-        >
-          <MaterialIcons name="analytics" size={40} color="#ffffff" />
-          <Text style={styles.moduleTitle}>Reportes</Text>
-          <Text style={styles.moduleDescription}>Progreso y datos</Text>
-        </TouchableOpacity>
-
         {/* Módulo de Admin/Familia */}
         <TouchableOpacity
           style={[styles.moduleCard, styles.adminCard]}
@@ -355,41 +226,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
-  },
-
-  /**
-   * Card de comunicación
-   */
-  communicationCard: {
-    backgroundColor: '#FF6B6B',
-  },
-
-  /**
-   * Card de regulación emocional
-   */
-  emotionalCard: {
-    backgroundColor: '#4ECDC4',
-  },
-
-  /**
-   * Card de agenda visual
-   */
-  scheduleCard: {
-    backgroundColor: '#45B7D1',
-  },
-
-  /**
-   * Card de alimentación
-   */
-  foodCard: {
-    backgroundColor: '#96CEB4',
-  },
-
-  /**
-   * Card de reportes
-   */
-  reportsCard: {
-    backgroundColor: '#9C88FF',
   },
 
   /**
