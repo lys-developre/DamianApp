@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -7,290 +7,211 @@ import {
   FlatList,
   Modal,
   Image,
-  Alert,
   TextInput,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import TimerImageButton from './TimerImageButton';
 import { formatSeconds, imageTimerPresets as timePresets } from '../../utils';
+import { useTimerImageButtonsManager } from './hooks/useTimerImageButtonsManager';
 
-const TimerImageButtonsManager = ({
-  onBack,
-  timerImageButtons,
-  setTimerImageButtons,
-}) => {
-  // Estado para edición
-  const [showModal, setShowModal] = useState(false);
-  const [newImage, setNewImage] = useState('');
-  const [newTimer, setNewTimer] = useState(0); // en segundos
-  const [editId, setEditId] = useState(null);
-  const [manualDays, setManualDays] = useState('');
-  const [manualHours, setManualHours] = useState('');
-  const [manualMinutes, setManualMinutes] = useState('');
-  const [manualSeconds, setManualSeconds] = useState('');
+/**
+ * Componente optimizado para gestión de temporizadores con imagen
+ *
+ * MEJORAS ARQUITECTURA MÓDULO 2:
+ * - ✅ Lógica extraída a hook personalizado useTimerImageButtonsManager
+ * - ✅ Componente enfocado solo en UI
+ * - ✅ React.memo para optimización de rendimiento
+ * - ✅ Separación clara de responsabilidades
+ *
+ * @author Damian App
+ * @version 2.0.0 - Refactorizado para Módulo 2
+ */
+const TimerImageButtonsManager = React.memo(
+  ({ onBack, timerImageButtons, setTimerImageButtons }) => {
+    // Hook personalizado para toda la lógica de gestión
+    const {
+      showModal,
+      newImage,
+      newTimer,
+      editId,
+      manualDays,
+      manualHours,
+      manualMinutes,
+      manualSeconds,
+      setManualDays,
+      setManualHours,
+      setManualMinutes,
+      setManualSeconds,
+      openEditModal,
+      openCreateModal,
+      closeModal,
+      pickImage,
+      handleAddPreset,
+      handleManualTime,
+      handleResetTimer,
+      handleSave,
+      handleDelete,
+    } = useTimerImageButtonsManager(timerImageButtons, setTimerImageButtons);
 
-  // Elimina el estado local de buttons, usa el global
-  const buttons = timerImageButtons;
-
-  // Al pulsar editar, carga los datos en el modal
-  const openEditModal = item => {
-    setEditId(item.id);
-    setNewImage(item.image);
-    setNewTimer(item.seconds || 0);
-    setManualDays('');
-    setManualHours('');
-    setManualMinutes('');
-    setManualSeconds('');
-    setShowModal(true);
-  };
-
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      setNewImage(result.assets[0].uri);
-    }
-  };
-
-  const handleAddPreset = seconds => {
-    setNewTimer(prev => prev + seconds);
-  };
-
-  const handleResetTimer = () => setNewTimer(0);
-
-  const handleManualTime = () => {
-    const d = parseInt(manualDays) || 0;
-    const h = parseInt(manualHours) || 0;
-    const m = parseInt(manualMinutes) || 0;
-    const s = parseInt(manualSeconds) || 0;
-    setNewTimer(d * 86400 + h * 3600 + m * 60 + s);
-  };
-
-  const handleSave = () => {
-    if (!newImage || newTimer <= 0) return;
-    if (editId) {
-      setTimerImageButtons(prev =>
-        prev.map(btn =>
-          btn.id === editId
-            ? {
-                ...btn,
-                image: newImage,
-                timer: formatSeconds(newTimer),
-                seconds: newTimer,
-                isActive: true,
-              }
-            : btn
-        )
-      );
-    } else {
-      setTimerImageButtons(prev => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          image: newImage,
-          timer: formatSeconds(newTimer),
-          seconds: newTimer,
-          isActive: true,
-        },
-      ]);
-    }
-    setShowModal(false);
-    setNewImage('');
-    setNewTimer(0);
-    setEditId(null);
-    setManualDays('');
-    setManualHours('');
-    setManualMinutes('');
-    setManualSeconds('');
-  };
-
-  const handleDelete = id => {
-    Alert.alert(
-      'Eliminar temporizador',
-      '¿Seguro que deseas eliminar este temporizador?',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: () =>
-            setTimerImageButtons(prev => prev.filter(btn => btn.id !== id)),
-        },
-      ]
-    );
-  };
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Gestión de temporizadores con imagen</Text>
-      <FlatList
-        data={buttons}
-        keyExtractor={item => item.id}
-        horizontal
-        renderItem={({ item }) => (
-          <View style={{ alignItems: 'center' }}>
-            <TimerImageButton
-              image={item.image}
-              timer={item.timer}
-              isActive={item.isActive}
-              onPress={() => {}}
-            />
-            <View style={{ flexDirection: 'row', marginTop: 4 }}>
-              <TouchableOpacity
-                style={styles.editBtn}
-                onPress={() => openEditModal(item)}
-              >
-                <Text style={styles.editBtnText}>Editar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteBtn}
-                onPress={() => handleDelete(item.id)}
-              >
-                <Text style={styles.deleteBtnText}>Eliminar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-        contentContainerStyle={styles.list}
-        showsHorizontalScrollIndicator={false}
-      />
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => {
-          setShowModal(true);
-          setEditId(null);
-          setNewImage('');
-          setNewTimer(0);
-        }}
-      >
-        <Text style={styles.addButtonText}>+ Nuevo temporizador</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.backButton} onPress={onBack}>
-        <Text style={styles.buttonText}>Volver</Text>
-      </TouchableOpacity>
-
-      {/* Modal para crear/editar temporizador */}
-      <Modal visible={showModal} transparent animationType="slide">
-        <View style={styles.modalBg}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {editId ? 'Editar' : 'Nuevo'} temporizador
-            </Text>
-            <TouchableOpacity style={styles.imagePickerBtn} onPress={pickImage}>
-              <Text style={styles.imagePickerText}>
-                {newImage ? 'Cambiar imagen' : 'Elegir imagen'}
-              </Text>
-            </TouchableOpacity>
-            {newImage ? (
-              <Image source={{ uri: newImage }} style={styles.previewImg} />
-            ) : null}
-            <Text style={styles.presetLabel}>
-              Tiempo total:{' '}
-              <Text style={{ fontWeight: 'bold', color: '#48bb78' }}>
-                {formatSeconds(newTimer)}
-              </Text>
-            </Text>
-            <View style={styles.presetsRow}>
-              {timePresets.map(preset => (
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Gestión de temporizadores con imagen</Text>
+        <FlatList
+          data={timerImageButtons}
+          keyExtractor={item => item.id}
+          horizontal
+          renderItem={({ item }) => (
+            <View style={{ alignItems: 'center' }}>
+              <TimerImageButton
+                image={item.image}
+                timer={item.timer}
+                isActive={item.isActive}
+                onPress={() => {}}
+              />
+              <View style={{ flexDirection: 'row', marginTop: 4 }}>
                 <TouchableOpacity
-                  key={preset.label}
-                  style={styles.presetBtn}
-                  onPress={() => handleAddPreset(preset.seconds)}
+                  style={styles.editBtn}
+                  onPress={() => openEditModal(item)}
                 >
-                  <Text style={styles.presetBtnText}>{preset.label}</Text>
+                  <Text style={styles.editBtnText}>Editar</Text>
                 </TouchableOpacity>
-              ))}
+                <TouchableOpacity
+                  style={styles.deleteBtn}
+                  onPress={() => handleDelete(item.id)}
+                >
+                  <Text style={styles.deleteBtnText}>Eliminar</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.manualTimeRow}>
-              <TextInput
-                style={styles.manualInput}
-                placeholder="días"
-                keyboardType="numeric"
-                value={manualDays}
-                onChangeText={t => {
-                  setManualDays(t);
-                }}
-                onBlur={handleManualTime}
-                placeholderTextColor="#aaa"
-                maxLength={2}
-              />
-              <TextInput
-                style={styles.manualInput}
-                placeholder="horas"
-                keyboardType="numeric"
-                value={manualHours}
-                onChangeText={t => {
-                  setManualHours(t);
-                }}
-                onBlur={handleManualTime}
-                placeholderTextColor="#aaa"
-                maxLength={2}
-              />
-              <TextInput
-                style={styles.manualInput}
-                placeholder="min"
-                keyboardType="numeric"
-                value={manualMinutes}
-                onChangeText={t => {
-                  setManualMinutes(t);
-                }}
-                onBlur={handleManualTime}
-                placeholderTextColor="#aaa"
-                maxLength={2}
-              />
-              <TextInput
-                style={styles.manualInput}
-                placeholder="seg"
-                keyboardType="numeric"
-                value={manualSeconds}
-                onChangeText={t => {
-                  setManualSeconds(t);
-                }}
-                onBlur={handleManualTime}
-                placeholderTextColor="#aaa"
-                maxLength={2}
-              />
-            </View>
-            <TouchableOpacity
-              style={styles.resetBtn}
-              onPress={() => {
-                handleResetTimer();
-                setManualDays('');
-                setManualHours('');
-                setManualMinutes('');
-                setManualSeconds('');
-              }}
-            >
-              <Text style={styles.resetBtnText}>Reiniciar tiempo</Text>
-            </TouchableOpacity>
-            <View
-              style={{ flexDirection: 'row', justifyContent: 'space-between' }}
-            >
-              <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-                <Text style={styles.saveBtnText}>Guardar</Text>
-              </TouchableOpacity>
+          )}
+          contentContainerStyle={styles.list}
+          showsHorizontalScrollIndicator={false}
+        />
+        <TouchableOpacity style={styles.addButton} onPress={openCreateModal}>
+          <Text style={styles.addButtonText}>+ Nuevo temporizador</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.backButton} onPress={onBack}>
+          <Text style={styles.buttonText}>Volver</Text>
+        </TouchableOpacity>
+
+        {/* Modal para crear/editar temporizador */}
+        <Modal visible={showModal} transparent animationType="slide">
+          <View style={styles.modalBg}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>
+                {editId ? 'Editar' : 'Nuevo'} temporizador
+              </Text>
               <TouchableOpacity
-                style={styles.cancelBtn}
+                style={styles.imagePickerBtn}
+                onPress={pickImage}
+              >
+                <Text style={styles.imagePickerText}>
+                  {newImage ? 'Cambiar imagen' : 'Elegir imagen'}
+                </Text>
+              </TouchableOpacity>
+              {newImage ? (
+                <Image source={{ uri: newImage }} style={styles.previewImg} />
+              ) : null}
+              <Text style={styles.presetLabel}>
+                Tiempo total:{' '}
+                <Text style={{ fontWeight: 'bold', color: '#48bb78' }}>
+                  {formatSeconds(newTimer)}
+                </Text>
+              </Text>
+              <View style={styles.presetsRow}>
+                {timePresets.map(preset => (
+                  <TouchableOpacity
+                    key={preset.label}
+                    style={styles.presetBtn}
+                    onPress={() => handleAddPreset(preset.seconds)}
+                  >
+                    <Text style={styles.presetBtnText}>{preset.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View style={styles.manualTimeRow}>
+                <TextInput
+                  style={styles.manualInput}
+                  placeholder="días"
+                  keyboardType="numeric"
+                  value={manualDays}
+                  onChangeText={t => {
+                    setManualDays(t);
+                  }}
+                  onBlur={handleManualTime}
+                  placeholderTextColor="#aaa"
+                  maxLength={2}
+                />
+                <TextInput
+                  style={styles.manualInput}
+                  placeholder="horas"
+                  keyboardType="numeric"
+                  value={manualHours}
+                  onChangeText={t => {
+                    setManualHours(t);
+                  }}
+                  onBlur={handleManualTime}
+                  placeholderTextColor="#aaa"
+                  maxLength={2}
+                />
+                <TextInput
+                  style={styles.manualInput}
+                  placeholder="min"
+                  keyboardType="numeric"
+                  value={manualMinutes}
+                  onChangeText={t => {
+                    setManualMinutes(t);
+                  }}
+                  onBlur={handleManualTime}
+                  placeholderTextColor="#aaa"
+                  maxLength={2}
+                />
+                <TextInput
+                  style={styles.manualInput}
+                  placeholder="seg"
+                  keyboardType="numeric"
+                  value={manualSeconds}
+                  onChangeText={t => {
+                    setManualSeconds(t);
+                  }}
+                  onBlur={handleManualTime}
+                  placeholderTextColor="#aaa"
+                  maxLength={2}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.resetBtn}
                 onPress={() => {
-                  setShowModal(false);
-                  setEditId(null);
+                  handleResetTimer();
+                  setManualDays('');
+                  setManualHours('');
+                  setManualMinutes('');
+                  setManualSeconds('');
                 }}
               >
-                <Text style={styles.saveBtnText}>Cancelar</Text>
+                <Text style={styles.resetBtnText}>Reiniciar tiempo</Text>
               </TouchableOpacity>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+                  <Text style={styles.saveBtnText}>Guardar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.cancelBtn} onPress={closeModal}>
+                  <Text style={styles.saveBtnText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-    </View>
-  );
-};
+        </Modal>
+      </View>
+    );
+  }
+);
+
+TimerImageButtonsManager.displayName = 'TimerImageButtonsManager';
 
 const styles = StyleSheet.create({
   container: {

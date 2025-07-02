@@ -4,7 +4,13 @@ import PropTypes from 'prop-types';
 import TimerImageButtonsManager from '../TimerImageButtons/TimerImageButtonsManager';
 
 /**
- * Pantalla de configuración administrativa de Damian APP
+ * Pantalla de configuración administrativa de Damian APP - Optimizada
+ *
+ * MEJORAS MÓDULO 2:
+ * - ✅ React.memo para optimización de rendimiento
+ * - ✅ useCallback para handlers estables
+ * - ✅ Separación clara de responsabilidades
+ * - ✅ Accesibilidad completa
  *
  * FUNCIONALIDAD: Hub de configuración para familia/terapeutas
  * NAVEGACIÓN: Renderizado condicional entre menú principal y sub-pantallas
@@ -26,87 +32,86 @@ import TimerImageButtonsManager from '../TimerImageButtons/TimerImageButtonsMana
  * @param {Function} props.setTimerImageButtons - Setter para temporizadores
  * @returns {JSX.Element} Pantalla de configuración administrativa
  * @author Damian
- * @version 1.0.0
+ * @version 2.0.0 - Optimizado Módulo 2
  */
+const AdminConfigScreen = React.memo(
+  ({ onBack, timerImageButtons, setTimerImageButtons }) => {
+    const [showTimerImageManager, setShowTimerImageManager] = useState(false);
 
-const AdminConfigScreen = ({
-  onBack,
-  timerImageButtons,
-  setTimerImageButtons,
-}) => {
-  const [showTimerImageManager, setShowTimerImageManager] = useState(false);
+    // Handlers memoizados para optimización de rendimiento
+    const handleBackToMenu = useCallback(
+      () => setShowTimerImageManager(false),
+      []
+    );
 
-  // Handlers memoizados para optimización de rendimiento
-  const handleBackToMenu = useCallback(
-    () => setShowTimerImageManager(false),
-    []
-  );
+    const handleShowTimerManager = useCallback(
+      () => setShowTimerImageManager(true),
+      []
+    );
 
-  const handleShowTimerManager = useCallback(
-    () => setShowTimerImageManager(true),
-    []
-  );
+    // RENDERIZADO CONDICIONAL: Sub-pantalla de gestión de temporizadores
+    if (showTimerImageManager) {
+      return (
+        <TimerImageButtonsManager
+          onBack={handleBackToMenu}
+          timerImageButtons={timerImageButtons}
+          setTimerImageButtons={setTimerImageButtons}
+        />
+      );
+    }
 
-  // RENDERIZADO CONDICIONAL: Sub-pantalla de gestión de temporizadores
-  if (showTimerImageManager) {
+    // RENDERIZADO PRINCIPAL: Menú de configuración administrativa
     return (
-      <TimerImageButtonsManager
-        onBack={handleBackToMenu}
-        timerImageButtons={timerImageButtons}
-        setTimerImageButtons={setTimerImageButtons}
-      />
+      <View style={styles.container}>
+        <Text style={styles.title}>Configuración</Text>
+
+        {/* BOTÓN: Gestión de temporizadores con imagen */}
+        <TouchableOpacity
+          style={styles.configButton}
+          onPress={handleShowTimerManager}
+          accessibilityRole="button"
+          accessibilityLabel="Gestionar imágenes con temporizador"
+          accessibilityHint="Abre la pantalla para configurar temporizadores con imágenes"
+        >
+          <Text style={styles.buttonText}>Imagenes con temporizador</Text>
+        </TouchableOpacity>
+
+        {/* BOTÓN: Configuración de temporizador digital */}
+        <TouchableOpacity
+          style={styles.configButton}
+          accessibilityRole="button"
+          accessibilityLabel="Configurar temporizador digital"
+          accessibilityHint="Abre configuración del temporizador principal"
+        >
+          <Text style={styles.buttonText}>Configurar temporizador</Text>
+        </TouchableOpacity>
+
+        {/* BOTÓN: Configuración de frases motivacionales */}
+        <TouchableOpacity
+          style={styles.configButton}
+          accessibilityRole="button"
+          accessibilityLabel="Configurar frases motivacionales"
+          accessibilityHint="Personaliza las frases que aparecen durante los temporizadores"
+        >
+          <Text style={styles.buttonText}>Configurar frases</Text>
+        </TouchableOpacity>
+
+        {/* BOTÓN: Volver a pantalla anterior */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={onBack}
+          accessibilityRole="button"
+          accessibilityLabel="Volver"
+          accessibilityHint="Regresa a la pantalla principal de la aplicación"
+        >
+          <Text style={styles.buttonText}>Volver</Text>
+        </TouchableOpacity>
+      </View>
     );
   }
+);
 
-  // RENDERIZADO PRINCIPAL: Menú de configuración administrativa
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Configuración</Text>
-
-      {/* BOTÓN: Gestión de temporizadores con imagen */}
-      <TouchableOpacity
-        style={styles.configButton}
-        onPress={handleShowTimerManager}
-        accessibilityRole="button"
-        accessibilityLabel="Gestionar imágenes con temporizador"
-        accessibilityHint="Abre la pantalla para configurar temporizadores con imágenes"
-      >
-        <Text style={styles.buttonText}>Imagenes con temporizador</Text>
-      </TouchableOpacity>
-
-      {/* BOTÓN: Configuración de temporizador digital */}
-      <TouchableOpacity
-        style={styles.configButton}
-        accessibilityRole="button"
-        accessibilityLabel="Configurar temporizador digital"
-        accessibilityHint="Abre configuración del temporizador principal"
-      >
-        <Text style={styles.buttonText}>Configurar temporizador</Text>
-      </TouchableOpacity>
-
-      {/* BOTÓN: Configuración de frases motivacionales */}
-      <TouchableOpacity
-        style={styles.configButton}
-        accessibilityRole="button"
-        accessibilityLabel="Configurar frases motivacionales"
-        accessibilityHint="Personaliza las frases que aparecen durante los temporizadores"
-      >
-        <Text style={styles.buttonText}>Configurar frases</Text>
-      </TouchableOpacity>
-
-      {/* BOTÓN: Volver a pantalla anterior */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={onBack}
-        accessibilityRole="button"
-        accessibilityLabel="Volver"
-        accessibilityHint="Regresa a la pantalla principal de la aplicación"
-      >
-        <Text style={styles.buttonText}>Volver</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
+AdminConfigScreen.displayName = 'AdminConfigScreen';
 
 const styles = StyleSheet.create({
   container: {

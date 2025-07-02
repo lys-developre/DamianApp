@@ -13,7 +13,13 @@ import SwitchesCelebrationModal from './components/SwitchesCelebrationModal';
 import { switchesStyles } from './styles/switchesStyles';
 
 /**
- * InteractiveSwitches - Componente de switches interactivos estilo iOS
+ * InteractiveSwitches - Componente optimizado de switches interactivos estilo iOS
+ *
+ * MEJORAS MÓDULO 2:
+ * - ✅ React.memo para optimización de rendimiento
+ * - ✅ Lógica extraída a hook personalizado useSwitches
+ * - ✅ Componentes UI separados y optimizados
+ * - ✅ Responsabilidad única: coordinar switches
  *
  * CARACTERÍSTICAS:
  * - 40 switches interactivos estilo iOS nativo
@@ -26,10 +32,9 @@ import { switchesStyles } from './styles/switchesStyles';
  * - Arquitectura modular con hooks y componentes separados
  *
  * @author Damian App
- * @version 17.0.0 - 40 iOS Switches (4x10 grid)
+ * @version 18.0.0 - Optimizado Módulo 2
  */
-
-const InteractiveSwitches = () => {
+const InteractiveSwitches = React.memo(() => {
   // Hook principal para manejar el estado de los switches
   const {
     switches,
@@ -66,6 +71,8 @@ const InteractiveSwitches = () => {
       />
     </View>
   );
-};
+});
+
+InteractiveSwitches.displayName = 'InteractiveSwitches';
 
 export default InteractiveSwitches;
