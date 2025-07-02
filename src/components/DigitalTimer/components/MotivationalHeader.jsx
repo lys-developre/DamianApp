@@ -85,8 +85,8 @@ const MotivationalHeader = React.memo(
         {showInitialPictogram && !isRunning && (
           <View style={styles.pictogramSection}>
             <PictogramDisplay
-              pictogramSource={require('../../../assets/pictogramas/esperar/esperar.png')}
-              audioSource={require('../../../assets/pictogramas/esperar/esperar.mp3')}
+              pictogramSource={require('../../../../assets/pictogramas/esperar/esperar.png')}
+              audioSource={require('../../../../assets/pictogramas/esperar/esperar.mp3')}
               text="Esperar"
               textColor="#FFFFFF"
               shouldPlayAudio={shouldPlayAudio}

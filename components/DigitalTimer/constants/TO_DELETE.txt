@@ -1,3 +1,0 @@
-motivationalPhrases.js
-
-Este archivo será eliminado para limpiar frases motivacionales asociadas a pictogramas.

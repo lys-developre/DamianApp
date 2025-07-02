@@ -12,28 +12,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import TimerImageButton from './TimerImageButton';
-
-const timePresets = [
-  { label: '15 min', seconds: 15 * 60 },
-  { label: '30 min', seconds: 30 * 60 },
-  { label: '1 hora', seconds: 60 * 60 },
-  { label: '1 día', seconds: 24 * 60 * 60 },
-  { label: '1 semana', seconds: 7 * 24 * 60 * 60 },
-  { label: '1 mes', seconds: 30 * 24 * 60 * 60 },
-];
-
-function formatSeconds(totalSeconds) {
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  let str = '';
-  if (days > 0) str += days + 'd ';
-  if (hours > 0 || days > 0) str += hours.toString().padStart(2, '0') + ':';
-  str += minutes.toString().padStart(2, '0') + ':';
-  str += seconds.toString().padStart(2, '0');
-  return str.trim();
-}
+import { formatSeconds, imageTimerPresets as timePresets } from '../../utils';
 
 const TimerImageButtonsManager = ({
   onBack,

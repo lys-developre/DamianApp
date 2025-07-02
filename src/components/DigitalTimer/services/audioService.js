@@ -82,7 +82,7 @@ class AudioService {
       switch (type) {
         case 'phrase-change':
           // Sonido suave para cambio de frase
-          const phraseSound = require('../../../assets/sounds/phrase_change.wav');
+          const phraseSound = require('../../../../assets/sounds/phrase_change.wav');
           const { sound: phrase } = await Audio.Sound.createAsync(phraseSound);
           await phrase.setVolumeAsync(options.volume || 0.6);
           await phrase.playAsync();
@@ -90,7 +90,7 @@ class AudioService {
 
         case 'celebration':
           // Sonido épico de celebración
-          const celebrationSound = require('../../../assets/sounds/celebration_epic.wav');
+          const celebrationSound = require('../../../../assets/sounds/celebration_epic.wav');
           const { sound: celebration } =
             await Audio.Sound.createAsync(celebrationSound);
           await celebration.setVolumeAsync(options.volume || 0.8);
@@ -99,7 +99,7 @@ class AudioService {
 
         case 'almost-done':
           // Sonido de "casi listo"
-          const almostDoneSound = require('../../../assets/sounds/almost_done.wav');
+          const almostDoneSound = require('../../../../assets/sounds/almost_done.wav');
           const { sound: almostDone } =
             await Audio.Sound.createAsync(almostDoneSound);
           await almostDone.setVolumeAsync(options.volume || 0.6);
@@ -108,7 +108,7 @@ class AudioService {
 
         default:
           // Sonido de notificación suave por defecto
-          const defaultSound = require('../../../assets/sounds/notification_soft.wav');
+          const defaultSound = require('../../../../assets/sounds/notification_soft.wav');
           const { sound: notification } =
             await Audio.Sound.createAsync(defaultSound);
           await notification.setVolumeAsync(options.volume || 0.5);

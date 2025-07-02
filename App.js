@@ -1,21 +1,20 @@
 import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet, View } from 'react-native';
-import Main from './components/Main';
+import { HomeScreen } from './src/screens';
 
 /**
  * Componente raíz de la aplicación Damian APP
  *
- * Actúa como layout principal proporcionando:
- * - SafeAreaProvider para manejo global de áreas seguras (multiplataforma)
- * - View como contenedor principal (optimizado para Android)
- * - Punto de entrada limpio y organizado
- * - Estructura modular para escalabilidad
+ * FLUJO ARQUITECTURAL:
+ * 1. SafeAreaProvider proporciona contexto global para áreas seguras (notch, barra de estado)
+ * 2. View actúa como contenedor flex que ocupa toda la pantalla
+ * 3. Main contiene toda la lógica y UI de la aplicación
  *
- * Nota: SafeAreaView nativo de React Native solo funciona en iOS.
- * Para Android usamos SafeAreaProvider de react-native-safe-area-context
+ * NOTA TÉCNICA: SafeAreaView nativo solo funciona en iOS.
+ * SafeAreaProvider de react-native-safe-area-context es multiplataforma.
  *
- * @returns {JSX.Element} Layout principal de la aplicación
+ * @returns {JSX.Element} Layout principal con manejo de áreas seguras
  * @author Damian
  * @version 1.0.0
  */
@@ -23,8 +22,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <View style={styles.container}>
-        {/* Componente principal con el contenido de la aplicación */}
-        <Main />
+        {/*
+         * COMPONENTE PRINCIPAL: HomeScreen contiene toda la UI y lógica de la app
+         * Se renderiza dentro del contexto de áreas seguras
+         */}
+        <HomeScreen />
       </View>
     </SafeAreaProvider>
   );
@@ -33,18 +35,15 @@ export default function App() {
 /**
  * Estilos del layout principal
  *
- * Define el comportamiento del contenedor raíz:
- * - Ocupar toda la pantalla disponible
- * - Proporcionar base para componentes hijos
+ * TÉCNICA UTILIZADA: StyleSheet.create() optimiza el rendimiento
+ * vs estilos inline que se recrean en cada render
  */
 const styles = StyleSheet.create({
   /**
-   * Contenedor raíz de la aplicación
+   * Contenedor raíz - Ocupa toda la pantalla disponible
    *
-   * Características:
-   * - Ocupa toda la pantalla (flex: 1)
-   * - Proporciona base para el SafeAreaProvider
-   * - Optimizado para Android
+   * flex: 1 = toma todo el espacio del padre (pantalla completa)
+   * Es la base para que SafeAreaProvider funcione correctamente
    */
   container: {
     flex: 1,

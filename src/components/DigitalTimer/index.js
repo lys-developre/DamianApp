@@ -28,7 +28,6 @@ export { audioService } from './services/audioService';
 export * from './utils/timerUtils';
 
 // Constantes
-export { timePresets } from './constants/timePresets';
 export { motivationalPhrases } from './constants/motivationalPhrases';
 
 // Estilos

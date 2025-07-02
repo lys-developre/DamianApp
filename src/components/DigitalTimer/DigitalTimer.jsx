@@ -13,7 +13,7 @@ import MotivationalHeader from './components/MotivationalHeader';
 import CelebrationModal from './components/CelebrationModal';
 
 // Constantes y utilidades
-import { timePresets } from './constants/timePresets';
+import { digitalTimerPresets as timePresets } from '../../utils';
 import { calculateProgress, getProgressColor } from './utils/timerUtils';
 
 // Estilos

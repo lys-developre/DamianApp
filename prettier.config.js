@@ -1,8 +1,8 @@
 /**
  * Configuración de Prettier para Damian APP
  *
- * Este archivo define las reglas de formateo automático del código
- * Sincronizado con eslint.config.js para evitar conflictos
+ * FUNCIONALIDAD: Formateo automático de código sincronizado con ESLint
+ * IMPACTO: Consistency de código + reducción de conflictos en git
  *
  * @see https://prettier.io/docs/en/options.html
  * @author Damian
@@ -11,50 +11,42 @@
 
 module.exports = {
   /**
-   * Agregar punto y coma al final de las declaraciones
-   * Mejora la legibilidad y evita errores de inserción automática
+   * SINTAXIS: Punto y coma obligatorio (evita ASI bugs)
    */
   semi: true,
 
   /**
-   * Usar comillas simples en lugar de dobles
-   * Consistencia con las preferencias del proyecto
+   * COMILLAS: Simples por consistencia del proyecto
    */
   singleQuote: true,
 
   /**
-   * Número de espacios por nivel de indentación
-   * Valor estándar para proyectos React Native
+   * INDENTACIÓN: 2 espacios (estándar React Native)
    */
   tabWidth: 2,
 
   /**
-   * Comas finales donde ES5 las permite (objetos, arrays)
-   * Facilita el versionado y reduce conflictos en git
+   * COMAS FINALES: ES5 compatible (mejor git diff)
    */
   trailingComma: 'es5',
 
   /**
-   * Longitud máxima de línea antes del salto automático
-   * Equilibrio entre legibilidad y densidad de código
+   * LONGITUD LÍNEA: 80 caracteres (legibilidad óptima)
    */
   printWidth: 80,
 
   /**
-   * Espacios dentro de llaves de objetos { foo }
-   * Mejora la legibilidad de objetos
+   * ESPACIOS OBJETOS: { foo } vs {foo} (legibilidad)
    */
   bracketSpacing: true,
 
   /**
-   * Evitar paréntesis en arrow functions con un solo parámetro
-   * Sintaxis más limpia: x => x en lugar de (x) => x
+   * ARROW FUNCTIONS: x => x vs (x) => x (sintaxis limpia)
    */
   arrowParens: 'avoid',
 
   /**
-   * Configuración de fin de línea usando LF (Unix)
-   * Evita problemas con caracteres CR/LF en sistemas mixtos
+   * FIN DE LÍNEA: LF Unix style (compatibilidad multiplataforma)
    */
   endOfLine: 'lf',
 };

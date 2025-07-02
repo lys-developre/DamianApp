@@ -1,11 +1,13 @@
 /**
  * Configuración de ESLint para Damian APP
  *
- * Este archivo configura ESLint para trabajar con:
- * - React Native y Expo
+ * TECNOLOGÍA: ESLint 9 con flat config (nueva sintaxis)
+ * FUNCIONALIDAD: Linting + Prettier integrado para calidad de código automática
+ *
+ * HERRAMIENTAS INTEGRADAS:
+ * - React Native y Expo rules
  * - Prettier para formateo automático
- * - Reglas de calidad de código
- * - Compatibilidad con la nueva configuración flat de ESLint 9
+ * - Detección de errores y malas prácticas
  *
  * @see https://docs.expo.dev/guides/using-eslint/
  * @author Damian
@@ -17,95 +19,80 @@ const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
 
 /**
- * Configuración principal de ESLint usando el formato "flat config"
- *
- * Se estructura como un array de configuraciones que se aplican
- * en orden secuencial para diferentes tipos de archivos
+ * CONFIGURACIÓN FLAT CONFIG (ESLint 9):
+ * Array de objetos que se aplican secuencialmente por tipo de archivo
  */
 module.exports = defineConfig([
-  // Configuración base de Expo - incluye reglas para React Native
+  // Configuración base de Expo - reglas para React Native
   expoConfig,
 
   {
     /**
-     * Archivos y directorios a ignorar durante el linting
-     *
-     * Se excluyen:
-     * - Archivos de build (dist, web-build)
-     * - Dependencias (node_modules)
-     * - Archivos generados por Expo (.expo)
-     * - Builds nativos (ios, android)
+     * ARCHIVOS IGNORADOS: Excluye directorios de build y dependencias
      */
     ignores: [
-      'dist/*', // Archivos de distribución
-      'node_modules/*', // Dependencias de npm
-      '.expo/*', // Archivos temporales de Expo
-      'ios/*', // Build nativo iOS
-      'android/*', // Build nativo Android
-      'web-build/*', // Build para web
+      'dist/*', // Distribución
+      'node_modules/*', // Dependencias npm
+      '.expo/*', // Temporales Expo
+      'ios/*', // Build iOS
+      'android/*', // Build Android
+      'web-build/*', // Build web
     ],
   },
 
   {
     /**
-     * Configuración específica para archivos de código JavaScript y TypeScript
-     *
-     * Aplica reglas de linting y formateo a todos los archivos
-     * con extensiones .js, .jsx, .ts, .tsx
+     * CONFIGURACIÓN PARA ARCHIVOS DE CÓDIGO: .js, .jsx, .ts, .tsx
      */
     files: ['**/*.{js,jsx,ts,tsx}'],
 
     /**
-     * Configuración del lenguaje y sintaxis
+     * SINTAXIS Y ENTORNO: ES2022 + módulos + globals React Native
      */
     languageOptions: {
-      ecmaVersion: 2022, // Soporte para ES2022
-      sourceType: 'module', // Uso de módulos ES6
+      ecmaVersion: 2022, // ES2022 features
+      sourceType: 'module', // ES6 modules
       globals: {
-        __DEV__: 'readonly', // Variable global de React Native para modo desarrollo
+        __DEV__: 'readonly', // React Native development flag
       },
     },
 
     /**
-     * Reglas de linting y formateo
+     * REGLAS DE LINTING Y FORMATEO
      */
     rules: {
       /**
-       * Integración con Prettier para formateo automático
-       *
-       * Configuración sincronizada con .prettierrc para evitar conflictos
+       * PRETTIER INTEGRATION: Configuración sincronizada con .prettierrc
        */
       'prettier/prettier': [
         'error',
         {
-          semi: true, // Punto y coma al final
+          semi: true, // Punto y coma obligatorio
           singleQuote: true, // Comillas simples
-          tabWidth: 2, // Indentación de 2 espacios
-          trailingComma: 'es5', // Comas finales donde ES5 las permite
-          printWidth: 80, // Líneas máximo 80 caracteres
-          bracketSpacing: true, // Espacios dentro de llaves { foo }
-          arrowParens: 'avoid', // Sin paréntesis en arrow functions con un parámetro
-          endOfLine: 'lf', // Usar LF en lugar de CRLF para evitar problemas
+          tabWidth: 2, // Indentación 2 espacios
+          trailingComma: 'es5', // Comas finales ES5
+          printWidth: 80, // Máximo 80 caracteres
+          bracketSpacing: true, // Espacios en objetos { foo }
+          arrowParens: 'avoid', // Sin paréntesis: x => x
+          endOfLine: 'lf', // LF line endings (Unix style)
         },
       ],
 
       /**
-       * Reglas de calidad específicas para React Native
+       * REGLAS DE CALIDAD ESPECÍFICAS
        */
       'no-console': [
         'warn',
         {
-          allow: ['warn', 'error'], // Permitir console.warn y console.error
+          allow: ['warn', 'error'], // Permitir warnings y errors
         },
       ], // Advertir sobre console.log en producción
-      'no-unused-vars': 'warn', // Detectar variables declaradas pero no utilizadas
-      'no-undef': 'error', // Error por variables no definidas
+      'no-unused-vars': 'warn', // Variables declaradas no usadas
+      'no-undef': 'error', // Variables no definidas = error
     },
 
     /**
-     * Plugins utilizados
-     *
-     * prettier: Integra Prettier como regla de ESLint
+     * PLUGINS: prettier plugin para integración ESLint + Prettier
      */
     plugins: {
       prettier: require('eslint-plugin-prettier'),

@@ -1,16 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
-import DigitalTimer from './DigitalTimer';
-import InteractiveSwitches from './InteractiveSwitches';
-import MainButtons from './MainButtons';
-import AdminConfigScreen from './AdminConfigScreen';
-import TimerImageButton from './TimerImageButtons';
+import DigitalTimer from '../components/DigitalTimer';
+import InteractiveSwitches from '../components/InteractiveSwitches';
+import MainButtons from '../components/MainButtons';
+import AdminConfigScreen from '../components/AdminConfigScreen';
+import TimerImageButton from '../components/TimerImageButtons';
+import { formatSeconds } from '../utils';
 
 const { width } = Dimensions.get('window');
 
 /**
- * Componente Main de la aplicación Damian APP
+ * Pantalla principal (Home) de la aplicación Damian APP
+ *
+ * ARQUITECTURA ACTUALIZADA: Movido de components/ a screens/ siguiendo estructura enterprise
  *
  * Sistema de comunicación aumentativa y regulación emocional especializado:
  * - Comunicación asistida visual con pictogramas personalizados
@@ -28,17 +37,20 @@ const { width } = Dimensions.get('window');
  * - Alimentación: Gamificación para introducción de alimentos
  * - Reportes: Análisis de progreso para familia y profesionales
  *
- * Optimizaciones de rendimiento:
- * - useCallback para funciones de navegación estables
- * - Renderizado condicional eficiente
- * - Estilos optimizados con StyleSheet
- * - Memoización de componentes críticos
+ * Optimizaciones de rendimiento aplicadas:
+ * - ✅ formatSeconds centralizado en utils/formatters.js
+ * - ✅ useCallback para handlers estables (handleConfigBack, handleConfigShow, handleTimerPress)
+ * - ✅ useMemo para mainButtons array con dependencias correctas
+ * - ✅ useMemo para estilos inline evitando recreaciones constantes
+ * - ✅ useMemo para mapeo de timerImageButtons optimizado
+ * - ✅ Eliminación de funciones inline en onPress y estilos inline repetitivos
+ * - ✅ Memoización de elementos JSX para renderizado eficiente
  *
  * @returns {JSX.Element} Hub principal con navegación especializada
  * @author Damian
  * @version 4.0.0
  */
-export default function Main() {
+export default function HomeScreen() {
   const [showConfig, setShowConfig] = useState(false);
 
   // Estado de temporizadores con imagen: tiempo en segundos y formateado
@@ -62,19 +74,77 @@ export default function Main() {
   // Referencia para evitar problemas de cierre sobre el estado
   const intervalRef = useRef();
 
-  // Formatea segundos a HH:mm:ss
-  const formatSeconds = totalSeconds => {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return (
-      String(hours).padStart(2, '0') +
-      ':' +
-      String(minutes).padStart(2, '0') +
-      ':' +
-      String(seconds).padStart(2, '0')
-    );
-  };
+  // Callbacks memoizados para evitar recreaciones
+  const handleConfigBack = useCallback(() => setShowConfig(false), []);
+  const handleConfigShow = useCallback(() => setShowConfig(true), []);
+
+  // Función para manejar vacía de timer (memoizada)
+  const handleTimerPress = useCallback(() => {}, []);
+
+  // MainButtons memoizado para evitar recreaciones
+  const mainButtons = useMemo(
+    () => [
+      {
+        key: 'admin',
+        icon: 'settings',
+        title: 'Configuración',
+        description: 'Modo familia',
+        onPress: handleConfigShow,
+        style: { backgroundColor: '#45B7D1' }, // Azul
+        accessibilityLabel: 'Modo familia/terapeuta',
+        accessibilityHint: 'Configuración y personalización',
+      },
+      {
+        key: 'admin-b',
+        icon: 'settings',
+        title: 'Configuración b',
+        description: 'Modo familia b',
+        onPress: handleTimerPress,
+        style: { backgroundColor: '#F59E42' }, // Naranja
+        accessibilityLabel: 'Modo familia/terapeuta',
+        accessibilityHint: 'Configuración y personalización',
+      },
+    ],
+    [handleConfigShow, handleTimerPress]
+  );
+
+  // Estilos memoizados para evitar recreaciones
+  const timerImageButtonsContainerStyle = useMemo(
+    () => ({ width: '100%', marginBottom: 18 }),
+    []
+  );
+
+  const timerImageButtonWrapperStyle = useMemo(
+    () => ({ width: '100%', alignItems: 'center', marginBottom: 12 }),
+    []
+  );
+
+  const timerImageButtonStyle = useMemo(
+    () => ({ width: width * 0.82, height: width * 0.82 }),
+    []
+  );
+
+  // Array de temporizadores memoizado para evitar recreaciones
+  const timerImageButtonElements = useMemo(
+    () =>
+      timerImageButtons.map(btn => (
+        <View key={btn.id} style={timerImageButtonWrapperStyle}>
+          <TimerImageButton
+            image={btn.image}
+            timer={btn.timer}
+            isActive={btn.isActive}
+            onPress={handleTimerPress}
+            style={timerImageButtonStyle}
+          />
+        </View>
+      )),
+    [
+      timerImageButtons,
+      timerImageButtonWrapperStyle,
+      timerImageButtonStyle,
+      handleTimerPress,
+    ]
+  );
 
   // Efecto: cuenta regresiva para todos los temporizadores activos
   useEffect(() => {
@@ -106,35 +176,11 @@ export default function Main() {
     return () => clearInterval(intervalRef.current);
   }, []);
 
-  // Definición de mainButtons (restaurada tras el cambio de posición)
-  const mainButtons = [
-    {
-      key: 'admin',
-      icon: 'settings',
-      title: 'Configuración',
-      description: 'Modo familia',
-      onPress: () => setShowConfig(true),
-      style: { backgroundColor: '#45B7D1' }, // Azul
-      accessibilityLabel: 'Modo familia/terapeuta',
-      accessibilityHint: 'Configuración y personalización',
-    },
-    {
-      key: 'admin-b',
-      icon: 'settings',
-      title: 'Configuración b',
-      description: 'Modo familia b',
-      onPress: () => {},
-      style: { backgroundColor: '#F59E42' }, // Naranja
-      accessibilityLabel: 'Modo familia/terapeuta',
-      accessibilityHint: 'Configuración y personalización',
-    },
-  ];
-
   // Renderizar hub principal
   if (showConfig) {
     return (
       <AdminConfigScreen
-        onBack={() => setShowConfig(false)}
+        onBack={handleConfigBack}
         timerImageButtons={timerImageButtons}
         setTimerImageButtons={setTimerImageButtons}
       />
@@ -162,21 +208,8 @@ export default function Main() {
       <InteractiveSwitches />
 
       {/* Temporizadores con imagen */}
-      <View style={{ width: '100%', marginBottom: 18 }}>
-        {timerImageButtons.map(btn => (
-          <View
-            key={btn.id}
-            style={{ width: '100%', alignItems: 'center', marginBottom: 12 }}
-          >
-            <TimerImageButton
-              image={btn.image}
-              timer={btn.timer}
-              isActive={btn.isActive}
-              onPress={() => {}}
-              style={{ width: width * 0.82, height: width * 0.82 }}
-            />
-          </View>
-        ))}
+      <View style={timerImageButtonsContainerStyle}>
+        {timerImageButtonElements}
       </View>
 
       {/* Grid de módulos principales (solo Admin) */}
@@ -197,7 +230,7 @@ export default function Main() {
 }
 
 /**
- * Estilos del componente Main
+ * Estilos del componente HomeScreen
  *
  * Define la apariencia visual del hub principal especializado:
  * - Layout responsivo con grid de módulos
