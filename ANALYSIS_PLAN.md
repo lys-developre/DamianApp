@@ -59,10 +59,30 @@ Auditoría y mejora profesional de app React Native + Expo siguiendo **13 módul
 
 ## ⚙️ **FASE 2: LÓGICA, DATOS Y SERVICIOS**
 
-### **4️⃣ GESTIÓN DE ESTADO Y FLUJO DE DATOS**
+### **4️⃣ GESTIÓN DE ESTADO Y FLUJO DE DATOS** 🔄 EN PROGRESO
 - [ ] 🔄 useState, Context, Redux, Zustand
 - [ ] 📊 Escalabilidad del flujo de datos
 - [ ] 🧹 Limpieza de gestión de estado
+- [ ] 🗂️ Centralización de estado global
+- [ ] 🔄 Persistencia de datos entre pantallas
+- [ ] 📱 Estado compartido entre componentes
+- [ ] 🔒 Inmutabilidad y actualizaciones seguras
+
+**ANÁLISIS ACTUAL DEL ESTADO:**
+
+**❌ PROBLEMAS IDENTIFICADOS:**
+1. **Estado fragmentado** - timerImageButtons en HomeScreen local
+2. **Props drilling** - Pasando estado por múltiples niveles
+3. **Sin persistencia** - Estado se pierde entre navegaciones
+4. **Lógica dispersa** - Estado de switches, timers separados
+5. **Sin gestión global** - Cada componente maneja su propio estado
+6. **Actualizaciones manuales** - Sin reactivity automática
+
+**✅ ESTADO ACTUAL FUNCIONAL:**
+- useState en HomeScreen para timerImageButtons ✅
+- useSwitches hook para switches ✅
+- useTimer hooks para temporizadores ✅
+- Props passing funcional entre componentes ✅
 
 ### **5️⃣ LÓGICA DE NEGOCIO Y SERVICIOS**
 - [ ] 🏢 Separación en servicios reutilizables

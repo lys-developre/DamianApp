@@ -1,13 +1,8 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useAppContext } from '../context';
 import DigitalTimer from '../components/DigitalTimer';
 import InteractiveSwitches from '../components/InteractiveSwitches';
 import MainButtons from '../components/MainButtons';
@@ -21,6 +16,7 @@ const { width } = Dimensions.get('window');
  *
  * ARQUITECTURA ACTUALIZADA: Movido de components/ a screens/ siguiendo estructura enterprise
  * MÓDULO 3: Integración con React Navigation para navegación profesional
+ * MÓDULO 4: Migración a Context API para gestión de estado global
  *
  * Sistema de comunicación aumentativa y regulación emocional especializado:
  * - Comunicación asistida visual con pictogramas personalizados
@@ -43,32 +39,19 @@ const { width } = Dimensions.get('window');
  * - ✅ useCallback para handlers estables
  * - ✅ useMemo para arrays y estilos optimizados
  * - ✅ React Navigation para gestión de navegación profesional
- * - ✅ Eliminación de renderizado condicional por navegación nativa
+ * - ✅ Context API para estado global centralizado
+ * - ✅ AsyncStorage para persistencia automática
  *
  * @returns {JSX.Element} Hub principal con navegación especializada
  * @author Damian
- * @version 5.0.0 - Navegación Módulo 3
+ * @version 6.0.0 - Estado Global Módulo 4
  */
 export default function HomeScreen() {
   const navigation = useNavigation();
+  const { state, timerImageActions } = useAppContext();
 
-  // Estado de temporizadores con imagen: tiempo en segundos y formateado
-  const [timerImageButtons, setTimerImageButtons] = useState([
-    {
-      id: '1',
-      image: 'https://placekitten.com/300/300',
-      timer: '02:30:00',
-      seconds: 2 * 3600 + 30 * 60, // 2h 30m
-      isActive: true,
-    },
-    {
-      id: '2',
-      image: 'https://placekitten.com/301/301',
-      timer: '00:00:00',
-      seconds: 0,
-      isActive: false,
-    },
-  ]);
+  // Extraer datos del estado global
+  const { timerImageButtons } = state;
 
   // Referencia para evitar problemas de cierre sobre el estado
   const intervalRef = useRef();
@@ -150,8 +133,9 @@ export default function HomeScreen() {
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
-      setTimerImageButtons(prev =>
-        prev.map(btn => {
+      // Actualizar temporizadores activos usando actions del context
+      timerImageActions.setTimers(
+        timerImageButtons.map(btn => {
           if (btn.isActive && btn.seconds > 0) {
             const newSeconds = btn.seconds - 1;
             if (newSeconds === 0) {
@@ -174,7 +158,7 @@ export default function HomeScreen() {
       );
     }, 1000);
     return () => clearInterval(intervalRef.current);
-  }, []);
+  }, [timerImageButtons, timerImageActions]);
 
   return (
     <ScrollView

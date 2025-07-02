@@ -10,6 +10,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useAppContext } from '../../context';
 import TimerImageButton from './TimerImageButton';
 import { formatSeconds, imageTimerPresets as timePresets } from '../../utils';
 import { useTimerImageButtonsManager } from './hooks/useTimerImageButtonsManager';
@@ -34,29 +35,10 @@ import { useTimerImageButtonsManager } from './hooks/useTimerImageButtonsManager
  */
 const TimerImageButtonsManager = React.memo(() => {
   const navigation = useNavigation();
+  const { state, timerImageActions } = useAppContext();
 
-  // Mock data temporal (en una app real vendría de Context o Redux)
-  const mockTimerImageButtons = [
-    {
-      id: '1',
-      image: 'https://placekitten.com/300/300',
-      timer: '02:30:00',
-      seconds: 2 * 3600 + 30 * 60,
-      isActive: true,
-    },
-    {
-      id: '2',
-      image: 'https://placekitten.com/301/301',
-      timer: '00:00:00',
-      seconds: 0,
-      isActive: false,
-    },
-  ];
-
-  const mockSetTimerImageButtons = () => {
-    // Mock setter - en implementación real actualizaría el estado global
-    // console.log('Actualizando temporizadores...'); // Comentado para cumplir con ESLint
-  };
+  // Extraer datos del estado global
+  const { timerImageButtons } = state;
 
   // Hook personalizado para toda la lógica de gestión
   const {
@@ -82,8 +64,8 @@ const TimerImageButtonsManager = React.memo(() => {
     setManualMinutes,
     setManualSeconds,
   } = useTimerImageButtonsManager(
-    mockTimerImageButtons,
-    mockSetTimerImageButtons
+    timerImageButtons,
+    timerImageActions.setTimerImageButtons
   );
 
   // Handler para volver usando React Navigation
@@ -95,7 +77,7 @@ const TimerImageButtonsManager = React.memo(() => {
     <View style={styles.container}>
       <Text style={styles.title}>Gestión de Temporizadores</Text>
       <FlatList
-        data={mockTimerImageButtons}
+        data={timerImageButtons}
         keyExtractor={item => item.id}
         horizontal
         renderItem={({ item }) => (

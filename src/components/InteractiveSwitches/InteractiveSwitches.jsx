@@ -1,8 +1,8 @@
 import React from 'react';
 import { View } from 'react-native';
 
-// Hooks personalizados
-import { useSwitches } from './hooks/useSwitches';
+// Context global
+import { useAppContext } from '../../context';
 
 // Componentes
 import SwitchesHeader from './components/SwitchesHeader';
@@ -21,6 +21,12 @@ import { switchesStyles } from './styles/switchesStyles';
  * - ✅ Componentes UI separados y optimizados
  * - ✅ Responsabilidad única: coordinar switches
  *
+ * MEJORAS MÓDULO 4:
+ * - ✅ Migración a Context API para estado global
+ * - ✅ Eliminación de hook local useSwitches
+ * - ✅ Estado persistente entre sesiones
+ * - ✅ Comunicación reactiva con otros componentes
+ *
  * CARACTERÍSTICAS:
  * - 40 switches interactivos estilo iOS nativo
  * - Diseño exacto basado en imagen de referencia iOS
@@ -29,20 +35,21 @@ import { switchesStyles } from './styles/switchesStyles';
  * - Espaciado optimizado para 10 filas completas
  * - Vibración al presionar y al completar todos
  * - Modal de celebración al completar todos los switches
- * - Arquitectura modular con hooks y componentes separados
+ * - Arquitectura modular con estado global centralizado
  *
  * @author Damian App
- * @version 18.0.0 - Optimizado Módulo 2
+ * @version 20.0.0 - Estado Global Módulo 4
  */
 const InteractiveSwitches = React.memo(() => {
-  // Hook principal para manejar el estado de los switches
-  const {
-    switches,
-    toggleSwitch,
-    resetAllSwitches,
-    showCelebration,
-    closeCelebration,
-  } = useSwitches();
+  // Hook principal para manejar el estado global de switches
+  const { state, switchesActions } = useAppContext();
+
+  // Extraer estado de switches del context global
+  const { switchesState } = state;
+  const { switches, showCelebration } = switchesState;
+
+  // Extraer acciones del context
+  const { toggleSwitch, resetAllSwitches, setCelebration } = switchesActions;
 
   return (
     <View style={switchesStyles.container}>
@@ -66,7 +73,7 @@ const InteractiveSwitches = React.memo(() => {
       {/* MODAL DE CELEBRACIÓN */}
       <SwitchesCelebrationModal
         visible={showCelebration}
-        onClose={closeCelebration}
+        onClose={() => setCelebration(false)}
         styles={switchesStyles}
       />
     </View>
