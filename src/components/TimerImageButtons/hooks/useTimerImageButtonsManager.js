@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { formatSeconds } from '../../../utils';
 
 /**
  * Hook personalizado para gestión de temporizadores con imagen
@@ -145,18 +146,7 @@ export const useTimerImageButtonsManager = (
       return;
     }
 
-    const formatSeconds = totalSeconds => {
-      const days = Math.floor(totalSeconds / 86400);
-      const hours = Math.floor((totalSeconds % 86400) / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
-      let str = '';
-      if (days > 0) str += days + 'd ';
-      if (hours > 0 || days > 0) str += hours.toString().padStart(2, '0') + ':';
-      str += minutes.toString().padStart(2, '0') + ':';
-      str += seconds.toString().padStart(2, '0');
-      return str.trim();
-    };
+    // Usar función formatSeconds centralizada de utils
 
     const timerData = {
       id: editId || Date.now().toString(),

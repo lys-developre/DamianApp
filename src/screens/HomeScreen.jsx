@@ -7,10 +7,10 @@ import React, {
 } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import DigitalTimer from '../components/DigitalTimer';
 import InteractiveSwitches from '../components/InteractiveSwitches';
 import MainButtons from '../components/MainButtons';
-import AdminConfigScreen from '../components/AdminConfigScreen';
 import TimerImageButton from '../components/TimerImageButtons';
 import { formatSeconds } from '../utils';
 
@@ -20,6 +20,7 @@ const { width } = Dimensions.get('window');
  * Pantalla principal (Home) de la aplicación Damian APP
  *
  * ARQUITECTURA ACTUALIZADA: Movido de components/ a screens/ siguiendo estructura enterprise
+ * MÓDULO 3: Integración con React Navigation para navegación profesional
  *
  * Sistema de comunicación aumentativa y regulación emocional especializado:
  * - Comunicación asistida visual con pictogramas personalizados
@@ -39,19 +40,17 @@ const { width } = Dimensions.get('window');
  *
  * Optimizaciones de rendimiento aplicadas:
  * - ✅ formatSeconds centralizado en utils/formatters.js
- * - ✅ useCallback para handlers estables (handleConfigBack, handleConfigShow, handleTimerPress)
- * - ✅ useMemo para mainButtons array con dependencias correctas
- * - ✅ useMemo para estilos inline evitando recreaciones constantes
- * - ✅ useMemo para mapeo de timerImageButtons optimizado
- * - ✅ Eliminación de funciones inline en onPress y estilos inline repetitivos
- * - ✅ Memoización de elementos JSX para renderizado eficiente
+ * - ✅ useCallback para handlers estables
+ * - ✅ useMemo para arrays y estilos optimizados
+ * - ✅ React Navigation para gestión de navegación profesional
+ * - ✅ Eliminación de renderizado condicional por navegación nativa
  *
  * @returns {JSX.Element} Hub principal con navegación especializada
  * @author Damian
- * @version 4.0.0
+ * @version 5.0.0 - Navegación Módulo 3
  */
 export default function HomeScreen() {
-  const [showConfig, setShowConfig] = useState(false);
+  const navigation = useNavigation();
 
   // Estado de temporizadores con imagen: tiempo en segundos y formateado
   const [timerImageButtons, setTimerImageButtons] = useState([
@@ -74,9 +73,10 @@ export default function HomeScreen() {
   // Referencia para evitar problemas de cierre sobre el estado
   const intervalRef = useRef();
 
-  // Callbacks memoizados para evitar recreaciones
-  const handleConfigBack = useCallback(() => setShowConfig(false), []);
-  const handleConfigShow = useCallback(() => setShowConfig(true), []);
+  // Callback para navegar a configuración usando React Navigation
+  const handleConfigShow = useCallback(() => {
+    navigation.navigate('AdminConfig');
+  }, [navigation]);
 
   // Función para manejar vacía de timer (memoizada)
   const handleTimerPress = useCallback(() => {}, []);
@@ -175,17 +175,6 @@ export default function HomeScreen() {
     }, 1000);
     return () => clearInterval(intervalRef.current);
   }, []);
-
-  // Renderizar hub principal
-  if (showConfig) {
-    return (
-      <AdminConfigScreen
-        onBack={handleConfigBack}
-        timerImageButtons={timerImageButtons}
-        setTimerImageButtons={setTimerImageButtons}
-      />
-    );
-  }
 
   return (
     <ScrollView
