@@ -1,23 +1,30 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { formatSeconds } from '../../../utils';
+import { utilsService, businessLogic, validator } from '../../../services';
 
 /**
- * Hook personalizado para gestión de temporizadores con imagen
+ * Hook personalizado para gestión de temporizadores con imagen - Módulo 5
+ *
+ * MEJORAS MÓDULO 5:
+ * - ✅ Integración con servicios centralizados
+ * - ✅ Validación robusta con ValidationService
+ * - ✅ Lógica de negocio centralizada en BusinessLogicService
+ * - ✅ Mejor manejo de errores y feedback
+ * - ✅ Formateo consistente con UtilsService
  *
  * RESPONSABILIDADES:
  * - Gestión de estado del formulario
- * - Lógica de validación de tiempo
+ * - Coordinación con servicios de validación y lógica
  * - Manejo de selección de imágenes
- * - Operaciones CRUD de temporizadores
+ * - Interfaz entre UI y servicios de negocio
  *
  * @param {Array} timerImageButtons - Array actual de temporizadores
  * @param {Function} setTimerImageButtons - Setter para actualizar temporizadores
  * @returns {Object} Estados y funciones para gestionar temporizadores
  *
  * @author Damian App
- * @version 1.0.0
+ * @version 2.0.0 - Servicios Módulo 5
  */
 export const useTimerImageButtonsManager = (
   timerImageButtons,
@@ -28,6 +35,8 @@ export const useTimerImageButtonsManager = (
   const [newImage, setNewImage] = useState('');
   const [newTimer, setNewTimer] = useState(0);
   const [editId, setEditId] = useState(null);
+  const [validationErrors, setValidationErrors] = useState([]);
+  const [validationWarnings, setValidationWarnings] = useState([]);
 
   // Estados para input manual de tiempo
   const [manualDays, setManualDays] = useState('');
@@ -101,19 +110,44 @@ export const useTimerImageButtonsManager = (
    * Añade tiempo preset al temporizador actual
    */
   const handleAddPreset = useCallback(seconds => {
-    setNewTimer(prev => prev + seconds);
+    // Validar preset usando BusinessLogicService
+    const preset = businessLogic.findPresetBySeconds(seconds);
+    if (preset) {
+      setNewTimer(prev => prev + seconds);
+    } else {
+      // Validar segundos directamente
+      const validation = validator
+        .reset()
+        .timerDuration(seconds)
+        .getValidationResults();
+      if (validation.isValid) {
+        setNewTimer(prev => prev + seconds);
+      } else {
+        Alert.alert('Error', 'Preset de tiempo inválido');
+      }
+    }
   }, []);
 
   /**
-   * Calcula el tiempo total desde los inputs manuales
+   * Calcula el tiempo total desde los inputs manuales usando UtilsService
    */
   const calculateManualTime = useCallback(() => {
-    const days = parseInt(manualDays) || 0;
-    const hours = parseInt(manualHours) || 0;
-    const minutes = parseInt(manualMinutes) || 0;
-    const seconds = parseInt(manualSeconds) || 0;
+    const timeComponents = {
+      days: parseInt(manualDays) || 0,
+      hours: parseInt(manualHours) || 0,
+      minutes: parseInt(manualMinutes) || 0,
+      seconds: parseInt(manualSeconds) || 0,
+    };
 
-    return days * 86400 + hours * 3600 + minutes * 60 + seconds;
+    // Usar BusinessLogicService para conversión con validación
+    const result = businessLogic.convertManualTimeToSeconds(timeComponents);
+
+    if (result.success) {
+      return result.seconds;
+    } else {
+      // Fallback usando UtilsService
+      return utilsService.timeComponentsToSeconds(timeComponents);
+    }
   }, [manualDays, manualHours, manualMinutes, manualSeconds]);
 
   /**
@@ -135,39 +169,67 @@ export const useTimerImageButtonsManager = (
    * Valida y guarda el temporizador (crear o editar)
    */
   const handleSave = useCallback(() => {
-    // Validaciones
-    if (!newImage.trim()) {
-      Alert.alert('Error', 'Selecciona una imagen');
-      return;
-    }
+    // Limpiar errores anteriores
+    setValidationErrors([]);
+    setValidationWarnings([]);
 
-    if (newTimer <= 0) {
-      Alert.alert('Error', 'El temporizador debe ser mayor a 0');
-      return;
-    }
-
-    // Usar función formatSeconds centralizada de utils
-
+    // Preparar datos para validación
     const timerData = {
-      id: editId || Date.now().toString(),
+      id: editId || utilsService.generateNumericId(timerImageButtons),
       image: newImage,
-      timer: formatSeconds(newTimer),
       seconds: newTimer,
       isActive: false,
     };
 
+    // Usar BusinessLogicService para crear/actualizar con validación completa
+    const result = editId
+      ? businessLogic.updateTimerImageButton(
+          editId,
+          timerData,
+          timerImageButtons
+        )
+      : businessLogic.createTimerImageButton(timerData, timerImageButtons);
+
+    if (!result.success) {
+      // Mostrar errores de validación
+      setValidationErrors(result.errors || []);
+      setValidationWarnings(result.warnings || []);
+
+      const errorMessages =
+        result.errors?.map(e => e.message).join('\n') || 'Error de validación';
+      Alert.alert('Error de validación', errorMessages);
+      return;
+    }
+
+    // Mostrar warnings si existen (no bloquean el guardado)
+    if (result.warnings && result.warnings.length > 0) {
+      setValidationWarnings(result.warnings);
+      const warningMessages = result.warnings.map(w => w.message).join('\n');
+      Alert.alert('Advertencias', warningMessages);
+    }
+
+    // Actualizar estado con el timer validado y normalizado
     if (editId) {
       // Editar existente
       setTimerImageButtons(prev =>
-        prev.map(btn => (btn.id === editId ? timerData : btn))
+        prev.map(btn => (btn.id === editId ? result.timer : btn))
       );
     } else {
       // Crear nuevo
-      setTimerImageButtons(prev => [...prev, timerData]);
+      setTimerImageButtons(prev => [...prev, result.timer]);
     }
 
     closeModal();
-  }, [newImage, newTimer, editId, setTimerImageButtons, closeModal]);
+  }, [
+    newImage,
+    newTimer,
+    editId,
+    timerImageButtons,
+    setTimerImageButtons,
+    closeModal,
+    setValidationErrors,
+    setValidationWarnings,
+  ]);
 
   /**
    * Elimina un temporizador con confirmación
@@ -204,6 +266,8 @@ export const useTimerImageButtonsManager = (
     manualHours,
     manualMinutes,
     manualSeconds,
+    validationErrors,
+    validationWarnings,
 
     // Setters para inputs manuales
     setManualDays,

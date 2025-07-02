@@ -1,15 +1,21 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storageService } from '../services';
 
 /**
- * Context principal de la aplicación Damian APP - Módulo 4
+ * Context principal de la aplicación Damian APP - Módulo 5
  *
  * RESPONSABILIDADES:
  * - Gestión centralizada del estado global
- * - Persistencia automática con AsyncStorage
+ * - Persistencia automática con StorageService
  * - Comunicación entre módulos independientes
  * - Configuraciones globales de la aplicación
  * - Estado reactivo entre componentes
+ *
+ * MEJORAS MÓDULO 5:
+ * - ✅ Integración con StorageService centralizado
+ * - ✅ Mejor manejo de errores en persistencia
+ * - ✅ Operaciones batch para mejor rendimiento
+ * - ✅ Validación de datos antes de persistir
  *
  * ESTADO CENTRALIZADO:
  * - timerImageButtons: Temporizadores con imagen
@@ -18,11 +24,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  * - userPreferences: Preferencias personalizadas
  *
  * @author Damian App
- * @version 1.0.0 - Módulo 4
+ * @version 2.0.0 - Servicios Módulo 5
  */
 
-// Clave para AsyncStorage
-const STORAGE_KEY = '@damian_app_state';
+// Clave para StorageService
+const STORAGE_KEY = 'app_state';
 
 // Estado inicial de la aplicación
 const initialState = {
@@ -368,33 +374,64 @@ export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   /**
-   * Guarda el estado en AsyncStorage
+   * Guarda el estado usando StorageService con mejor manejo de errores
    */
   const saveStateToStorage = async currentState => {
     try {
       // Excluir propiedades que no necesitan persistencia
       const { isLoading, isInitialized, ...stateToSave } = currentState;
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+
+      const success = await storageService.setItem(STORAGE_KEY, stateToSave, {
+        useCache: true,
+        debug: __DEV__,
+      });
+
+      if (!success && __DEV__) {
+        console.warn('⚠️ Estado no pudo ser guardado completamente');
+      }
     } catch (error) {
-      console.warn('Error saving state to AsyncStorage:', error);
+      console.warn('❌ Error saving state:', error);
     }
   };
 
   /**
-   * Carga el estado desde AsyncStorage
+   * Carga el estado usando StorageService con validación
    */
   const loadStateFromStorage = async () => {
     try {
-      const savedState = await AsyncStorage.getItem(STORAGE_KEY);
-      if (savedState) {
-        const parsedState = JSON.parse(savedState);
-        dispatch({ type: ActionTypes.INITIALIZE_STATE, payload: parsedState });
+      // Inicializar StorageService si no está inicializado
+      await storageService.initialize();
+
+      const savedState = await storageService.getItem(STORAGE_KEY, null, {
+        useCache: true,
+        debug: __DEV__,
+      });
+
+      if (savedState && typeof savedState === 'object') {
+        // Validar estructura básica del estado guardado
+        if (savedState.timerImageButtons && savedState.switchesState) {
+          dispatch({ type: ActionTypes.INITIALIZE_STATE, payload: savedState });
+
+          if (__DEV__) {
+            console.warn('✅ Estado cargado desde storage');
+          }
+        } else {
+          if (__DEV__) {
+            console.warn(
+              '⚠️ Estado guardado tiene estructura inválida, usando estado inicial'
+            );
+          }
+          dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+        }
       } else {
         // Primera vez, usar estado inicial
+        if (__DEV__) {
+          console.warn('💾 Primera vez ejecutando app, usando estado inicial');
+        }
         dispatch({ type: ActionTypes.SET_LOADING, payload: false });
       }
     } catch (error) {
-      console.warn('Error loading state from AsyncStorage:', error);
+      console.warn('❌ Error loading state from storage:', error);
       dispatch({ type: ActionTypes.SET_LOADING, payload: false });
     }
   };

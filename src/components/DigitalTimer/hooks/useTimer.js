@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { hapticsService } from '../services/hapticsService';
-import { audioService } from '../services/audioService';
+import { hapticsService, audioService } from '../../../services';
 
 /**
  * Hook personalizado para manejar la lógica del temporizador TEA
