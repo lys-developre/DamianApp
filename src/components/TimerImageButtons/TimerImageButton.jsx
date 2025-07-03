@@ -9,6 +9,11 @@ import {
   Easing,
 } from 'react-native';
 import { useTheme } from '../../theme';
+import {
+  useUIConfig,
+  useAccessibilityConfig,
+  useHapticsConfig,
+} from '../../hooks/useConfig';
 
 /**
  * Botón con imagen de fondo y temporizador superpuesto - Módulo 7
@@ -21,9 +26,11 @@ import { useTheme } from '../../theme';
  * - ✅ Eliminación de colores hardcodeados
  * - ✅ Colores dinámicos desde theme
  * - ✅ Preparado para modo oscuro/claro
+ * - ✅ Respeta configuración de animaciones
+ * - ✅ Integración con haptics configurables
  *
  * @author Damian App
- * @version 2.0.0 - Theme System
+ * @version 2.1.0 - Theme System + Configuración avanzada
  */
 export default function TimerImageButton({
   image,
@@ -33,6 +40,16 @@ export default function TimerImageButton({
   style,
 }) {
   const { colors } = useTheme();
+
+  // Hooks de configuración
+  const uiConfig = useUIConfig();
+  const accessibilityConfig = useAccessibilityConfig();
+  const hapticsConfig = useHapticsConfig();
+
+  // Verificar si las animaciones están habilitadas
+  const animationsEnabled =
+    uiConfig.animations?.enabled !== false &&
+    !accessibilityConfig.reduceAnimations;
 
   // Colores dinámicos según estado usando theme
   const borderColor = isActive
@@ -45,7 +62,7 @@ export default function TimerImageButton({
   const glowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (isActive) {
+    if (isActive && animationsEnabled) {
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
@@ -80,41 +97,58 @@ export default function TimerImageButton({
       pulseAnim.setValue(1);
       glowAnim.setValue(0);
     }
-  }, [isActive, pulseAnim, glowAnim]);
+  }, [isActive, pulseAnim, glowAnim, animationsEnabled]);
+
+  // Función para manejar el press con haptics
+  const handlePress = async () => {
+    // Solo ejecutar haptics si está habilitado
+    if (hapticsConfig.enabled) {
+      try {
+        const { hapticsService } = await import(
+          '../../services/hapticsService'
+        );
+        await hapticsService.medium(); // Feedback medio para acción importante
+      } catch (error) {
+        console.warn('Haptics no disponible:', error);
+      }
+    }
+    onPress();
+  };
 
   // Sombra/Glow animado usando colores del theme
-  const shadowStyle = isActive
-    ? {
-        shadowColor: glowColor,
-        shadowOpacity: glowAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0.3, 0.8],
-        }),
-        shadowRadius: glowAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [16, 32],
-        }),
-        shadowOffset: { width: 0, height: 0 },
-      }
-    : {
-        shadowColor: glowColor,
-        shadowOpacity: 0.7,
-        shadowRadius: 24,
-        shadowOffset: { width: 0, height: 0 },
-      };
+  const shadowStyle =
+    isActive && animationsEnabled
+      ? {
+          shadowColor: glowColor,
+          shadowOpacity: glowAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.3, 0.8],
+          }),
+          shadowRadius: glowAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [16, 32],
+          }),
+          shadowOffset: { width: 0, height: 0 },
+        }
+      : {
+          shadowColor: glowColor,
+          shadowOpacity: 0.7,
+          shadowRadius: 24,
+          shadowOffset: { width: 0, height: 0 },
+        };
 
   return (
     <Animated.View
       style={[
         {
-          transform: [{ scale: pulseAnim }],
+          transform: [{ scale: animationsEnabled ? pulseAnim : 1 }],
         },
         shadowStyle,
         style,
       ]}
     >
       <TouchableOpacity
-        onPress={onPress}
+        onPress={handlePress}
         style={[
           styles.button,
           {

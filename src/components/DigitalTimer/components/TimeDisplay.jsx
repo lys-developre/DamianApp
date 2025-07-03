@@ -24,6 +24,7 @@ const TimeDisplay = React.memo(
     secondTickOpacity,
     styles,
     colors,
+    showMilliseconds = false,
   }) => (
     <View style={styles.displayContainer}>
       {/* Display principal del tiempo con heartbeat */}
@@ -38,7 +39,7 @@ const TimeDisplay = React.memo(
         <Text
           style={[styles.timeDisplay, { color: colors.TIMER_DISPLAY_WHITE }]}
         >
-          {formatTime(time)}
+          {formatTime(time, showMilliseconds)}
         </Text>
       </Animated.View>
 

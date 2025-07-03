@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { hapticsService, audioService } from '../../../services';
+import { useHapticsConfig, useAudioConfig } from '../../../hooks/useConfig';
 
 /**
  * Hook personalizado para manejar la lógica del temporizador TEA
@@ -16,6 +16,10 @@ import { hapticsService, audioService } from '../../../services';
  */
 
 export const useTimer = () => {
+  // Hooks de configuración
+  const hapticsConfig = useHapticsConfig();
+  const audioConfig = useAudioConfig();
+
   // Estados principales - Configuración por defecto: 1 hora
   const [time, setTime] = useState(3600); // 1 hora = 3600 segundos
   const [isRunning, setIsRunning] = useState(false);
@@ -36,31 +40,68 @@ export const useTimer = () => {
 
     const progress = ((initialTime - time) / initialTime) * 100;
     return Math.min(Math.round(progress * 100) / 100, 100);
-  }, [initialTime, time]);
-
-  /**
+  }, [initialTime, time]); /**
    * Inicia la celebración cuando se completa el temporizador
    */
-  const startCelebration = useCallback(() => {
+  const startCelebration = useCallback(async () => {
     setShowCelebration(true);
-    hapticsService.celebration();
-    audioService.epicCelebration();
-  }, []);
+
+    // Ejecutar haptics solo si está habilitado
+    if (hapticsConfig.enabled) {
+      try {
+        const { hapticsService } = await import(
+          '../../../services/hapticsService'
+        );
+        await hapticsService.celebration();
+      } catch (error) {
+        console.warn('Haptics no disponible:', error);
+      }
+    }
+
+    // Ejecutar audio solo si está habilitado
+    if (audioConfig.enabled) {
+      try {
+        const { audioService } = await import('../../../services/audioService');
+        await audioService.epicCelebration();
+      } catch (error) {
+        console.warn('Audio no disponible:', error);
+      }
+    }
+  }, [hapticsConfig.enabled, audioConfig.enabled]);
 
   /**
    * Efecto especial cuando se alcanza el 95% del progreso
    */
-  const triggerAlmostDoneEffect = useCallback(() => {
+  const triggerAlmostDoneEffect = useCallback(async () => {
     if (hasTriggeredAlmostDone.current) return;
 
     hasTriggeredAlmostDone.current = true;
-    hapticsService.heavy();
-    audioService.almostDone();
 
-    setTimeout(() => {
-      hapticsService.medium();
-    }, 400);
-  }, []);
+    // Ejecutar haptics solo si está habilitado
+    if (hapticsConfig.enabled) {
+      try {
+        const { hapticsService } = await import(
+          '../../../services/hapticsService'
+        );
+        await hapticsService.heavy();
+        setTimeout(async () => {
+          await hapticsService.medium();
+        }, 400);
+      } catch (error) {
+        console.warn('Haptics no disponible:', error);
+      }
+    }
+
+    // Ejecutar audio solo si está habilitado
+    if (audioConfig.enabled) {
+      try {
+        const { audioService } = await import('../../../services/audioService');
+        await audioService.almostDone();
+      } catch (error) {
+        console.warn('Audio no disponible:', error);
+      }
+    }
+  }, [hapticsConfig.enabled, audioConfig.enabled]);
 
   /**
    * Alterna entre iniciar y pausar el temporizador
@@ -134,8 +175,19 @@ export const useTimer = () => {
           return newTime;
         });
 
-        // Vibración cada segundo para feedback constante
-        hapticsService.tick();
+        // Vibración cada segundo para feedback constante (solo si está habilitado)
+        if (hapticsConfig.enabled) {
+          (async () => {
+            try {
+              const { hapticsService } = await import(
+                '../../../services/hapticsService'
+              );
+              await hapticsService.tick();
+            } catch (error) {
+              console.warn('Haptics no disponible:', error);
+            }
+          })();
+        }
       }, 1000);
     } else if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -147,7 +199,7 @@ export const useTimer = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isRunning, time, startCelebration]);
+  }, [isRunning, time, startCelebration, hapticsConfig.enabled]);
 
   // Efecto para detectar 95% de progreso
   useEffect(() => {
@@ -159,10 +211,38 @@ export const useTimer = () => {
 
   // Inicializar servicios de audio y haptics al montar
   useEffect(() => {
-    audioService.initialize();
-    hapticsService.initialize();
+    const initializeServices = async () => {
+      try {
+        const { audioService } = await import('../../../services/audioService');
+        await audioService.initialize();
+      } catch (error) {
+        console.warn('Audio service no disponible:', error);
+      }
+
+      try {
+        const { hapticsService } = await import(
+          '../../../services/hapticsService'
+        );
+        await hapticsService.initialize();
+      } catch (error) {
+        console.warn('Haptics service no disponible:', error);
+      }
+    };
+
+    initializeServices();
+
     return () => {
-      audioService.cleanup();
+      // Cleanup
+      (async () => {
+        try {
+          const { audioService } = await import(
+            '../../../services/audioService'
+          );
+          await audioService.cleanup();
+        } catch (error) {
+          console.warn('Error en cleanup de audio:', error);
+        }
+      })();
     };
   }, []);
 

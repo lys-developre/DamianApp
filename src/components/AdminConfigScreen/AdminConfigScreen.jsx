@@ -41,6 +41,11 @@ const AdminConfigScreen = React.memo(() => {
     navigation.navigate('ThemeSelector');
   }, [navigation]);
 
+  // Handler para mostrar configuración avanzada
+  const handleShowAdvancedConfig = useCallback(() => {
+    navigation.navigate('AdvancedConfig');
+  }, [navigation]);
+
   // Handler para volver a la pantalla anterior
   const handleGoBack = useCallback(() => {
     navigation.goBack();
@@ -83,12 +88,13 @@ const AdminConfigScreen = React.memo(() => {
       {/* BOTÓN: Configuración de frases motivacionales */}
       <TouchableOpacity
         style={[styles.configButton, { backgroundColor: colors.PRIMARY }]}
+        onPress={handleShowAdvancedConfig}
         accessibilityRole="button"
-        accessibilityLabel="Configurar frases motivacionales"
-        accessibilityHint="Personaliza las frases que aparecen durante los temporizadores"
+        accessibilityLabel="Configuración avanzada"
+        accessibilityHint="Abre la pantalla de configuración avanzada para personalizar la experiencia"
       >
         <Text style={[styles.buttonText, { color: colors.TEXT_PRIMARY }]}>
-          Configurar frases
+          Configuración avanzada
         </Text>
       </TouchableOpacity>
 

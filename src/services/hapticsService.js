@@ -2,6 +2,7 @@
 // Nota: Los console.log están condicionados con __DEV__ para debugging en desarrollo
 
 import * as Haptics from 'expo-haptics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * Servicio de Haptics mejorado para feedback táctil TEA
@@ -20,6 +21,23 @@ class HapticsService {
   constructor() {
     this.isSupported = true;
     this.initialize();
+  }
+
+  /**
+   * Verifica si haptics está habilitado en la configuración
+   * Lee directamente desde AsyncStorage para evitar dependencias circulares
+   */
+  async isHapticsEnabled() {
+    try {
+      const configStr = await AsyncStorage.getItem('@damianapp_user_config');
+      if (!configStr) return true; // Por defecto habilitado
+
+      const config = JSON.parse(configStr);
+      return config.haptics?.enabled !== false;
+    } catch (_error) {
+      // Si hay error leyendo la config, asumir habilitado
+      return true;
+    }
   }
 
   /**
@@ -62,6 +80,15 @@ class HapticsService {
    * @param {string} type - Tipo de haptic para logging
    */
   async execute(hapticsFunction, type = 'haptic') {
+    // Verificar si los haptics están habilitados en la configuración
+    const isEnabled = await this.isHapticsEnabled();
+    if (!isEnabled) {
+      if (__DEV__) {
+        console.log(`🔇 Haptic ${type} deshabilitado por configuración`);
+      }
+      return;
+    }
+
     // Si no hay soporte, salir silenciosamente
     if (!this.isSupported) {
       return;

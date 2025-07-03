@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Animated, TouchableOpacity, Text } from 'react-native';
 import { useTheme } from '../../theme';
+import { useUIConfig } from '../../hooks/useConfig';
 
 // Hooks personalizados
 import { useTimer } from './hooks/useTimer';
@@ -45,6 +46,9 @@ import { timerStyles } from './styles/timerStyles';
 const DigitalTimer = ({ hideMotivationalHeader = false, onClose = null }) => {
   // Hook del tema para colores centralizados
   const { colors } = useTheme();
+
+  // Hook de configuración UI
+  const uiConfig = useUIConfig();
 
   // Hook principal del temporizador
   const {
@@ -147,19 +151,21 @@ const DigitalTimer = ({ hideMotivationalHeader = false, onClose = null }) => {
           },
         ]}
       >
-        {/* Efecto de brillo adicional */}
-        <Animated.View
-          style={[
-            timerStyles.progressGlow,
-            {
-              opacity: progressGlow.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.3, 0.8],
-              }),
-              backgroundColor: getProgressColor(Math.min(progress + 10, 100)), // Color ligeramente más intenso
-            },
-          ]}
-        />
+        {/* Efecto de brillo adicional (configurable) */}
+        {uiConfig.timer?.glowEffect !== false && (
+          <Animated.View
+            style={[
+              timerStyles.progressGlow,
+              {
+                opacity: progressGlow.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.3, 0.8],
+                }),
+                backgroundColor: getProgressColor(Math.min(progress + 10, 100)), // Color ligeramente más intenso
+              },
+            ]}
+          />
+        )}
       </Animated.View>
 
       {/* HEADER CON MENSAJE MOTIVACIONAL */}
@@ -196,6 +202,7 @@ const DigitalTimer = ({ hideMotivationalHeader = false, onClose = null }) => {
         secondTickOpacity={secondTickOpacity}
         styles={timerStyles}
         colors={colors}
+        showMilliseconds={uiConfig.timer?.showMilliseconds || false}
       />
 
       {/* BOTONES DE CONTROL */}

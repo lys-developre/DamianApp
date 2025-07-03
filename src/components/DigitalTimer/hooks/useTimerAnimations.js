@@ -1,20 +1,20 @@
 import { useRef, useCallback, useEffect } from 'react';
 import { Animated } from 'react-native';
-import { hapticsService } from '../services/hapticsService';
 import { motivationalPhrases } from '../constants/motivationalPhrases';
 import { getCurrentPhrase } from '../utils/timerUtils';
+import { useUIConfig, useAccessibilityConfig } from '../../../hooks/useConfig';
 
 /**
  * Hook personalizado para manejar animaciones del temporizador TEA
  *
  * FUNCIONALIDADES:
- * - Animaciones de frases motivacionales
- * - Animaciones de progreso (pulsación y brillo)
- * - Animaciones de celebración
- * - Feedback visual cada segundo (pulso de vida)
+ * - Animaciones de frases motivacionales (respeta configuración)
+ * - Animaciones de progreso (pulsación y brillo) (respeta configuración)
+ * - Animaciones de celebración (respeta configuración)
+ * - Feedback visual cada segundo (pulso de vida) (respeta configuración)
  *
  * @author Damian App
- * @version 1.0.0
+ * @version 2.0.0 - Con configuración avanzada
  */
 
 export const useTimerAnimations = ({
@@ -23,6 +23,14 @@ export const useTimerAnimations = ({
   initialTime,
   getProgress,
 }) => {
+  // Configuraciones
+  const uiConfig = useUIConfig();
+  const accessibilityConfig = useAccessibilityConfig();
+
+  // Verificar si las animaciones están habilitadas
+  const animationsEnabled =
+    uiConfig.animations?.enabled !== false &&
+    !accessibilityConfig.reduceAnimations;
   // Referencias de animaciones para frases
   const textOpacity = useRef(new Animated.Value(1)).current;
   const phraseScale = useRef(new Animated.Value(1)).current;
@@ -47,7 +55,21 @@ export const useTimerAnimations = ({
   /**
    * Función que ejecuta animaciones de "pulso de vida" cada segundo
    */
-  const triggerSecondTick = useCallback(() => {
+  const triggerSecondTick = useCallback(async () => {
+    // Solo ejecutar animaciones si están habilitadas
+    if (!animationsEnabled) {
+      // Mantener solo el haptic si las animaciones están deshabilitadas
+      try {
+        const { hapticsService } = await import(
+          '../../../services/hapticsService'
+        );
+        await hapticsService.light();
+      } catch (error) {
+        console.warn('Haptics no disponible:', error);
+      }
+      return;
+    }
+
     // 1. Heartbeat del número del temporizador
     Animated.sequence([
       Animated.timing(heartbeatScale, {
@@ -91,13 +113,28 @@ export const useTimerAnimations = ({
     ]).start();
 
     // Vibración suave para feedback táctil
-    hapticsService.light();
-  }, [heartbeatScale, sparkleOpacity, secondTickOpacity]);
+    try {
+      const { hapticsService } = await import(
+        '../../../services/hapticsService'
+      );
+      await hapticsService.light();
+    } catch (error) {
+      console.warn('Haptics no disponible:', error);
+    }
+  }, [heartbeatScale, sparkleOpacity, secondTickOpacity, animationsEnabled]);
 
   /**
    * Inicia las animaciones de celebración
    */
   const startCelebrationAnimations = useCallback(() => {
+    // Si las animaciones están deshabilitadas, solo mostrar el modal sin animaciones
+    if (!animationsEnabled) {
+      modalOpacity.setValue(1);
+      trophyScale.setValue(1);
+      confettiScale.setValue(1);
+      return;
+    }
+
     // Secuencia de animaciones
     Animated.sequence([
       Animated.timing(modalOpacity, {
@@ -124,7 +161,7 @@ export const useTimerAnimations = ({
       }),
     ]).start();
 
-    // Rotación continua de medallas
+    // Rotación continua de medallas (solo si animaciones habilitadas)
     const rotateAnimation = () => {
       medallRotation.setValue(0);
       Animated.loop(
@@ -137,7 +174,13 @@ export const useTimerAnimations = ({
     };
 
     setTimeout(rotateAnimation, 1000);
-  }, [modalOpacity, trophyScale, medallRotation, confettiScale]);
+  }, [
+    modalOpacity,
+    trophyScale,
+    medallRotation,
+    confettiScale,
+    animationsEnabled,
+  ]);
 
   /**
    * Cierra las animaciones de celebración
@@ -161,7 +204,7 @@ export const useTimerAnimations = ({
 
   // Efecto para animar la barra de progreso
   useEffect(() => {
-    if (isRunning && time > 0) {
+    if (isRunning && time > 0 && animationsEnabled) {
       const pulseAnimation = Animated.loop(
         Animated.sequence([
           Animated.timing(progressPulse, {
@@ -203,7 +246,7 @@ export const useTimerAnimations = ({
       progressPulse.setValue(1);
       progressGlow.setValue(0);
     }
-  }, [isRunning, time, progressPulse, progressGlow]);
+  }, [isRunning, time, progressPulse, progressGlow, animationsEnabled]);
 
   // Efecto para animar el cambio de frases motivacionales
   useEffect(() => {
@@ -215,46 +258,64 @@ export const useTimerAnimations = ({
     );
 
     if (previousPhrase.current !== currentPhrase) {
-      hapticsService.light();
+      // Haptics para cambio de frase
+      (async () => {
+        try {
+          const { hapticsService } = await import(
+            '../../../services/hapticsService'
+          );
+          await hapticsService.light();
+        } catch (error) {
+          console.warn('Haptics no disponible:', error);
+        }
+      })();
 
-      Animated.sequence([
-        Animated.parallel([
-          Animated.timing(textOpacity, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(phraseScale, {
-            toValue: 0.8,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(phraseTranslateY, {
-            toValue: -20,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.timing(textOpacity, {
-            toValue: 1,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-          Animated.spring(phraseScale, {
-            toValue: 1,
-            tension: 80,
-            friction: 8,
-            useNativeDriver: true,
-          }),
-          Animated.spring(phraseTranslateY, {
-            toValue: 0,
-            tension: 80,
-            friction: 8,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]).start();
+      // Solo animar si las animaciones están habilitadas
+      if (animationsEnabled) {
+        Animated.sequence([
+          Animated.parallel([
+            Animated.timing(textOpacity, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+            Animated.timing(phraseScale, {
+              toValue: 0.8,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+            Animated.timing(phraseTranslateY, {
+              toValue: -20,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.parallel([
+            Animated.timing(textOpacity, {
+              toValue: 1,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+            Animated.spring(phraseScale, {
+              toValue: 1,
+              tension: 80,
+              friction: 8,
+              useNativeDriver: true,
+            }),
+            Animated.spring(phraseTranslateY, {
+              toValue: 0,
+              tension: 80,
+              friction: 8,
+              useNativeDriver: true,
+            }),
+          ]),
+        ]).start();
+      } else {
+        // Si no hay animaciones, simplemente resetear valores
+        textOpacity.setValue(1);
+        phraseScale.setValue(1);
+        phraseTranslateY.setValue(0);
+      }
 
       previousPhrase.current = currentPhrase;
     }
@@ -265,6 +326,7 @@ export const useTimerAnimations = ({
     phraseScale,
     phraseTranslateY,
     getProgress,
+    animationsEnabled,
   ]);
 
   return {

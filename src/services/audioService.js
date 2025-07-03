@@ -2,6 +2,7 @@
 // Nota: Los console.log están condicionados con __DEV__ para debugging en desarrollo
 
 import { Audio } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * Servicio de Audio optimizado para TEA
@@ -20,6 +21,23 @@ class AudioService {
   constructor() {
     this.isInitialized = false;
     this.customSounds = new Map(); // Cache para sonidos personalizados
+  }
+
+  /**
+   * Verifica si audio está habilitado en la configuración
+   * Lee directamente desde AsyncStorage para evitar dependencias circulares
+   */
+  async isAudioEnabled() {
+    try {
+      const configStr = await AsyncStorage.getItem('@damianapp_user_config');
+      if (!configStr) return true; // Por defecto habilitado
+
+      const config = JSON.parse(configStr);
+      return config.audio?.enabled !== false;
+    } catch (_error) {
+      // Si hay error leyendo la config, asumir habilitado
+      return true;
+    }
   }
 
   /**
@@ -53,6 +71,15 @@ class AudioService {
    */
   async playSound(type, options = {}) {
     try {
+      // Verificar si el audio está habilitado en la configuración
+      const isEnabled = await this.isAudioEnabled();
+      if (!isEnabled) {
+        if (__DEV__) {
+          console.log(`🔇 Audio ${type} deshabilitado por configuración`);
+        }
+        return;
+      }
+
       await this.initialize();
 
       // Intentar reproducir sonido personalizado primero
@@ -82,7 +109,7 @@ class AudioService {
       switch (type) {
         case 'phrase-change':
           // Sonido suave para cambio de frase
-          const phraseSound = require('../../../../assets/sounds/phrase_change.wav');
+          const phraseSound = require('../../assets/sounds/phrase_change.wav');
           const { sound: phrase } = await Audio.Sound.createAsync(phraseSound);
           await phrase.setVolumeAsync(options.volume || 0.6);
           await phrase.playAsync();
@@ -90,7 +117,7 @@ class AudioService {
 
         case 'celebration':
           // Sonido épico de celebración
-          const celebrationSound = require('../../../../assets/sounds/celebration_epic.wav');
+          const celebrationSound = require('../../assets/sounds/celebration_epic.wav');
           const { sound: celebration } =
             await Audio.Sound.createAsync(celebrationSound);
           await celebration.setVolumeAsync(options.volume || 0.8);
@@ -99,7 +126,7 @@ class AudioService {
 
         case 'almost-done':
           // Sonido de "casi listo"
-          const almostDoneSound = require('../../../../assets/sounds/almost_done.wav');
+          const almostDoneSound = require('../../assets/sounds/almost_done.wav');
           const { sound: almostDone } =
             await Audio.Sound.createAsync(almostDoneSound);
           await almostDone.setVolumeAsync(options.volume || 0.6);
@@ -108,7 +135,7 @@ class AudioService {
 
         default:
           // Sonido de notificación suave por defecto
-          const defaultSound = require('../../../../assets/sounds/notification_soft.wav');
+          const defaultSound = require('../../assets/sounds/notification_soft.wav');
           const { sound: notification } =
             await Audio.Sound.createAsync(defaultSound);
           await notification.setVolumeAsync(options.volume || 0.5);

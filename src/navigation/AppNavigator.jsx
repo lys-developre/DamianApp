@@ -8,6 +8,7 @@ import { HomeScreen } from '../screens';
 import AdminConfigScreen from '../components/AdminConfigScreen';
 import TimerImageButtonsManager from '../components/TimerImageButtons';
 import ThemeSelector from '../components/ThemeSelector/ThemeSelector';
+import AdvancedConfigScreen from '../components/AdvancedConfigScreen';
 
 /**
  * Navegador principal de la aplicación Damian APP
@@ -71,7 +72,7 @@ const RootStack = () => {
         }}
       />
       <Stack.Screen
-        name="TimerImageManager"
+        name="TimerImageButtonsManager"
         component={TimerImageButtonsManager}
         options={{
           title: 'Gestión de Temporizadores',
@@ -83,6 +84,14 @@ const RootStack = () => {
         component={ThemeSelector}
         options={{
           title: 'Temas de Color',
+          headerBackTitleVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="AdvancedConfig"
+        component={AdvancedConfigScreen}
+        options={{
+          title: 'Configuración Avanzada',
           headerBackTitleVisible: false,
         }}
       />

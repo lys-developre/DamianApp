@@ -11,23 +11,32 @@
  */
 
 /**
- * Convierte segundos a formato de tiempo legible HH:MM:SS
+ * Convierte segundos a formato de tiempo legible HH:MM:SS o HH:MM:SS.mmm
  *
  * @param {number} seconds - Tiempo en segundos a convertir
- * @returns {string} Tiempo formateado como "HH:MM:SS"
+ * @param {boolean} showMilliseconds - Si true, muestra milisegundos
+ * @returns {string} Tiempo formateado como "HH:MM:SS" o "HH:MM:SS.mmm"
  *
  * @example
  * formatTime(90) // returns "00:01:30"
- * formatTime(3661) // returns "01:01:01"
+ * formatTime(90.5, true) // returns "00:01:30.500"
  */
-export const formatTime = seconds => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+export const formatTime = (seconds, showMilliseconds = false) => {
+  const totalSeconds = Math.floor(seconds);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const secs = totalSeconds % 60;
 
-  return `${hours.toString().padStart(2, '0')}:${minutes
+  const baseTime = `${hours.toString().padStart(2, '0')}:${minutes
     .toString()
     .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+  if (showMilliseconds) {
+    const milliseconds = Math.floor((seconds - totalSeconds) * 1000);
+    return `${baseTime}.${milliseconds.toString().padStart(3, '0')}`;
+  }
+
+  return baseTime;
 };
 
 /**

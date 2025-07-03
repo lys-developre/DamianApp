@@ -481,9 +481,7 @@ export const AppProvider = ({ children }) => {
       toggleSwitch: async id => {
         // Importar haptics dinámicamente para feedback al toggle
         try {
-          const { hapticsService } = await import(
-            '../components/DigitalTimer/services/hapticsService'
-          );
+          const { hapticsService } = await import('../services/hapticsService');
           await hapticsService.light();
         } catch (error) {
           console.warn('Haptics no disponible:', error);
@@ -502,7 +500,7 @@ export const AppProvider = ({ children }) => {
           setTimeout(async () => {
             try {
               const { hapticsService } = await import(
-                '../components/DigitalTimer/services/hapticsService'
+                '../services/hapticsService'
               );
               await hapticsService.celebration();
             } catch (error) {

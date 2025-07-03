@@ -2,6 +2,7 @@
 // Nota: Los console.log están condicionados con __DEV__ para debugging en desarrollo
 
 import { Audio } from 'expo-av';
+import configService from '../../../services/configService';
 
 /**
  * Servicio de Audio optimizado para TEA
@@ -11,15 +12,39 @@ import { Audio } from 'expo-av';
  * - Manejo robusto de errores con fallbacks
  * - Optimizado para dispositivos Android
  * - Volúmenes calibrados para usuarios TEA
+ * - ✅ RESPETA CONFIGURACIONES AVANZADAS
  *
  * @author Damian App
- * @version 1.0.0
+ * @version 2.0.0 - Con configuración dinámica
  */
 
 class AudioService {
   constructor() {
     this.isInitialized = false;
     this.customSounds = new Map(); // Cache para sonidos personalizados
+  }
+
+  /**
+   * Obtiene la configuración actual de audio
+   */
+  getAudioConfig() {
+    try {
+      const enabled = configService.get('audio.enabled', true);
+      const volume = configService.get('audio.volume', 0.8);
+      const fadeIn = configService.get('audio.fadeIn', true);
+      return { enabled, volume, fadeIn };
+    } catch (_error) {
+      // Fallback a valores por defecto
+      return { enabled: true, volume: 0.8, fadeIn: true };
+    }
+  }
+
+  /**
+   * Verifica si el audio está habilitado
+   */
+  isEnabled() {
+    const config = this.getAudioConfig();
+    return config.enabled;
   }
 
   /**
@@ -52,18 +77,37 @@ class AudioService {
    * Reproduce sonido usando archivo personalizado o tono nativo
    */
   async playSound(type, options = {}) {
+    // Verificar si el audio está habilitado en configuración
+    if (!this.isEnabled()) {
+      if (__DEV__) {
+        console.log(
+          `🔇 Audio ${type} omitido (deshabilitado por configuración)`
+        );
+      }
+      return;
+    }
+
     try {
       await this.initialize();
+
+      // Obtener configuración de audio
+      const config = this.getAudioConfig();
+      const finalOptions = {
+        volume: config.volume,
+        fadeIn: config.fadeIn,
+        ...options,
+      };
 
       // Intentar reproducir sonido personalizado primero
       if (this.customSounds.has(type)) {
         const sound = this.customSounds.get(type);
+        await sound.setVolumeAsync(finalOptions.volume);
         await sound.replayAsync();
         return;
       }
 
       // Fallback a tonos nativos del sistema
-      await this.playNativeSound(type, options);
+      await this.playNativeSound(type, finalOptions);
     } catch (error) {
       if (__DEV__) {
         console.warn(`Error reproduciendo sonido ${type}:`, error);

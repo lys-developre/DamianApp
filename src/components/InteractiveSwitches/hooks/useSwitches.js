@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useUIConfig, useHapticsConfig } from '../../../hooks/useConfig';
 
 /**
  * Hook personalizado para manejar el estado de los switches interactivos
@@ -7,14 +8,17 @@ import { useState, useCallback } from 'react';
  * - Estado de 40 switches independientes (duplicado)
  * - Toggle individual de cada switch con vibración
  * - Reset de todos los switches
- * - Celebración cuando todos están activos
- * - Integración con haptics para feedback
+ * - Celebración cuando todos están activos (configurable)
+ * - Integración con haptics para feedback (respeta configuración)
  *
  * @author Damian App
- * @version 2.0.0
+ * @version 3.0.0 - Con configuración avanzada
  */
 
 export const useSwitches = () => {
+  // Hooks de configuración
+  const uiConfig = useUIConfig();
+  const hapticsConfig = useHapticsConfig();
   // Estado inicial: 40 switches estilo iOS
   const [switches, setSwitches] = useState(
     Array.from({ length: 40 }, (_, index) => ({
@@ -32,14 +36,16 @@ export const useSwitches = () => {
    */
   const toggleSwitch = useCallback(
     async switchId => {
-      // Importar haptics dinámicamente para evitar problemas de dependencias
-      try {
-        const { hapticsService } = await import(
-          '../../DigitalTimer/services/hapticsService'
-        );
-        await hapticsService.light(); // Vibración suave al presionar
-      } catch (error) {
-        console.warn('Haptics no disponible:', error);
+      // Solo ejecutar haptics si está habilitado en la configuración
+      if (hapticsConfig.enabled) {
+        try {
+          const { hapticsService } = await import(
+            '../../../services/hapticsService'
+          );
+          await hapticsService.light(); // Vibración suave al presionar
+        } catch (error) {
+          console.warn('Haptics no disponible:', error);
+        }
       }
 
       setSwitches(prevSwitches => {
@@ -56,25 +62,32 @@ export const useSwitches = () => {
         // Verificar si todos los switches están activos
         const allActive = newSwitches.every(sw => sw.isActive);
         if (allActive && !showCelebration) {
-          // Activar celebración
-          setShowCelebration(true);
-          // Vibración de celebración
-          setTimeout(async () => {
-            try {
-              const { hapticsService } = await import(
-                '../../DigitalTimer/services/hapticsService'
-              );
-              await hapticsService.celebration();
-            } catch (error) {
-              console.warn('Haptics no disponible:', error);
+          // Verificar si las celebraciones están habilitadas
+          const showCelebrations = uiConfig.switches?.showCelebration !== false;
+
+          if (showCelebrations) {
+            // Activar celebración
+            setShowCelebration(true);
+            // Vibración de celebración solo si está habilitada
+            if (hapticsConfig.enabled) {
+              setTimeout(async () => {
+                try {
+                  const { hapticsService } = await import(
+                    '../../../services/hapticsService'
+                  );
+                  await hapticsService.celebration();
+                } catch (error) {
+                  console.warn('Haptics no disponible:', error);
+                }
+              }, 100);
             }
-          }, 100);
+          }
         }
 
         return newSwitches;
       });
     },
-    [showCelebration]
+    [showCelebration, uiConfig.switches?.showCelebration, hapticsConfig.enabled]
   );
 
   /**
