@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { storageService } from '../services';
+import { useUIConfig, useHapticsConfig } from '../hooks/useConfig';
 
 /**
  * Context principal de la aplicación Damian APP - Módulo 5
@@ -206,10 +207,8 @@ const appReducer = (state, action) => {
           : switchItem
       );
 
-      // Verificar si todos los switches están activos para mostrar celebración
-      const allActive = updatedSwitches.every(sw => sw.isActive);
-      const shouldShowCelebration =
-        allActive && !state.switchesState.showCelebration;
+      // La celebración se controlará desde las acciones según la configuración
+      const shouldShowCelebration = false; // Se controla desde switchesActions
 
       return {
         ...state,
@@ -373,6 +372,10 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
+  // Hooks de configuración avanzada para switches
+  const uiConfig = useUIConfig();
+  const hapticsConfig = useHapticsConfig();
+
   /**
    * Guarda el estado usando StorageService con mejor manejo de errores
    */
@@ -479,17 +482,21 @@ export const AppProvider = ({ children }) => {
     // Acciones helper para Switches
     switchesActions: {
       toggleSwitch: async id => {
-        // Importar haptics dinámicamente para feedback al toggle
-        try {
-          const { hapticsService } = await import('../services/hapticsService');
-          await hapticsService.light();
-        } catch (error) {
-          console.warn('Haptics no disponible:', error);
+        // Solo vibrar si está habilitado en la configuración
+        if (hapticsConfig.enabled) {
+          try {
+            const { hapticsService } = await import(
+              '../services/hapticsService'
+            );
+            await hapticsService.light();
+          } catch (error) {
+            console.warn('Haptics no disponible:', error);
+          }
         }
 
         dispatch({ type: ActionTypes.TOGGLE_SWITCH, payload: id });
 
-        // Verificar si necesitamos celebración con haptics
+        // Verificar si necesitamos celebración según configuración
         const currentState = state;
         const updatedSwitches = currentState.switchesState.switches.map(sw =>
           sw.id === id ? { ...sw, isActive: !sw.isActive } : sw
@@ -497,16 +504,28 @@ export const AppProvider = ({ children }) => {
         const allActive = updatedSwitches.every(sw => sw.isActive);
 
         if (allActive && !currentState.switchesState.showCelebration) {
-          setTimeout(async () => {
-            try {
-              const { hapticsService } = await import(
-                '../services/hapticsService'
-              );
-              await hapticsService.celebration();
-            } catch (error) {
-              console.warn('Haptics no disponible:', error);
+          // Solo mostrar celebración si está habilitada en configuración
+          if (uiConfig.switches?.showCelebration !== false) {
+            // Mostrar modal de celebración
+            dispatch({
+              type: ActionTypes.SET_SWITCHES_CELEBRATION,
+              payload: true,
+            });
+
+            // Vibración de celebración solo si está habilitada
+            if (hapticsConfig.enabled) {
+              setTimeout(async () => {
+                try {
+                  const { hapticsService } = await import(
+                    '../services/hapticsService'
+                  );
+                  await hapticsService.celebration();
+                } catch (error) {
+                  console.warn('Haptics no disponible:', error);
+                }
+              }, 100);
             }
-          }, 100);
+          }
         }
       },
 
