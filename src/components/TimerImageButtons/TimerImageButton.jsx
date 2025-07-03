@@ -8,12 +8,22 @@ import {
   Animated,
   Easing,
 } from 'react-native';
+import { useTheme } from '../../theme';
 
 /**
- * Botón con imagen de fondo y temporizador superpuesto.
+ * Botón con imagen de fondo y temporizador superpuesto - Módulo 7
  * Cambia color de borde según estado (rojo activo, verde terminado).
  * Ahora es 3 veces más grande y tiene animaciones de pulso y brillo.
  * Animaciones corregidas para evitar conflictos con useNativeDriver.
+ *
+ * MEJORAS MÓDULO 7:
+ * - ✅ Migración al theme system centralizado
+ * - ✅ Eliminación de colores hardcodeados
+ * - ✅ Colores dinámicos desde theme
+ * - ✅ Preparado para modo oscuro/claro
+ *
+ * @author Damian App
+ * @version 2.0.0 - Theme System
  */
 export default function TimerImageButton({
   image,
@@ -22,7 +32,13 @@ export default function TimerImageButton({
   onPress,
   style,
 }) {
-  const borderColor = isActive ? '#E53E3E' : '#38A169'; // rojo o verde
+  const { colors } = useTheme();
+
+  // Colores dinámicos según estado usando theme
+  const borderColor = isActive
+    ? colors.TIMER_ACTIVE_BORDER
+    : colors.TIMER_COMPLETE_BORDER;
+  const glowColor = isActive ? colors.TIMER_GLOW_RED : colors.TIMER_GLOW_GREEN;
 
   // Animación de pulso y glow (solo JS, no nativo)
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -66,10 +82,10 @@ export default function TimerImageButton({
     }
   }, [isActive, pulseAnim, glowAnim]);
 
-  // Sombra/Glow animado
+  // Sombra/Glow animado usando colores del theme
   const shadowStyle = isActive
     ? {
-        shadowColor: '#E53E3E',
+        shadowColor: glowColor,
         shadowOpacity: glowAnim.interpolate({
           inputRange: [0, 1],
           outputRange: [0.3, 0.8],
@@ -81,7 +97,7 @@ export default function TimerImageButton({
         shadowOffset: { width: 0, height: 0 },
       }
     : {
-        shadowColor: '#38A169',
+        shadowColor: glowColor,
         shadowOpacity: 0.7,
         shadowRadius: 24,
         shadowOffset: { width: 0, height: 0 },

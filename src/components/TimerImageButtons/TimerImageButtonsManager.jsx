@@ -11,12 +11,19 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../../context';
+import { useTheme } from '../../theme';
 import TimerImageButton from './TimerImageButton';
 import { formatSeconds, imageTimerPresets as timePresets } from '../../utils';
 import { useTimerImageButtonsManager } from './hooks/useTimerImageButtonsManager';
 
 /**
- * Componente optimizado para gestión de temporizadores con imagen - Módulo 3
+ * Componente optimizado para gestión de temporizadores con imagen - Módulo 7
+ *
+ * MEJORAS MÓDULO 7:
+ * - ✅ Migración completa al theme system centralizado
+ * - ✅ Eliminación de colores hardcodeados
+ * - ✅ Mantenimiento del aspecto visual actual
+ * - ✅ Preparación para modo oscuro/claro
  *
  * MEJORAS MÓDULO 3:
  * - ✅ Integración con React Navigation
@@ -31,11 +38,12 @@ import { useTimerImageButtonsManager } from './hooks/useTimerImageButtonsManager
  * - ✅ Separación clara de responsabilidades
  *
  * @author Damian App
- * @version 3.0.0 - Navegación Módulo 3
+ * @version 4.0.0 - Theme System Módulo 7
  */
 const TimerImageButtonsManager = React.memo(() => {
   const navigation = useNavigation();
   const { state, timerImageActions } = useAppContext();
+  const { colors } = useTheme();
 
   // Extraer datos del estado global
   const { timerImageButtons } = state;
@@ -74,8 +82,12 @@ const TimerImageButtonsManager = React.memo(() => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Gestión de Temporizadores</Text>
+    <View
+      style={[styles.container, { backgroundColor: colors.BACKGROUND_PRIMARY }]}
+    >
+      <Text style={[styles.title, { color: colors.TEXT_PRIMARY }]}>
+        Gestión de Temporizadores
+      </Text>
       <FlatList
         data={timerImageButtons}
         keyExtractor={item => item.id}
@@ -90,16 +102,24 @@ const TimerImageButtonsManager = React.memo(() => {
             />
             <View style={{ flexDirection: 'row', marginTop: 4 }}>
               <TouchableOpacity
-                style={styles.editBtn}
+                style={[styles.editBtn, { backgroundColor: colors.SECONDARY }]}
                 onPress={() => openEditModal(item)}
               >
-                <Text style={styles.editBtnText}>Editar</Text>
+                <Text
+                  style={[styles.editBtnText, { color: colors.TEXT_PRIMARY }]}
+                >
+                  Editar
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.deleteBtn}
+                style={[styles.deleteBtn, { backgroundColor: colors.DANGER }]}
                 onPress={() => handleDelete(item.id)}
               >
-                <Text style={styles.deleteBtnText}>Eliminar</Text>
+                <Text
+                  style={[styles.deleteBtnText, { color: colors.TEXT_PRIMARY }]}
+                >
+                  Eliminar
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -107,31 +127,59 @@ const TimerImageButtonsManager = React.memo(() => {
         contentContainerStyle={styles.list}
         showsHorizontalScrollIndicator={false}
       />
-      <TouchableOpacity style={styles.addButton} onPress={openCreateModal}>
-        <Text style={styles.addButtonText}>+ Nuevo temporizador</Text>
+      <TouchableOpacity
+        style={[styles.addButton, { backgroundColor: colors.SECONDARY }]}
+        onPress={openCreateModal}
+      >
+        <Text style={[styles.addButtonText, { color: colors.TEXT_PRIMARY }]}>
+          + Nuevo temporizador
+        </Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-        <Text style={styles.buttonText}>Volver</Text>
+      <TouchableOpacity
+        style={[styles.backButton, { backgroundColor: colors.WARNING }]}
+        onPress={handleGoBack}
+      >
+        <Text style={[styles.buttonText, { color: colors.TEXT_PRIMARY }]}>
+          Volver
+        </Text>
       </TouchableOpacity>
 
       {/* Modal para crear/editar temporizador */}
       <Modal visible={showModal} transparent animationType="slide">
         <View style={styles.modalBg}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
+          <View
+            style={[
+              styles.modalContent,
+              { backgroundColor: colors.BACKGROUND_CARD },
+            ]}
+          >
+            <Text style={[styles.modalTitle, { color: colors.TEXT_PRIMARY }]}>
               {editId ? 'Editar' : 'Nuevo'} temporizador
             </Text>
-            <TouchableOpacity style={styles.imagePickerBtn} onPress={pickImage}>
-              <Text style={styles.imagePickerText}>
+            <TouchableOpacity
+              style={[
+                styles.imagePickerBtn,
+                { backgroundColor: colors.PRIMARY },
+              ]}
+              onPress={pickImage}
+            >
+              <Text
+                style={[styles.imagePickerText, { color: colors.TEXT_PRIMARY }]}
+              >
                 {newImage ? 'Cambiar imagen' : 'Elegir imagen'}
               </Text>
             </TouchableOpacity>
             {newImage ? (
               <Image source={{ uri: newImage }} style={styles.previewImg} />
             ) : null}
-            <Text style={styles.presetLabel}>
+            <Text style={[styles.presetLabel, { color: colors.TEXT_PRIMARY }]}>
               Tiempo total:{' '}
-              <Text style={{ fontWeight: 'bold', color: '#48bb78' }}>
+              <Text
+                style={{
+                  fontWeight: 'bold',
+                  color: colors.TEXT_SUCCESS,
+                }}
+              >
                 {formatSeconds(newTimer)}
               </Text>
             </Text>
@@ -139,57 +187,98 @@ const TimerImageButtonsManager = React.memo(() => {
               {timePresets.map(preset => (
                 <TouchableOpacity
                   key={preset.label}
-                  style={styles.presetBtn}
+                  style={[
+                    styles.presetBtn,
+                    { backgroundColor: colors.BACKGROUND_SECONDARY },
+                  ]}
                   onPress={() => handleAddPreset(preset.seconds)}
                 >
-                  <Text style={styles.presetBtnText}>{preset.label}</Text>
+                  <Text
+                    style={[
+                      styles.presetBtnText,
+                      { color: colors.TEXT_PRIMARY },
+                    ]}
+                  >
+                    {preset.label}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
             <View style={styles.manualTimeRow}>
               <TextInput
-                style={styles.manualInput}
+                style={[
+                  styles.manualInput,
+                  {
+                    backgroundColor: colors.BACKGROUND_SECONDARY,
+                    color: colors.TEXT_PRIMARY,
+                    borderColor: colors.BORDER_PRIMARY,
+                  },
+                ]}
                 placeholder="días"
                 keyboardType="numeric"
                 value={manualDays}
                 onChangeText={setManualDays}
                 onBlur={handleManualTime}
-                placeholderTextColor="#aaa"
+                placeholderTextColor={colors.TEXT_MUTED}
                 maxLength={2}
               />
               <TextInput
-                style={styles.manualInput}
+                style={[
+                  styles.manualInput,
+                  {
+                    backgroundColor: colors.BACKGROUND_SECONDARY,
+                    color: colors.TEXT_PRIMARY,
+                    borderColor: colors.BORDER_PRIMARY,
+                  },
+                ]}
                 placeholder="horas"
                 keyboardType="numeric"
                 value={manualHours}
                 onChangeText={setManualHours}
                 onBlur={handleManualTime}
-                placeholderTextColor="#aaa"
+                placeholderTextColor={colors.TEXT_MUTED}
                 maxLength={2}
               />
               <TextInput
-                style={styles.manualInput}
+                style={[
+                  styles.manualInput,
+                  {
+                    backgroundColor: colors.BACKGROUND_SECONDARY,
+                    color: colors.TEXT_PRIMARY,
+                    borderColor: colors.BORDER_PRIMARY,
+                  },
+                ]}
                 placeholder="min"
                 keyboardType="numeric"
                 value={manualMinutes}
                 onChangeText={setManualMinutes}
                 onBlur={handleManualTime}
-                placeholderTextColor="#aaa"
+                placeholderTextColor={colors.TEXT_MUTED}
                 maxLength={2}
               />
               <TextInput
-                style={styles.manualInput}
+                style={[
+                  styles.manualInput,
+                  {
+                    backgroundColor: colors.BACKGROUND_SECONDARY,
+                    color: colors.TEXT_PRIMARY,
+                    borderColor: colors.BORDER_PRIMARY,
+                  },
+                ]}
                 placeholder="seg"
                 keyboardType="numeric"
                 value={manualSeconds}
                 onChangeText={setManualSeconds}
                 onBlur={handleManualTime}
-                placeholderTextColor="#aaa"
+                placeholderTextColor={colors.TEXT_MUTED}
                 maxLength={2}
               />
             </View>
             <TouchableOpacity
-              style={styles.resetBtn}
+              style={[
+                styles.resetBtn,
+                { backgroundColor: colors.BACKGROUND_TERTIARY },
+              ]}
               onPress={() => {
                 handleResetTimer();
                 setManualDays('');
@@ -198,7 +287,11 @@ const TimerImageButtonsManager = React.memo(() => {
                 setManualSeconds('');
               }}
             >
-              <Text style={styles.resetBtnText}>Reiniciar tiempo</Text>
+              <Text
+                style={[styles.resetBtnText, { color: colors.TEXT_PRIMARY }]}
+              >
+                Reiniciar tiempo
+              </Text>
             </TouchableOpacity>
             <View
               style={{
@@ -206,11 +299,25 @@ const TimerImageButtonsManager = React.memo(() => {
                 justifyContent: 'space-between',
               }}
             >
-              <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-                <Text style={styles.saveBtnText}>Guardar</Text>
+              <TouchableOpacity
+                style={[styles.saveBtn, { backgroundColor: colors.SECONDARY }]}
+                onPress={handleSave}
+              >
+                <Text
+                  style={[styles.saveBtnText, { color: colors.TEXT_PRIMARY }]}
+                >
+                  Guardar
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelBtn} onPress={closeModal}>
-                <Text style={styles.saveBtnText}>Cancelar</Text>
+              <TouchableOpacity
+                style={[styles.cancelBtn, { backgroundColor: colors.DANGER }]}
+                onPress={closeModal}
+              >
+                <Text
+                  style={[styles.saveBtnText, { color: colors.TEXT_PRIMARY }]}
+                >
+                  Cancelar
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -222,17 +329,16 @@ const TimerImageButtonsManager = React.memo(() => {
 
 TimerImageButtonsManager.displayName = 'TimerImageButtonsManager';
 
+// Estilos sin colores hardcodeados - los colores vienen del theme
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E293B',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
   },
   title: {
     fontSize: 22,
-    color: '#fff',
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
@@ -242,31 +348,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   editBtn: {
-    backgroundColor: '#48bb78',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
     marginHorizontal: 2,
   },
   editBtnText: {
-    color: '#fff',
     fontSize: 12,
     fontWeight: '600',
   },
   deleteBtn: {
-    backgroundColor: '#E53E3E',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
     marginHorizontal: 2,
   },
   deleteBtnText: {
-    color: '#fff',
     fontSize: 12,
     fontWeight: '600',
   },
   addButton: {
-    backgroundColor: '#48bb78',
     paddingVertical: 14,
     paddingHorizontal: 30,
     borderRadius: 16,
@@ -274,12 +375,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
   backButton: {
-    backgroundColor: '#F59E42',
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 16,
@@ -288,7 +387,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
@@ -300,7 +398,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#222',
     borderRadius: 16,
     padding: 24,
     width: 340,
@@ -311,20 +408,17 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   modalTitle: {
-    color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
   },
   imagePickerBtn: {
-    backgroundColor: '#45B7D1',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 12,
     marginBottom: 12,
   },
   imagePickerText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -335,7 +429,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   presetLabel: {
-    color: '#fff',
     fontSize: 16,
     marginBottom: 8,
   },
@@ -346,14 +439,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   presetBtn: {
-    backgroundColor: '#374151',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
     margin: 4,
   },
   presetBtnText: {
-    color: '#fff',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -362,9 +453,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   manualInput: {
-    backgroundColor: '#374151',
-    color: '#fff',
     borderRadius: 8,
+    borderWidth: 1,
     paddingHorizontal: 8,
     paddingVertical: 6,
     marginHorizontal: 4,
@@ -373,31 +463,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   resetBtn: {
-    backgroundColor: '#6B7280',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
     marginBottom: 16,
   },
   resetBtnText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
   saveBtn: {
-    backgroundColor: '#48bb78',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 12,
     marginHorizontal: 8,
   },
   saveBtnText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
   cancelBtn: {
-    backgroundColor: '#E53E3E',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 12,

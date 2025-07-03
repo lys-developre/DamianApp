@@ -2,8 +2,14 @@
  * Theme exports centralizados
  *
  * @author Damian App
- * @version 1.0.0 - Módulo 7
+ * @version 2.0.0 - Dynamic Theme System
  */
 
-export { THEME, useTheme, createStyles } from './theme';
+// Exportar tema estático (para referencia)
+export { THEME, createStyles } from './theme';
+
+// Exportar sistema dinámico de temas
+export { ThemeProvider, useTheme, withTheme } from './ThemeProvider';
+
+// Export por defecto
 export { default } from './theme';

@@ -3,11 +3,16 @@ import { View, Text, Animated } from 'react-native';
 import { formatTime } from '../utils/timerUtils';
 
 /**
- * Componente optimizado para el display del tiempo
+ * Componente optimizado para el display del tiempo - Módulo 7
  * Separado para evitar re-renders innecesarios
  *
+ * MEJORAS MÓDULO 7:
+ * - ✅ Migración al theme system centralizado
+ * - ✅ Eliminación de colores hardcodeados
+ * - ✅ Uso de colores dinámicos desde props
+ *
  * @author Damian App
- * @version 1.0.0
+ * @version 2.0.0 - Theme System
  */
 
 const TimeDisplay = React.memo(
@@ -18,6 +23,7 @@ const TimeDisplay = React.memo(
     sparkleOpacity,
     secondTickOpacity,
     styles,
+    colors,
   }) => (
     <View style={styles.displayContainer}>
       {/* Display principal del tiempo con heartbeat */}
@@ -29,7 +35,11 @@ const TimeDisplay = React.memo(
           },
         ]}
       >
-        <Text style={styles.timeDisplay}>{formatTime(time)}</Text>
+        <Text
+          style={[styles.timeDisplay, { color: colors.TIMER_DISPLAY_WHITE }]}
+        >
+          {formatTime(time)}
+        </Text>
       </Animated.View>
 
       {/* Partículas de vida que destellan */}

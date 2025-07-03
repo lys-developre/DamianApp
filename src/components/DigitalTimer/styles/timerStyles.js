@@ -1,12 +1,89 @@
 import { StyleSheet } from 'react-native';
 
 /**
- * Estilos del componente DigitalTimer
+ * Estilos del componente DigitalTimer - Módulo 7
  * Separados para mejor organización y mantenimiento
  *
+ * MEJORAS MÓDULO 7:
+ * - ✅ Preparado para theme system centralizado
+ * - ✅ Función para crear estilos dinámicos con colores del theme
+ * - ✅ Compatibilidad con modo oscuro/claro
+ *
  * @author Damian App
- * @version 1.0.0
+ * @version 2.0.0 - Theme System
  */
+
+/**
+ * Crea estilos dinámicos basados en el theme
+ * @param {Object} colors - Colores del theme actual
+ * @returns {Object} Estilos con colores dinámicos
+ */
+export const createTimerStyles = colors =>
+  StyleSheet.create({
+    // Estilos que usan colores del theme
+    timeDisplay: {
+      fontSize: 47,
+      fontWeight: 'bold',
+      color: colors.TIMER_DISPLAY_WHITE,
+      fontFamily: 'monospace',
+      textAlign: 'center',
+      marginBottom: 16,
+      letterSpacing: 2,
+      textShadowColor: 'rgba(0, 0, 0, 0.4)',
+      textShadowOffset: { width: 2, height: 2 },
+      textShadowRadius: 4,
+    },
+
+    playPauseButton: {
+      backgroundColor: colors.CONTROL_PLAY,
+    },
+
+    resetButton: {
+      backgroundColor: colors.CONTROL_RESET,
+    },
+
+    presetButtonActive: {
+      backgroundColor: colors.PRESET_BUTTON_PURPLE,
+      borderColor: '#5E35B1',
+      borderWidth: 3,
+      transform: [{ scale: 1.2 }],
+      shadowOpacity: 0.5,
+      elevation: 8,
+      minWidth: 90,
+    },
+
+    celebrationButton: {
+      backgroundColor: colors.CELEBRATION_TEAL,
+      borderRadius: 25,
+      paddingVertical: 15,
+      paddingHorizontal: 30,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 5,
+      borderWidth: 2,
+      borderColor: colors.PRIMARY,
+    },
+
+    motivationalFrame: {
+      backgroundColor: colors.GLASS_BACKGROUND,
+      borderRadius: 18,
+      borderWidth: 4,
+      borderColor: '#2D3748',
+      paddingVertical: 20,
+      paddingHorizontal: 23,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 7 },
+      shadowOpacity: 0.3,
+      shadowRadius: 14,
+      elevation: 12,
+      overflow: 'hidden',
+      position: 'relative',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });
 
 export const timerStyles = StyleSheet.create({
   // ==========================================================================

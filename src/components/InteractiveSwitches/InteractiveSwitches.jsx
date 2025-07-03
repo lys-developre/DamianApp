@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
+import { useTheme } from '../../theme';
 
 // Context global
 import { useAppContext } from '../../context';
@@ -41,6 +42,9 @@ import { switchesStyles } from './styles/switchesStyles';
  * @version 20.0.0 - Estado Global Módulo 4
  */
 const InteractiveSwitches = React.memo(() => {
+  // Hook del tema para colores centralizados
+  const { colors } = useTheme();
+
   // Hook principal para manejar el estado global de switches
   const { state, switchesActions } = useAppContext();
 
@@ -67,7 +71,11 @@ const InteractiveSwitches = React.memo(() => {
         />
 
         {/* BOTÓN DE RESET EN LA PARTE INFERIOR */}
-        <SwitchesHeader onReset={resetAllSwitches} styles={switchesStyles} />
+        <SwitchesHeader
+          onReset={resetAllSwitches}
+          styles={switchesStyles}
+          colors={colors}
+        />
       </View>
 
       {/* MODAL DE CELEBRACIÓN */}

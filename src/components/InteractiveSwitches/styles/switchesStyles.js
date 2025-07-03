@@ -1,8 +1,13 @@
 import { StyleSheet } from 'react-native';
 
 /**
- * Estilos del componente InteractiveSwitches - 40 switches TIPO iOS
+ * Estilos del componente InteractiveSwitches - 40 switches TIPO iOS - Módulo 7
  * Diseño exacto basado en la imagen iOS proporcionada (4 columnas)
+ *
+ * MEJORAS MÓDULO 7:
+ * - ✅ Preparado para theme system centralizado
+ * - ✅ Función para crear estilos dinámicos con colores del theme
+ * - ✅ Compatibilidad con modo oscuro/claro
  *
  * CARACTERÍSTICAS EXACTAS DE LA IMAGEN iOS:
  * - 40 switches compactos tipo iOS (40 total)
@@ -16,8 +21,109 @@ import { StyleSheet } from 'react-native';
  * - Sin texto, solo estados visuales
  *
  * @author Damian App
- * @version 17.0.0 - 40 iOS Switches (4x10 grid)
+ * @version 18.0.0 - Theme System Módulo 7
  */
+
+/**
+ * Crea estilos dinámicos basados en el theme
+ * @param {Object} colors - Colores del theme actual
+ * @returns {Object} Estilos con colores dinámicos
+ */
+export const createSwitchesStyles = colors =>
+  StyleSheet.create({
+    // Estilos que usan colores del theme
+    resetButton: {
+      backgroundColor: colors.SECONDARY, // Verde Material Design vibrante
+      height: 44,
+      borderRadius: 12,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.25,
+      shadowRadius: 6,
+      elevation: 5,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.2)',
+    },
+
+    resetButtonText: {
+      color: colors.TEXT_PRIMARY,
+      fontSize: 15,
+      fontWeight: '600',
+      marginLeft: 8,
+    },
+
+    celebrationButton: {
+      backgroundColor: colors.SECONDARY, // Verde Material Design consistente
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+
+    celebrationButtonText: {
+      color: colors.TEXT_PRIMARY,
+      fontSize: 16,
+      fontWeight: '600',
+      textAlign: 'center',
+    },
+
+    // Contenedor principal con colores dinámicos
+    container: {
+      backgroundColor: colors.BACKGROUND_CARD, // Fondo dinámico según el tema
+      borderRadius: 24,
+      padding: 20,
+      marginBottom: 20,
+      marginHorizontal: 8,
+      borderWidth: 1,
+      borderColor: colors.BORDER_PRIMARY, // Borde dinámico
+      shadowColor: colors.isDark
+        ? 'rgba(255, 255, 255, 0.1)'
+        : 'rgba(0, 0, 0, 0.1)',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.25,
+      shadowRadius: 24,
+      elevation: 10,
+      position: 'relative',
+      overflow: 'hidden',
+    },
+
+    // Modal de celebración con colores dinámicos
+    celebrationContent: {
+      backgroundColor: colors.BACKGROUND_CARD,
+      borderRadius: 24,
+      padding: 30,
+      alignItems: 'center',
+      minWidth: '80%',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 20,
+      elevation: 15,
+    },
+
+    celebrationTitle: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: colors.TEXT_PRIMARY,
+      textAlign: 'center',
+      marginBottom: 10,
+    },
+
+    celebrationSubtitle: {
+      fontSize: 16,
+      color: colors.TEXT_SECONDARY,
+      textAlign: 'center',
+      marginBottom: 25,
+      lineHeight: 22,
+    },
+  });
 
 export const switchesStyles = StyleSheet.create({
   // ==========================================================================

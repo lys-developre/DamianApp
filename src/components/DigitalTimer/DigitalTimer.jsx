@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Animated, TouchableOpacity, Text } from 'react-native';
+import { useTheme } from '../../theme';
 
 // Hooks personalizados
 import { useTimer } from './hooks/useTimer';
@@ -20,7 +21,13 @@ import { calculateProgress, getProgressColor } from './utils/timerUtils';
 import { timerStyles } from './styles/timerStyles';
 
 /**
- * DigitalTimer - Temporizador refactorizado para terapia TEA
+ * DigitalTimer - Temporizador refactorizado para terapia TEA - Módulo 7
+ *
+ * MEJORAS MÓDULO 7:
+ * - ✅ Migración al theme system centralizado
+ * - ✅ Colores dinámicos para modo oscuro/claro
+ * - ✅ Estilos responsivos con tema
+ * - ✅ Preparado para toggle de modo
  *
  * ARQUITECTURA MODULAR:
  * - Hooks personalizados para lógica de negocio
@@ -32,10 +39,13 @@ import { timerStyles } from './styles/timerStyles';
  * @param {boolean} props.hideMotivationalHeader - Si true, oculta el header motivacional
  * @param {Function} props.onClose - Función callback para cerrar el timer (opcional)
  * @author Damian App
- * @version 2.0.0 (Refactorizado)
+ * @version 3.0.0 - Theme System Módulo 7
  */
 
 const DigitalTimer = ({ hideMotivationalHeader = false, onClose = null }) => {
+  // Hook del tema para colores centralizados
+  const { colors } = useTheme();
+
   // Hook principal del temporizador
   const {
     time,
@@ -90,11 +100,34 @@ const DigitalTimer = ({ hideMotivationalHeader = false, onClose = null }) => {
     closeCelebration();
   };
 
+  // Estilos dinámicos con theme
+  const dynamicStyles = {
+    container: [
+      timerStyles.container,
+      {
+        backgroundColor: colors.GLASS_LIGHT,
+        borderColor: colors.BORDER_PRIMARY,
+      },
+    ],
+    closeButton: [
+      timerStyles.closeButton,
+      {
+        backgroundColor: colors.DANGER,
+      },
+    ],
+    closeButtonText: [
+      timerStyles.closeButtonText,
+      {
+        color: colors.TEXT_PRIMARY,
+      },
+    ],
+  };
+
   // Cálculos para el progreso
   const progress = calculateProgress(initialTime, time);
 
   return (
-    <View style={timerStyles.container}>
+    <View style={dynamicStyles.container}>
       {/* CAPAS DEL EFECTO GLASS */}
       <View style={timerStyles.glassOverlay} />
       <View style={timerStyles.innerGlassBorder} />
@@ -146,11 +179,11 @@ const DigitalTimer = ({ hideMotivationalHeader = false, onClose = null }) => {
       {/* BOTÓN DE CERRAR (solo si se proporciona onClose) */}
       {onClose && (
         <TouchableOpacity
-          style={timerStyles.closeButton}
+          style={dynamicStyles.closeButton}
           onPress={onClose}
           activeOpacity={0.7}
         >
-          <Text style={timerStyles.closeButtonText}>✕</Text>
+          <Text style={dynamicStyles.closeButtonText}>✕</Text>
         </TouchableOpacity>
       )}
 
@@ -162,6 +195,7 @@ const DigitalTimer = ({ hideMotivationalHeader = false, onClose = null }) => {
         sparkleOpacity={sparkleOpacity}
         secondTickOpacity={secondTickOpacity}
         styles={timerStyles}
+        colors={colors}
       />
 
       {/* BOTONES DE CONTROL */}
@@ -170,6 +204,7 @@ const DigitalTimer = ({ hideMotivationalHeader = false, onClose = null }) => {
         toggleTimer={toggleTimer}
         resetTimer={resetTimer}
         styles={timerStyles}
+        colors={colors}
       />
 
       {/* PRESETS DE TIEMPO */}
@@ -178,6 +213,7 @@ const DigitalTimer = ({ hideMotivationalHeader = false, onClose = null }) => {
         activePresetIndex={activePresetIndex}
         setPresetTime={setPresetTime}
         styles={timerStyles}
+        colors={colors}
       />
 
       {/* MODAL DE CELEBRACIÓN */}
