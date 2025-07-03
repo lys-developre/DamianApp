@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../context';
+import { useTheme } from '../theme';
 import DigitalTimer from '../components/DigitalTimer';
 import InteractiveSwitches from '../components/InteractiveSwitches';
 import MainButtons from '../components/MainButtons';
@@ -49,6 +50,10 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen() {
   const navigation = useNavigation();
   const { state, timerImageActions } = useAppContext();
+  const { colors } = useTheme();
+
+  // Crear estilos usando el theme dentro del componente
+  const styles = useMemo(() => createHomeScreenStyles(colors), [colors]);
 
   // Extraer datos del estado global
   const { timerImageButtons } = state;
@@ -73,7 +78,7 @@ export default function HomeScreen() {
         title: 'Configuración',
         description: 'Modo familia',
         onPress: handleConfigShow,
-        style: { backgroundColor: '#45B7D1' }, // Azul
+        style: { backgroundColor: colors.PRIMARY }, // Usando theme
         accessibilityLabel: 'Modo familia/terapeuta',
         accessibilityHint: 'Configuración y personalización',
       },
@@ -83,12 +88,12 @@ export default function HomeScreen() {
         title: 'Configuración b',
         description: 'Modo familia b',
         onPress: handleTimerPress,
-        style: { backgroundColor: '#F59E42' }, // Naranja
+        style: { backgroundColor: colors.WARNING }, // Usando theme
         accessibilityLabel: 'Modo familia/terapeuta',
         accessibilityHint: 'Configuración y personalización',
       },
     ],
-    [handleConfigShow, handleTimerPress]
+    [handleConfigShow, handleTimerPress, colors]
   );
 
   // Estilos memoizados para evitar recreaciones
@@ -203,164 +208,100 @@ export default function HomeScreen() {
 }
 
 /**
- * Estilos del componente HomeScreen
- *
- * Define la apariencia visual del hub principal especializado:
- * - Layout responsivo con grid de módulos
- * - Colores suaves y contrastantes para accesibilidad
- * - Tipografía clara y espaciado generoso
- * - Sombras y efectos visuales optimizados
- * - Diseño adaptado a necesidades de autismo
+ * Función para crear estilos usando el theme system
+ * Mantiene el aspecto visual actual pero centraliza los colores
  */
-const styles = StyleSheet.create({
-  /**
-   * Contenedor principal scrollable - FONDO MEJORADO
-   * Color que contrasta perfectamente con el efecto glass del DigitalTimer
-   */
-  container: {
-    flex: 1,
-    backgroundColor: '#1E293B', // Azul gris oscuro elegante para contraste optimal
-  },
-
-  /**
-   * Contenedor del contenido scrollable
-   */
-  contentContainer: {
-    flexGrow: 1,
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-  },
-
-  /**
-   * Header con título y badge
-   */
-  headerContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
-    paddingTop: 20,
-  },
-
-  /**
-   * Título principal de la aplicación
-   */
-  appTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    textAlign: 'center',
-    marginBottom: 5,
-  },
-
-  /**
-   * Subtítulo descriptivo
-   */
-  appSubtitle: {
-    fontSize: 16,
-    color: '#ffffff',
-    textAlign: 'center',
-    opacity: 0.9,
-    marginBottom: 15,
-  },
-
-  /**
-   * Badge de versión
-   */
-  badge: {
-    backgroundColor: '#48bb78',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-
-  /**
-   * Texto del badge
-   */
-  badgeText: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-
-  /**
-   * Grid de módulos principales
-   */
-  modulesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    paddingHorizontal: 5,
-  },
-
-  /**
-   * Card base para módulos
-   */
-  moduleCard: {
-    width: width * 0.42, // Aproximadamente 42% del ancho de la pantalla
-    height: 140,
-    borderRadius: 20,
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
+const createHomeScreenStyles = colors =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.BACKGROUND_PRIMARY, // Era: '#1E293B'
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-    marginHorizontal: 'auto',
-  },
-
-  /**
-   * Card de admin/familia
-   */
-  adminCard: {
-    backgroundColor: '#45B7D1',
-  },
-
-  /**
-   * Título del módulo
-   */
-  moduleTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 4,
-  },
-
-  /**
-   * Descripción del módulo
-   */
-  moduleDescription: {
-    fontSize: 12,
-    color: '#ffffff',
-    textAlign: 'center',
-    opacity: 0.9,
-  },
-
-  /**
-   * Indicador inferior
-   */
-  bottomIndicator: {
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    marginTop: 20,
-  },
-
-  /**
-   * Texto del indicador
-   */
-  indicatorText: {
-    color: '#ffffff',
-    fontSize: 12,
-    textAlign: 'center',
-    opacity: 0.8,
-    fontWeight: '500',
-    lineHeight: 16,
-  },
-});
+    contentContainer: {
+      flexGrow: 1,
+      paddingVertical: 20,
+      paddingHorizontal: 15,
+    },
+    headerContainer: {
+      alignItems: 'center',
+      marginBottom: 30,
+      paddingTop: 20,
+    },
+    appTitle: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: colors.TEXT_PRIMARY, // Era: '#ffffff'
+      textAlign: 'center',
+      marginBottom: 5,
+    },
+    appSubtitle: {
+      fontSize: 16,
+      color: colors.TEXT_PRIMARY, // Era: '#ffffff'
+      textAlign: 'center',
+      opacity: 0.9,
+      marginBottom: 15,
+    },
+    badge: {
+      backgroundColor: colors.SECONDARY, // Era: '#48bb78'
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 12,
+    },
+    badgeText: {
+      color: colors.TEXT_PRIMARY, // Era: '#ffffff'
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    modulesGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      paddingHorizontal: 5,
+    },
+    moduleCard: {
+      width: width * 0.42,
+      height: 140,
+      borderRadius: 20,
+      padding: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 15,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+      marginHorizontal: 'auto',
+    },
+    adminCard: {
+      backgroundColor: colors.PRIMARY, // Era: '#45B7D1'
+    },
+    moduleTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: colors.TEXT_PRIMARY, // Era: '#ffffff'
+      textAlign: 'center',
+      marginTop: 8,
+      marginBottom: 4,
+    },
+    moduleDescription: {
+      fontSize: 12,
+      color: colors.TEXT_PRIMARY, // Era: '#ffffff'
+      textAlign: 'center',
+      opacity: 0.9,
+    },
+    bottomIndicator: {
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 20,
+      marginTop: 20,
+    },
+    indicatorText: {
+      color: colors.TEXT_PRIMARY, // Era: '#ffffff'
+      fontSize: 12,
+      textAlign: 'center',
+      opacity: 0.8,
+      fontWeight: '500',
+      lineHeight: 16,
+    },
+  });
