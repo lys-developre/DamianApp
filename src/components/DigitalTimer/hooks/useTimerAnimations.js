@@ -2,7 +2,11 @@ import { useRef, useCallback, useEffect } from 'react';
 import { Animated } from 'react-native';
 import { motivationalPhrases } from '../constants/motivationalPhrases';
 import { getCurrentPhrase } from '../utils/timerUtils';
-import { useUIConfig, useAccessibilityConfig } from '../../../hooks/useConfig';
+import {
+  useUIConfig,
+  useAccessibilityConfig,
+  useHapticsConfig,
+} from '../../../hooks/useConfig';
 
 /**
  * Hook personalizado para manejar animaciones del temporizador TEA
@@ -26,6 +30,7 @@ export const useTimerAnimations = ({
   // Configuraciones
   const uiConfig = useUIConfig();
   const accessibilityConfig = useAccessibilityConfig();
+  const hapticsConfig = useHapticsConfig();
 
   // Verificar si las animaciones están habilitadas
   const animationsEnabled =
@@ -58,14 +63,16 @@ export const useTimerAnimations = ({
   const triggerSecondTick = useCallback(async () => {
     // Solo ejecutar animaciones si están habilitadas
     if (!animationsEnabled) {
-      // Mantener solo el haptic si las animaciones están deshabilitadas
-      try {
-        const { hapticsService } = await import(
-          '../../../services/hapticsService'
-        );
-        await hapticsService.light();
-      } catch (error) {
-        console.warn('Haptics no disponible:', error);
+      // Mantener solo el haptic si las animaciones están deshabilitadas pero haptics habilitados
+      if (hapticsConfig.enabled) {
+        try {
+          const { hapticsService } = await import(
+            '../../../services/hapticsService'
+          );
+          await hapticsService.light();
+        } catch (error) {
+          console.warn('Haptics no disponible:', error);
+        }
       }
       return;
     }
@@ -112,16 +119,24 @@ export const useTimerAnimations = ({
       }),
     ]).start();
 
-    // Vibración suave para feedback táctil
-    try {
-      const { hapticsService } = await import(
-        '../../../services/hapticsService'
-      );
-      await hapticsService.light();
-    } catch (error) {
-      console.warn('Haptics no disponible:', error);
+    // Vibración suave para feedback táctil solo si está habilitada
+    if (hapticsConfig.enabled) {
+      try {
+        const { hapticsService } = await import(
+          '../../../services/hapticsService'
+        );
+        await hapticsService.light();
+      } catch (error) {
+        console.warn('Haptics no disponible:', error);
+      }
     }
-  }, [heartbeatScale, sparkleOpacity, secondTickOpacity, animationsEnabled]);
+  }, [
+    heartbeatScale,
+    sparkleOpacity,
+    secondTickOpacity,
+    animationsEnabled,
+    hapticsConfig.enabled,
+  ]);
 
   /**
    * Inicia las animaciones de celebración
@@ -258,17 +273,19 @@ export const useTimerAnimations = ({
     );
 
     if (previousPhrase.current !== currentPhrase) {
-      // Haptics para cambio de frase
-      (async () => {
-        try {
-          const { hapticsService } = await import(
-            '../../../services/hapticsService'
-          );
-          await hapticsService.light();
-        } catch (error) {
-          console.warn('Haptics no disponible:', error);
-        }
-      })();
+      // Haptics para cambio de frase solo si está habilitado
+      if (hapticsConfig.enabled) {
+        (async () => {
+          try {
+            const { hapticsService } = await import(
+              '../../../services/hapticsService'
+            );
+            await hapticsService.light();
+          } catch (error) {
+            console.warn('Haptics no disponible:', error);
+          }
+        })();
+      }
 
       // Solo animar si las animaciones están habilitadas
       if (animationsEnabled) {
@@ -327,6 +344,7 @@ export const useTimerAnimations = ({
     phraseTranslateY,
     getProgress,
     animationsEnabled,
+    hapticsConfig.enabled,
   ]);
 
   return {

@@ -56,19 +56,27 @@ class HapticsService {
         return;
       }
 
-      // Hacer una prueba silenciosa
+      // Hacer una prueba más robusta con diferentes intensidades
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
       this.isSupported = true;
 
       if (__DEV__) {
         console.log('✅ HapticsService inicializado correctamente');
+        console.log('🔧 Device info - Haptics support verified');
+        // Ejecutar test de diagnóstico después de la inicialización
+        setTimeout(() => this.testHaptics(), 1000);
       }
     } catch (error) {
       this.isSupported = false;
       if (__DEV__) {
+        console.warn('⚠️ Haptics no soportado:', error.message);
         console.warn(
-          '⚠️ Haptics no soportado (normal en simulador):',
-          error.message
+          '📱 Verificar: 1) Dispositivo real (no simulador) 2) Vibración habilitada en sistema 3) Permisos de vibración'
         );
       }
     }
@@ -107,12 +115,59 @@ class HapticsService {
   }
 
   /**
+   * Método de diagnóstico para verificar haptics en dispositivo real
+   */
+  async testHaptics() {
+    if (__DEV__) {
+      console.log('🔧 INICIANDO DIAGNÓSTICO DE HAPTICS...');
+      console.log('📱 isSupported:', this.isSupported);
+      console.log('⚙️ Haptics module:', !!Haptics);
+      console.log('🔧 impactAsync available:', !!Haptics?.impactAsync);
+      console.log(
+        '🔧 notificationAsync available:',
+        !!Haptics?.notificationAsync
+      );
+
+      if (this.isSupported) {
+        try {
+          console.log('🧪 Probando NotificationFeedbackType.Success...');
+          await Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Success
+          );
+          console.log('✅ NotificationFeedbackType.Success: OK');
+
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          console.log('🧪 Probando ImpactFeedbackStyle.Heavy...');
+          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          console.log('✅ ImpactFeedbackStyle.Heavy: OK');
+
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          console.log('🧪 Probando selectionAsync...');
+          await Haptics.selectionAsync();
+          console.log('✅ selectionAsync: OK');
+        } catch (error) {
+          console.error('❌ Error en test de haptics:', error);
+        }
+      } else {
+        console.warn('⚠️ Haptics no soportado en este dispositivo');
+      }
+    }
+  }
+
+  /**
    * Haptic suave para cada segundo del temporizador
    * Optimizado para feedback constante sin ser molesto
    */
   async tick() {
     await this.execute(async () => {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      // Usar selectionAsync que es más sutil para ticks constantes
+      try {
+        await Haptics.selectionAsync();
+      } catch {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
     }, 'Tick Segundo');
   }
 
@@ -121,12 +176,17 @@ class HapticsService {
    */
   async light() {
     await this.execute(async () => {
-      // Pulso inicial suave
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      await new Promise(resolve => setTimeout(resolve, 150));
-
-      // Segundo pulso para prolongar sensación
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      // Usar notificationAsync que es más confiable en algunos dispositivos
+      try {
+        await Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success
+        );
+      } catch {
+        // Fallback a impactAsync si notificationAsync falla
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
     }, 'Light Enhanced');
   }
 
@@ -135,9 +195,16 @@ class HapticsService {
    */
   async medium() {
     await this.execute(async () => {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await new Promise(resolve => setTimeout(resolve, 200));
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      try {
+        await Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Warning
+        );
+      } catch {
+        // Fallback con múltiples pulsos medium
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        await new Promise(resolve => setTimeout(resolve, 150));
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
     }, 'Medium Enhanced');
   }
 
@@ -146,9 +213,16 @@ class HapticsService {
    */
   async heavy() {
     await this.execute(async () => {
-      for (let i = 0; i < 3; i++) {
+      try {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        await new Promise(resolve => setTimeout(resolve, 200));
         await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-        if (i < 2) await new Promise(resolve => setTimeout(resolve, 100));
+      } catch {
+        // Fallback con múltiples pulsos heavy
+        for (let i = 0; i < 3; i++) {
+          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          if (i < 2) await new Promise(resolve => setTimeout(resolve, 100));
+        }
       }
     }, 'Heavy Enhanced');
   }
@@ -183,6 +257,43 @@ class HapticsService {
         }
       }
     }, 'Celebration Epic');
+  }
+
+  /**
+   * Método especial para probar haptics desde configuración avanzada
+   * Fuerza la ejecución sin verificar configuración
+   */
+  async forceTestHaptic() {
+    if (__DEV__) {
+      console.log('🧪 FORZANDO TEST DE HAPTICS...');
+    }
+
+    // Bypass de todas las verificaciones
+    if (!this.isSupported) {
+      if (__DEV__) {
+        console.warn('⚠️ Haptics no soportado en este dispositivo');
+      }
+      return false;
+    }
+
+    try {
+      // Test con múltiples tipos de haptics
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      await new Promise(resolve => setTimeout(resolve, 200));
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      await new Promise(resolve => setTimeout(resolve, 200));
+      await Haptics.selectionAsync();
+
+      if (__DEV__) {
+        console.log('✅ Test de haptics forzado completado');
+      }
+      return true;
+    } catch (error) {
+      if (__DEV__) {
+        console.error('❌ Error en test forzado de haptics:', error);
+      }
+      return false;
+    }
   }
 }
 
