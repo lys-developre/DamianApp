@@ -98,4 +98,30 @@ module.exports = defineConfig([
       prettier: require('eslint-plugin-prettier'),
     },
   },
+
+  // Configuración específica para archivos de test
+  {
+    files: ['**/*.test.{js,jsx}', '**/*.spec.{js,jsx}', '**/setupTests.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        __DEV__: 'readonly',
+        jest: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        global: 'readonly',
+      },
+    },
+    rules: {
+      'no-undef': 'error',
+      'prettier/prettier': 'error',
+    },
+  },
 ]);
