@@ -35,28 +35,26 @@ const MotivationalHeader = React.memo(
     // Estado para trackear si ya se reprodujo audio en esta sesión
     const [hasPlayedAudio, setHasPlayedAudio] = useState(false);
 
-    // Efecto para manejar el cambio de estado del pictograma y audio
+    // Efecto para ocultar el pictograma y marcar audio como reproducido al iniciar
     useEffect(() => {
-      // Si el timer está corriendo, ocultar el pictograma y mostrar frases
       if (isRunning && showInitialPictogram) {
         setShowInitialPictogram(false);
-        // Marcar que ya se reprodujo audio en esta sesión
         setHasPlayedAudio(true);
       }
-      // Al parar el timer (reset), volver a mostrar el pictograma
+    }, [isRunning, showInitialPictogram]);
+
+    // Efecto para mostrar el pictograma y resetear audio al parar y resetear el timer
+    useEffect(() => {
       if (!isRunning && time === initialTime) {
         setShowInitialPictogram(true);
-        // NO activar audio aquí - se activará cuando se presione PLAY
         setShouldPlayAudio(false);
       }
-    }, [isRunning, showInitialPictogram, time, initialTime, hasPlayedAudio]);
+    }, [isRunning, time, initialTime]);
 
     // Efecto separado para manejar el audio cuando se presiona PLAY
     useEffect(() => {
-      // Cuando se presiona PLAY (cambia a isRunning=true) y aún no se reprodujo audio
       if (isRunning && !hasPlayedAudio && showInitialPictogram) {
         setShouldPlayAudio(true);
-        // Programar para desactivar el audio después de que se reproduzca
         setTimeout(() => {
           setShouldPlayAudio(false);
         }, 100); // Pequeño delay para asegurar que se active
@@ -65,7 +63,6 @@ const MotivationalHeader = React.memo(
 
     // Efecto para resetear el estado de audio cuando se cambia de preset
     useEffect(() => {
-      // Resetear cuando cambia el tiempo inicial (nuevo preset seleccionado)
       setHasPlayedAudio(false);
       setShouldPlayAudio(false);
     }, [initialTime]);

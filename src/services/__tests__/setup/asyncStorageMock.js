@@ -1,71 +1,25 @@
 /**
- * Mock profesional de AsyncStorage para testing
- * Aplicando PROTOCOLO_CALIDAD_TESTING.md - Dependency Isolation
+ * Mock profesional de AsyncStorage para tests unitarios y de integración.
+ *
+ * Este mock simula la API de AsyncStorage y permite aislar la lógica de persistencia
+ * en los tests, siguiendo el principio ISP (Interface Segregation Principle).
+ *
+ * ⚠️ ADVERTENCIA: Este archivo es solo un mock, no contiene tests y no debe ser tratado
+ * como suite de test por Jest. Usar solo para mocking en tests.
  *
  * @author DamianApp Testing Team
  * @version 1.0.0
  */
 
-// PROTOCOLO: Mock completo y robusto
-const AsyncStorageMock = {
-  // Storage interno para simular persistencia
-  _storage: new Map(),
+const jest = global.jest || require('jest-mock');
 
-  // Métodos principales
-  async getItem(key) {
-    const value = this._storage.get(key);
-    return value !== undefined ? value : null;
-  },
-
-  async setItem(key, value) {
-    this._storage.set(key, value);
-    return Promise.resolve();
-  },
-
-  async removeItem(key) {
-    this._storage.delete(key);
-    return Promise.resolve();
-  },
-
-  async clear() {
-    this._storage.clear();
-    return Promise.resolve();
-  },
-
-  async getAllKeys() {
-    return Array.from(this._storage.keys());
-  },
-
-  async multiGet(keys) {
-    return keys.map(key => [key, this._storage.get(key) || null]);
-  },
-
-  async multiSet(keyValuePairs) {
-    keyValuePairs.forEach(([key, value]) => {
-      this._storage.set(key, value);
-    });
-    return Promise.resolve();
-  },
-
-  async multiRemove(keys) {
-    keys.forEach(key => {
-      this._storage.delete(key);
-    });
-    return Promise.resolve();
-  },
-
-  // Método para limpiar en tests
-  _clear() {
-    this._storage.clear();
-  },
-
-  // Método para configurar datos de test
-  _setTestData(data) {
-    this._clear();
-    Object.entries(data).forEach(([key, value]) => {
-      this._storage.set(key, value);
-    });
-  },
+export default {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+  getAllKeys: jest.fn(),
+  multiGet: jest.fn(),
+  multiSet: jest.fn(),
+  multiRemove: jest.fn(),
 };
-
-export default AsyncStorageMock;

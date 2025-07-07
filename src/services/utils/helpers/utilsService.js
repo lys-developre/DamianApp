@@ -561,3 +561,7 @@ export const utilsService = new UtilsService();
 
 // Export de la clase para testing
 export { UtilsService };
+
+// Export por defecto para uso global
+const utilsServiceDefault = new UtilsService();
+export default utilsServiceDefault;

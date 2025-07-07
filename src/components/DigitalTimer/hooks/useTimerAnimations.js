@@ -82,12 +82,12 @@ export const useTimerAnimations = ({
       Animated.timing(heartbeatScale, {
         toValue: 1.1,
         duration: 150,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(heartbeatScale, {
         toValue: 1,
         duration: 150,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
 
@@ -96,12 +96,12 @@ export const useTimerAnimations = ({
       Animated.timing(sparkleOpacity, {
         toValue: 1,
         duration: 100,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(sparkleOpacity, {
         toValue: 0.3,
         duration: 400,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
 
@@ -110,12 +110,12 @@ export const useTimerAnimations = ({
       Animated.timing(secondTickOpacity, {
         toValue: 1,
         duration: 100,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(secondTickOpacity, {
         toValue: 0,
         duration: 500,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
 
@@ -155,24 +155,24 @@ export const useTimerAnimations = ({
       Animated.timing(modalOpacity, {
         toValue: 1,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.spring(trophyScale, {
         toValue: 1,
         tension: 50,
         friction: 5,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(medallRotation, {
         toValue: 1,
         duration: 2000,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.spring(confettiScale, {
         toValue: 1,
         tension: 80,
         friction: 8,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
 
@@ -183,7 +183,7 @@ export const useTimerAnimations = ({
         Animated.timing(medallRotation, {
           toValue: 1,
           duration: 3000,
-          useNativeDriver: true,
+          useNativeDriver: false,
         })
       ).start();
     };
@@ -205,7 +205,7 @@ export const useTimerAnimations = ({
       Animated.timing(modalOpacity, {
         toValue: 0,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start(() => {
         // Reset de todas las animaciones
         trophyScale.setValue(0);
@@ -225,12 +225,12 @@ export const useTimerAnimations = ({
           Animated.timing(progressPulse, {
             toValue: 1.02,
             duration: 1000,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
           Animated.timing(progressPulse, {
             toValue: 1,
             duration: 1000,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
         ])
       );
@@ -240,12 +240,12 @@ export const useTimerAnimations = ({
           Animated.timing(progressGlow, {
             toValue: 1,
             duration: 2000,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
           Animated.timing(progressGlow, {
             toValue: 0.3,
             duration: 2000,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
         ])
       );
@@ -294,36 +294,36 @@ export const useTimerAnimations = ({
             Animated.timing(textOpacity, {
               toValue: 0,
               duration: 300,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
             Animated.timing(phraseScale, {
               toValue: 0.8,
               duration: 300,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
             Animated.timing(phraseTranslateY, {
               toValue: -20,
               duration: 300,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
           ]),
           Animated.parallel([
             Animated.timing(textOpacity, {
               toValue: 1,
               duration: 400,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
             Animated.spring(phraseScale, {
               toValue: 1,
               tension: 80,
               friction: 8,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
             Animated.spring(phraseTranslateY, {
               toValue: 0,
               tension: 80,
               friction: 8,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
           ]),
         ]).start();

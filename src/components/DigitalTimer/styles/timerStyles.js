@@ -29,9 +29,7 @@ export const createTimerStyles = colors =>
       textAlign: 'center',
       marginBottom: 16,
       letterSpacing: 2,
-      textShadowColor: 'rgba(0, 0, 0, 0.4)',
-      textShadowOffset: { width: 2, height: 2 },
-      textShadowRadius: 4,
+      textShadow: '2px 2px 4px rgba(0, 0, 0, 0.4)',
     },
 
     playPauseButton: {
@@ -47,7 +45,7 @@ export const createTimerStyles = colors =>
       borderColor: '#5E35B1',
       borderWidth: 3,
       transform: [{ scale: 1.2 }],
-      shadowOpacity: 0.5,
+      boxShadow: '0px 4px 8px rgba(0,0,0,0.5)',
       elevation: 8,
       minWidth: 90,
     },
@@ -57,10 +55,7 @@ export const createTimerStyles = colors =>
       borderRadius: 25,
       paddingVertical: 15,
       paddingHorizontal: 30,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
+      boxShadow: '0px 4px 8px rgba(0,0,0,0.3)',
       elevation: 5,
       borderWidth: 2,
       borderColor: colors.PRIMARY,
@@ -73,10 +68,7 @@ export const createTimerStyles = colors =>
       borderColor: '#2D3748',
       paddingVertical: 20,
       paddingHorizontal: 23,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 7 },
-      shadowOpacity: 0.3,
-      shadowRadius: 14,
+      boxShadow: '0px 7px 14px rgba(0,0,0,0.3)',
       elevation: 12,
       overflow: 'hidden',
       position: 'relative',
@@ -451,9 +443,7 @@ export const timerStyles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 16, // 10% más pequeño (18 * 0.9)
     letterSpacing: 2,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
+    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.4)',
   },
 
   sparkleContainer: {
@@ -462,7 +452,6 @@ export const timerStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    pointerEvents: 'none',
     zIndex: 5,
   },
 

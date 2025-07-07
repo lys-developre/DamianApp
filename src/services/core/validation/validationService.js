@@ -1,20 +1,17 @@
 /**
- * Servicio centralizado de validación para Damian APP
+ * Servicio centralizado de validación para DamianApp.
  *
  * RESPONSABILIDADES:
- * - Validación de datos de entrada en formularios
- * - Validación de configuraciones y preferencias
- * - Validación de formato de tiempo y duraciones
- * - Sanitización de datos para seguridad
- * - Validación de archivos y URLs
+ * - Validación de datos de entrada en formularios y configuraciones.
+ * - Validación de formato de tiempo, duraciones, archivos y URLs.
+ * - Sanitización de datos para seguridad.
  *
  * PATRONES IMPLEMENTADOS:
- * - Validator Pattern con fluent API
- * - Error messages localizados y descriptivos
- * - Validación asíncrona para recursos externos
- * - Schema validation para objetos complejos
+ * - Validator Pattern con fluent API.
+ * - Mensajes de error localizados y descriptivos.
+ * - Validación asíncrona y schema validation para objetos complejos.
  *
- * @author Damian App
+ * @author DamianApp Team
  * @version 1.0.0 - Módulo 5
  */
 

@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "_comment_development": "Scripts para desarrollo y ejecución",
-    "start": "expo start",
+    "start": "expo start --tunnel --clear",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
@@ -78,7 +78,8 @@
     ],
     "testPathIgnorePatterns": [
       "<rootDir>/node_modules/",
-      "<rootDir>/.expo/"
+      "<rootDir>/.expo/",
+      "<rootDir>/src/services/__tests__/setup/asyncStorageMock.js"
     ],
     "collectCoverageFrom": [
       "src/**/*.{js,jsx}",

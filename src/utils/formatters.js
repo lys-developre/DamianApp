@@ -2,14 +2,14 @@
  * Utilidades de formateo para Damian APP - Migrado a Servicios Módulo 5
  *
  * DEPRECATION NOTICE: Este archivo mantiene compatibilidad hacia atrás
- * NUEVO ENFOQUE: Usar utilsService desde src/services/ para nuevas funciones
+ * NUEVO ENFOQUE: Usar utilsService desde src/services/para nuevas funciones
  * MIGRACIÓN: Gradualmente mover todas las funciones a utilsService
  *
  * @author Damian
  * @version 2.0.0 - Servicios Módulo 5
  */
 
-import { utilsService } from '../services/utilsService';
+import utilsServiceDefault from '../services/utils/helpers/utilsService';
 
 /**
  * Formatea segundos totales a formato HH:mm:ss
@@ -19,7 +19,7 @@ import { utilsService } from '../services/utilsService';
  * @returns {string} Tiempo formateado como "HH:mm:ss"
  */
 export const formatSeconds = totalSeconds => {
-  return utilsService.formatSeconds(totalSeconds);
+  return utilsServiceDefault.formatSeconds(totalSeconds);
 };
 
 /**
@@ -42,5 +42,5 @@ export const formatMinutes = minutes => {
  * @returns {string} Duración formateada
  */
 export const formatDuration = seconds => {
-  return utilsService.formatDuration(seconds, true);
+  return utilsServiceDefault.formatDuration(seconds, true);
 };
