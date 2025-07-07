@@ -359,7 +359,7 @@ class ConfigService {
 
     for (const key in source) {
       if (
-        source[key] &&
+        source[key] !== null &&
         typeof source[key] === 'object' &&
         !Array.isArray(source[key])
       ) {
