@@ -75,27 +75,49 @@ class ConfigService {
 
 ## 🧹 **2. CLEAN CODE (Obligatorio)**
 
-### **Nomenclatura en Español**
+### **Nomenclatura Clara (Híbrido Estratégico)**
 ```javascript
-// ✅ Nombres claros en español
+// ✅ Español para lógica de negocio específica
 const configuracionUsuario = getConfiguracion();
 const esConfiguracionValida = validarConfiguracion(config);
-const guardarConfiguracion = async (config) => { };
+const guardarPreferenciasUsuario = async (preferencias) => { };
 
-// ❌ Nombres vagos o en inglés mezclado
+// ✅ Inglés para estándares universales
+const isValid = validateConfig(config);
+const userData = getUserData();
+const apiResponse = await fetchData();
+
+// ✅ Híbrido cuando mejora claridad
+const esUsuarioAdmin = checkUserRole('admin');
+const timerConfig = getTimerConfiguration();
+
+// ❌ Nombres vagos en cualquier idioma
 const cfg = getData();
 const flag = check(data);
+const cosa = proceso(x);
 ```
 
-### **Funciones Pequeñas**
+### **Funciones Pequeñas y Focalizadas**
 ```javascript
-// ✅ Función con propósito único (< 20 líneas)
+// ✅ Función con propósito único (preferiblemente < 20 líneas)
 const validarEmail = (email) => {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 };
 
-// ❌ Función gigante (> 50 líneas)
+// ⚠️ Aceptable si está bien estructurada (20-30 líneas)
+const procesarConfiguracionCompleja = (config) => {
+  // Validaciones separadas y claras
+  if (!validarEstructura(config)) return false;
+  
+  // Transformaciones específicas
+  const configNormalizada = normalizarConfig(config);
+  
+  // Guardar con error handling
+  return guardarConfigSegura(configNormalizada);
+};
+
+// ❌ Función gigante (> 50 líneas = rechazo automático)
 const procesarTodo = (data) => {
   // 100 líneas de código...
 };
@@ -163,21 +185,64 @@ const useConfig = () => {
 
 ---
 
-## 📊 **4. MANEJO DE ERRORES**
+## � **5. SEGURIDAD Y CONTROL DE ACCESO**
+
+### **Validación de Inputs**
+```javascript
+// ✅ Siempre validar datos del usuario
+const guardarConfiguracion = (config) => {
+  if (!config || typeof config !== 'object') {
+    throw new ValidationError('Configuración inválida');
+  }
+  
+  const configLimpia = sanitizarConfiguracion(config);
+  return storageService.save('user_config', configLimpia);
+};
+```
+
+### **Protección de Datos Sensibles**
+```javascript
+// ✅ No exponer secretos en el código
+const API_URL = process.env.REACT_NATIVE_API_URL; // Desde variables de entorno
+const token = await SecureStore.getItemAsync('auth_token'); // Storage seguro
+
+// ❌ Secretos hardcodeados
+const API_KEY = 'sk-1234567890abcdef'; // ¡NUNCA!
+```
+
+### **Control de Acceso TEA-Específico**
+```javascript
+// ✅ Validar permisos antes de acciones críticas
+const cambiarConfiguracionTerapia = async (nuevaConfig) => {
+  const usuarioActual = await getUserRole();
+  
+  if (!['terapeuta', 'admin'].includes(usuarioActual.role)) {
+    throw new UnauthorizedError('Solo terapeutas pueden cambiar configuración');
+  }
+  
+  return await updateTherapyConfig(nuevaConfig);
+};
+```
+
+---
+
+## �📊 **6. MANEJO DE ERRORES**
 
 ### **Try-Catch Específicos**
 ```javascript
-// ✅ Manejo granular de errores
+// ✅ Manejo granular de errores por tipo
 const loadConfig = async () => {
   try {
     const data = await AsyncStorage.getItem(CONFIG_KEY);
     return JSON.parse(data);
-  } catch (parseError) {
-    console.warn('Config corrupta, usando default:', parseError);
-    return DEFAULT_CONFIG;
-  } catch (storageError) {
-    console.error('Error de storage:', storageError);
-    throw new ConfigLoadError('No se puede cargar configuración');
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.warn('Config corrupta, usando default:', error);
+      return DEFAULT_CONFIG;
+    } else {
+      console.error('Error de storage:', error);
+      throw new ConfigLoadError('No se puede cargar configuración');
+    }
   }
 };
 ```
@@ -197,7 +262,37 @@ class ConfigValidationError extends Error {
 
 ---
 
-## 🔍 **5. CRITERIOS DE ACEPTACIÓN**
+## ⚖️ **7. EXCEPCIONES JUSTIFICADAS**
+
+### **Flexibilidad Permitida (Con Revisión Técnica)**
+```javascript
+// ✅ Excepciones aceptables con justificación:
+
+// 1. Prototipado rápido (temporal)
+// Permite funciones > 20 líneas si están bien comentadas y son temporales
+
+// 2. Lógica compleja pero bien estructurada
+const procesarAlgoritmoTerapia = (datosUsuario) => {
+  // 35 líneas pero cada bloque está claramente separado
+  // y representa un paso específico del algoritmo TEA
+};
+
+// 3. Configuraciones específicas del dominio
+const configuracionesTEA = {
+  // Puede usar nombres técnicos del dominio en inglés
+  // cuando sea el estándar en terapia TEA
+};
+```
+
+### **Proceso de Excepción**
+- 🔍 **Documentar razón** en comentario o PR
+- 👥 **Revisión en pareja** obligatoria  
+- 📅 **Revisión posterior** en siguiente iteración
+- 🎯 **Plan de refactoring** si es temporal
+
+---
+
+## 🔍 **8. CRITERIOS DE ACEPTACIÓN**
 
 ### **Pre-Commit Checklist**
 - [ ] ✅ Sigue principios SOLID
@@ -222,14 +317,22 @@ class ConfigValidationError extends Error {
 ## 🚨 **6. CRITERIOS DE RECHAZO**
 
 ### **Rechazar automáticamente si:**
-- ❌ Viola principios SOLID
-- ❌ Funciones > 50 líneas
-- ❌ Nombres en inglés o vagos
-- ❌ Sin manejo de errores
-- ❌ Lógica de negocio en UI
-- ❌ Importaciones desordenadas
-- ❌ console.log no removidos
-- ❌ Código duplicado
+- ❌ Viola principios SOLID sin justificación
+- ❌ Funciones > 50 líneas (límite absoluto)
+- ❌ Nombres vagos o sin contexto (en cualquier idioma)
+- ❌ Sin manejo de errores en lógica crítica
+- ❌ Lógica de negocio en componentes UI
+- ❌ Importaciones desordenadas sin estructura
+- ❌ console.log no removidos (excepto __DEV__)
+- ❌ Código duplicado > 5%
+- ❌ Datos sensibles hardcodeados
+- ❌ Sin tests en servicios críticos
+
+### **Revisar manualmente si:**
+- ⚠️ Funciones 20-50 líneas (evaluar estructura)
+- ⚠️ Nomenclatura híbrida (verificar consistencia)
+- ⚠️ Lógica compleja (confirmar claridad)
+- ⚠️ Excepciones justificadas (validar razones)
 
 ---
 
@@ -237,12 +340,21 @@ class ConfigValidationError extends Error {
 
 ```javascript
 const codeQualityMetrics = {
-  complexity: "< 10 por función",      // Complejidad ciclomática
-  duplication: "< 3%",                 // Código duplicado
-  maintainability: "A",                // Índice de mantenibilidad
-  testCoverage: "> 85%",              // Cobertura de tests
-  lintErrors: "0",                    // Errores de linting
-  typeErrors: "0"                     // Errores de tipos
+  complexity: "< 10 por función",           // Complejidad ciclomática
+  duplication: "< 3%",                      // Código duplicado
+  maintainability: "A",                     // Índice de mantenibilidad
+  testCoverageTotal: "> 80%",              // Cobertura general
+  testCoverageCritical: "100%",            // Lógica de negocio crítica
+  lintErrors: "0",                         // Errores de linting
+  typeErrors: "0",                         // Errores de tipos
+  securityIssues: "0"                      // Vulnerabilidades
+};
+
+// Prioridad de testing por impacto
+const testingPriorities = {
+  critical: "storageService, configService, audioService", // 100% coverage
+  important: "validationService, hapticsService",          // >90% coverage  
+  standard: "UI components, utilities"                     // >75% coverage
 };
 ```
 
