@@ -312,9 +312,40 @@ it('debería guardar configuración y notificar listeners', async () => {
 
 ### **E2E Tests (Pocos - 10%)**
 ```javascript
-// ✅ Test flujo completo de usuario
-it('debería cambiar tema desde pantalla de configuración', () => {
-  // Test completo de UI hasta persistencia
+// ✅ Test flujo completo de usuario con Detox (React Native)
+describe('Configuración de Tema', () => {
+  it('debería cambiar tema desde pantalla de configuración', async () => {
+    // ARRANGE: Navegar a configuración
+    await device.reloadReactNative();
+    await element(by.id('settings-tab')).tap();
+    
+    // ACT: Cambiar tema
+    await element(by.id('theme-toggle')).tap();
+    await element(by.text('Modo Oscuro')).tap();
+    
+    // ASSERT: Verificar cambio visual y persistencia
+    await expect(element(by.id('main-container'))).toHaveClass('dark-theme');
+    
+    // Verificar persistencia
+    await device.reloadReactNative();
+    await expect(element(by.id('main-container'))).toHaveClass('dark-theme');
+  });
+});
+
+// ✅ Ejemplo alternativo con Testing Library (Web)
+import { render, screen, fireEvent } from '@testing-library/react-native';
+
+it('debería completar flujo de configuración de timer', async () => {
+  render(<App />);
+  
+  // ARRANGE & ACT: Flujo completo
+  fireEvent.press(screen.getByTestId('digital-timer-btn'));
+  fireEvent.changeText(screen.getByTestId('timer-input'), '05:30');
+  fireEvent.press(screen.getByTestId('start-timer-btn'));
+  
+  // ASSERT: Timer iniciado y guardado
+  expect(screen.getByTestId('timer-display')).toHaveTextContent('05:30');
+  expect(screen.getByTestId('timer-status')).toHaveTextContent('Ejecutándose');
 });
 ```
 
@@ -327,15 +358,164 @@ it('debería cambiar tema desde pantalla de configuración', () => {
 - ❌ Cobertura < 85%
 - ❌ Tests interdependientes
 - ❌ Nombres vagos ("debería funcionar")
-- ❌ Mocks masivos innecesarios
+- ❌ **Mocks masivos innecesarios** (ver ejemplos abajo)
 - ❌ Sin casos de error
 - ❌ Inspección manual requerida
 - ❌ Tests que no fallan cuando deberían
 - ❌ Console.log en tests
 
+### **❌ Ejemplos de Mocks Masivos Innecesarios:**
+```javascript
+// ❌ Mock todo el módulo cuando solo necesitas un método
+jest.mock('../entireService', () => ({
+  method1: jest.fn(),
+  method2: jest.fn(),
+  method3: jest.fn(),
+  method4: jest.fn(),
+  // ... 20 métodos más mockeados innecesariamente
+}));
+
+// ✅ Mock solo lo que necesitas
+import { entireService } from '../entireService';
+jest.spyOn(entireService, 'method1').mockReturnValue(true);
+
+// ❌ Mock de dependencias que no afectan el test
+jest.mock('@react-native-async-storage/async-storage');
+jest.mock('../audioService');
+jest.mock('../hapticsService');
+// ... y solo testas validación de email
+
+// ✅ Mock solo dependencias relevantes
+// Solo mock lo que tu test realmente usa
+```
+
 ---
 
-## 📋 **10. PLANTILLA ESTÁNDAR**
+## ⚠️ **10. ERRORES COMUNES Y CÓMO EVITARLOS**
+
+### **🔄 Mal Uso de beforeEach**
+```javascript
+// ❌ Setup excesivo que afecta todos los tests
+beforeEach(() => {
+  // Configuración que solo necesitan algunos tests
+  mockAudioService.setup();
+  mockStorageService.clear();
+  mockHapticsService.enable();
+});
+
+// ✅ Setup específico por contexto
+describe('cuando audio está habilitado', () => {
+  beforeEach(() => {
+    mockAudioService.setEnabled(true); // Solo para estos tests
+  });
+});
+```
+
+### **🔁 Repetir Lógica de Setup**
+```javascript
+// ❌ Duplicar preparación en cada test
+it('test 1', () => {
+  const config = { audio: true, haptics: false };
+  const service = new ConfigService(config);
+  // ... test
+});
+
+it('test 2', () => {
+  const config = { audio: true, haptics: false }; // Duplicado
+  const service = new ConfigService(config);     // Duplicado
+  // ... test
+});
+
+// ✅ Helper para setup común
+const createTestConfigService = (overrides = {}) => {
+  const defaultConfig = { audio: true, haptics: false };
+  return new ConfigService({ ...defaultConfig, ...overrides });
+};
+```
+
+### **📢 Console.log como Validación**
+```javascript
+// ❌ Depender de inspección manual
+it('debería procesar datos', () => {
+  const result = processData(input);
+  console.log('Resultado:', result); // ¡No es validación!
+});
+
+// ✅ Assertions explícitas
+it('debería procesar datos', () => {
+  const result = processData(input);
+  expect(result).toEqual(expectedOutput);
+  expect(result.status).toBe('success');
+});
+```
+
+### **🎭 Mocks Innecesarios**
+```javascript
+// ❌ Mock algo que no afecta el test
+it('debería validar email formato', () => {
+  jest.spyOn(audioService, 'playSound').mockImplementation(); // ¿Por qué?
+  
+  const isValid = validateEmailFormat('test@example.com');
+  expect(isValid).toBe(true);
+});
+
+// ✅ No mock si no es necesario
+it('debería validar email formato', () => {
+  const isValid = validateEmailFormat('test@example.com');
+  expect(isValid).toBe(true);
+});
+```
+
+### **🔗 Tests Interdependientes**
+```javascript
+// ❌ Test que depende del resultado de otro
+describe('ConfigService', () => {
+  let sharedState; // ¡Peligroso!
+  
+  it('debería guardar configuración', () => {
+    sharedState = configService.save(config);
+  });
+  
+  it('debería cargar configuración guardada', () => {
+    const loaded = configService.load();
+    expect(loaded).toEqual(sharedState); // Depende del test anterior
+  });
+});
+
+// ✅ Tests independientes
+describe('ConfigService', () => {
+  it('debería guardar configuración', () => {
+    const result = configService.save(testConfig);
+    expect(result.success).toBe(true);
+  });
+  
+  it('debería cargar configuración', () => {
+    // Setup específico para este test
+    configService.save(testConfig);
+    const loaded = configService.load();
+    expect(loaded).toEqual(testConfig);
+  });
+});
+```
+
+### **⏱️ Tests Lentos por Async Mal Manejado**
+```javascript
+// ❌ No esperar promises correctamente
+it('debería guardar configuración', () => {
+  configService.saveAsync(config); // ¡No await!
+  expect(storageService.setItem).toHaveBeenCalled(); // Puede fallar
+});
+
+// ✅ Manejar async apropiadamente
+it('debería guardar configuración', async () => {
+  await configService.saveAsync(config);
+  expect(storageService.setItem).toHaveBeenCalled();
+});
+```
+
+---
+
+## 📋 **11. PLANTILLA ESTÁNDAR**
 
 ```javascript
 /**
@@ -400,19 +580,28 @@ describe('Nombre del Servicio', () => {
 
 ---
 
-## 🔄 **11. PROCESO DE MEJORA**
+## 🔄 **12. PROCESO DE MEJORA**
 
 ### **Refactoring de Tests**
 - 🔄 Revisar tests obsoletos cada sprint
 - 📊 Analizar métricas de flakiness
-- 🧹 Eliminar tests duplicados
+- 🧹 Eliminar tests duplicados y mocks innecesarios
 - 📈 Mejorar cobertura gradualmente
+- ⚠️ Revisar errores comunes en retrospectivas
 
 ### **Capacitación**
 - 📚 Revisar F.I.R.S.T. mensualmente
 - 👥 Pair testing sessions
 - 🎯 Focus en SOLID Testing
 - 🏆 Reconocer tests de calidad
+- 📖 Estudio de casos de errores comunes
+
+### **Herramientas Recomendadas**
+- **Unit Tests:** Jest + React Native Testing Library
+- **E2E Tests:** Detox (React Native) o Cypress (Web)
+- **Coverage:** Jest built-in coverage
+- **Performance:** jest --detectPerformance
+- **Linting:** ESLint + jest/recommended rules
 
 ---
 

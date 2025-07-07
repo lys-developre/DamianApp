@@ -13,14 +13,16 @@ Conjunto de estándares y procesos para mantener la **máxima calidad** en el de
 #### **📘 [PROTOCOLO_CALIDAD_CODIGO.md](./PROTOCOLO_CALIDAD_CODIGO.md)**
 - **Propósito:** Estándares inmutables de calidad de código
 - **Aplica a:** Todo el código de producción
-- **Principios:** SOLID, Clean Code, Arquitectura
+- **Principios:** SOLID, Clean Code, Arquitectura, Seguridad
 - **Uso:** Consultar antes de cada PR, en code review
+- **Scope:** NO incluye testing (ver protocolo específico abajo)
 
 #### **🧪 [PROTOCOLO_CALIDAD_TESTING.md](./PROTOCOLO_CALIDAD_TESTING.md)**
 - **Propósito:** Estándares inmutables de testing
 - **Aplica a:** Todos los tests unitarios e integración
-- **Principios:** F.I.R.S.T., SOLID Testing, A.A.A.
+- **Principios:** F.I.R.S.T., SOLID Testing, A.A.A., Mocking
 - **Uso:** Consultar antes de escribir tests
+- **Scope:** Cobertura completa de testing (no duplicado en protocolo de código)
 
 ### **📊 Protocolos Dinámicos (Editable por Iteración)**
 > Estos protocolos se actualizan con cada iteración para trackear progreso.

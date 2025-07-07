@@ -185,7 +185,41 @@ const useConfig = () => {
 
 ---
 
-## � **5. SEGURIDAD Y CONTROL DE ACCESO**
+## 🧪 **4. TESTING (Referencia Cruzada)**
+
+### **📋 Protocolo Especializado Disponible**
+> **Para TODO lo relacionado con testing, consultar:** [**📋 PROTOCOLO_CALIDAD_TESTING.md**](./PROTOCOLO_CALIDAD_TESTING.md)
+
+### **🎯 Solo Integración Código-Testing aquí:**
+
+| **Métrica**                | **Límite Obligatorio**    | **Detalles en Testing** |
+|----------------------------|---------------------------|--------------------------|
+| **Cobertura Total**        | > 80%                     | Ver protocolo testing    |
+| **Cobertura Crítica**      | 100%                      | Ver protocolo testing    |
+| **Velocidad Test Suite**   | < 30 segundos             | Ver protocolo testing    |
+| **Tests por Función**      | Al menos 1 test           | Ver protocolo testing    |
+
+### **✅ Código Diseñado para Testing**
+```javascript
+// ✅ Dependencias inyectables (fácil testing)
+class ConfigService {
+  constructor(dependencies = {}) {
+    this.storage = dependencies.storage || defaultStorage;
+    this.validator = dependencies.validator || defaultValidator;
+  }
+}
+
+// ✅ Funciones puras (fáciles de testear)
+const formatearTiempo = (segundos) => {
+  const minutos = Math.floor(segundos / 60);
+  const segs = segundos % 60;
+  return `${minutos}:${segs.toString().padStart(2, '0')}`;
+};
+```
+
+---
+
+## 🔐 **5. SEGURIDAD Y CONTROL DE ACCESO**
 
 ### **Validación de Inputs**
 ```javascript
@@ -226,7 +260,7 @@ const cambiarConfiguracionTerapia = async (nuevaConfig) => {
 
 ---
 
-## �📊 **6. MANEJO DE ERRORES**
+## 📊 **6. MANEJO DE ERRORES**
 
 ### **Try-Catch Específicos**
 ```javascript
@@ -296,25 +330,27 @@ const configuracionesTEA = {
 
 ### **Pre-Commit Checklist**
 - [ ] ✅ Sigue principios SOLID
-- [ ] 🧹 Nomenclatura en español clara
-- [ ] 📏 Funciones < 20 líneas
-- [ ] 🏗️ Separación de responsabilidades
-- [ ] 🚨 Manejo de errores apropiado
-- [ ] 📝 Comentarios estratégicos (no obvios)
-- [ ] 🔧 Sin console.log en producción
-- [ ] 📊 Sin código comentado/muerto
+- [ ] 🧹 Nomenclatura clara (híbrido estratégico español-inglés)
+- [ ] 📏 Funciones focalizadas (preferiblemente < 20 líneas, máximo 50)
+- [ ] 🏗️ Separación correcta de responsabilidades
+- [ ] 🚨 Manejo de errores implementado en lógica crítica
+- [ ] 📝 Comentarios estratégicos (explican POR QUÉ, no QUÉ)
+- [ ] 🔧 Sin console.log en producción (solo __DEV__)
+- [ ] 📊 Sin código comentado o muerto
+- [ ] 🔐 No hay datos sensibles hardcodeados
+- [ ] 🧪 Tests escritos (ver protocolo testing)
 
 ### **Code Review Checklist**
-- [ ] ✅ ¿Se puede entender sin explicación?
-- [ ] 🔧 ¿Es fácil de modificar?
+- [ ] ✅ ¿Se puede entender sin explicación adicional?
+- [ ] 🔧 ¿Es fácil de modificar y extender?
 - [ ] 🧪 ¿Es fácil de testear?
-- [ ] 🐛 ¿Maneja casos edge?
-- [ ] 📱 ¿Funciona en todos los dispositivos?
+- [ ] 🐛 ¿Maneja casos edge y errores?
+- [ ] 📱 ¿Funciona correctamente en dispositivos TEA?
 - [ ] ⚡ ¿Es performante?
 
 ---
 
-## 🚨 **6. CRITERIOS DE RECHAZO**
+## 🚨 **9. CRITERIOS DE RECHAZO**
 
 ### **Rechazar automáticamente si:**
 - ❌ Viola principios SOLID sin justificación
@@ -336,31 +372,29 @@ const configuracionesTEA = {
 
 ---
 
-## 📏 **7. MÉTRICAS DE CALIDAD**
+## 📏 **10. MÉTRICAS DE CALIDAD**
 
-```javascript
-const codeQualityMetrics = {
-  complexity: "< 10 por función",           // Complejidad ciclomática
-  duplication: "< 3%",                      // Código duplicado
-  maintainability: "A",                     // Índice de mantenibilidad
-  testCoverageTotal: "> 80%",              // Cobertura general
-  testCoverageCritical: "100%",            // Lógica de negocio crítica
-  lintErrors: "0",                         // Errores de linting
-  typeErrors: "0",                         // Errores de tipos
-  securityIssues: "0"                      // Vulnerabilidades
-};
+| **Métrica**                     | **Límite Sugerido**             |
+|--------------------------------|----------------------------------|
+| **Complejidad por función**    | < 10                            |
+| **Duplicación de código**      | < 3%                            |
+| **Índice de mantenibilidad**   | A                               |
+| **Cobertura total de tests**   | > 80%                           |
+| **Cobertura crítica de tests** | 100%                            |
+| **Errores de linter**          | 0                               |
+| **Errores de tipos**           | 0                               |
+| **Vulnerabilidades**           | 0                               |
 
-// Prioridad de testing por impacto
-const testingPriorities = {
-  critical: "storageService, configService, audioService", // 100% coverage
-  important: "validationService, hapticsService",          // >90% coverage  
-  standard: "UI components, utilities"                     // >75% coverage
-};
-```
+### **Prioridad de Testing por Impacto**
+| **Criticidad** | **Servicios**                          | **Cobertura** |
+|----------------|----------------------------------------|---------------|
+| **Crítico**    | storageService, configService, audioService | 100%          |
+| **Importante** | validationService, hapticsService     | >90%          |
+| **Estándar**   | UI components, utilities               | >75%          |
 
 ---
 
-## 🔄 **8. PROCESO DE MEJORA**
+## 🔄 **11. PROCESO DE MEJORA**
 
 ### **Refactoring Continuo**
 - 🔄 Refactorizar al menos 1 archivo por semana
