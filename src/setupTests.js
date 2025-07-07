@@ -11,7 +11,7 @@
 // Importar matchers de testing-library (reemplaza jest-native deprecated)
 import '@testing-library/react-native/extend-expect';
 
-// Mock de AsyncStorage para testing
+// Simulación de AsyncStorage para pruebas
 const mockAsyncStorage = {
   getItem: jest.fn(),
   setItem: jest.fn(),
@@ -23,7 +23,7 @@ const mockAsyncStorage = {
   multiRemove: jest.fn(),
 };
 
-// Mock de React Navigation
+// Simulación de React Navigation
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
     navigate: jest.fn(),
@@ -36,7 +36,7 @@ jest.mock('@react-navigation/native', () => ({
   useFocusEffect: jest.fn(),
 }));
 
-// Mock de Expo modules
+// Simulación de módulos Expo
 jest.mock('expo-av', () => ({
   Audio: {
     Sound: {
@@ -54,14 +54,14 @@ jest.mock('expo-haptics', () => ({
 
 jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 
-// Mock de React Native Reanimated
+// Simulación de React Native Reanimated
 jest.mock('react-native-reanimated', () => {
   const Reanimated = require('react-native-reanimated/mock');
   Reanimated.default.call = () => {};
   return Reanimated;
 });
 
-// Mock de React Native Gesture Handler
+// Simulación de React Native Gesture Handler
 jest.mock('react-native-gesture-handler', () => {
   const View = require('react-native/Libraries/Components/View/View');
   return {
@@ -94,10 +94,10 @@ jest.mock('react-native-gesture-handler', () => {
   };
 });
 
-// Mock de react-native-confetti-cannon
+// Simulación de react-native-confetti-cannon
 jest.mock('react-native-confetti-cannon', () => 'ConfettiCannon');
 
-// Configuración global de testing
+// Configuración global de pruebas
 global.console = {
   ...console,
   warn: jest.fn(),
@@ -105,11 +105,11 @@ global.console = {
   log: jest.fn(),
 };
 
-// Configuración para testing de timers
+// Configuración para pruebas de temporizadores
 jest.useFakeTimers();
 
-// Configuración para testing de fetch
+// Configuración para pruebas de fetch
 global.fetch = jest.fn();
 
-// Configuración para React Native testing
-jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
+// Configuración para pruebas de React Native
+// Simulación removida - era incompatible con RN 0.79.5

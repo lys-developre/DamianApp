@@ -18,7 +18,8 @@
  * @version 1.0.0 - Módulo 5
  */
 
-import { utilsService, validator } from './index';
+import { utilsService } from './utilsService';
+import { validator } from './validationService';
 
 class BusinessLogicService {
   constructor() {

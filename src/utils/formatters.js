@@ -9,7 +9,7 @@
  * @version 2.0.0 - Servicios Módulo 5
  */
 
-import { utilsService } from '../services';
+import { utilsService } from '../services/utilsService';
 
 /**
  * Formatea segundos totales a formato HH:mm:ss

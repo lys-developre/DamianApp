@@ -229,12 +229,24 @@ class ConfigService {
   async reset() {
     try {
       const oldConfig = { ...this.config };
+
+      // Reset en memoria (siempre debe funcionar)
       this.config = { ...DEFAULT_CONFIG };
 
-      await AsyncStorage.removeItem(CONFIG_STORAGE_KEY);
-      await AsyncStorage.removeItem(CONFIG_VERSION_KEY);
-
+      // Notificar siempre que el reset en memoria funcionó
       this.notifyListeners('reset', { config: this.config, oldConfig });
+
+      // Intentar limpiar storage (secundario)
+      try {
+        await AsyncStorage.removeItem(CONFIG_STORAGE_KEY);
+        await AsyncStorage.removeItem(CONFIG_VERSION_KEY);
+      } catch (storageError) {
+        console.warn(
+          'Warning: Failed to clear storage during reset:',
+          storageError
+        );
+        // No fallar por errores de storage - el reset en memoria es lo importante
+      }
 
       return true;
     } catch (error) {

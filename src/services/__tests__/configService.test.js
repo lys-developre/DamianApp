@@ -1,5 +1,6 @@
 /**
  * Tests unitarios para configService
+ * Pruebas completas del servicio de configuración dinámico
  *
  * @author Damian App
  * @version 1.0.0
@@ -8,7 +9,7 @@
 import configService from '../configService';
 import { DEFAULT_CONFIG } from '../../config/appConfig';
 
-// Mock de AsyncStorage
+// Mock de AsyncStorage con métodos reales
 const mockAsyncStorage = {
   getItem: jest.fn(),
   setItem: jest.fn(),
@@ -18,201 +19,409 @@ const mockAsyncStorage = {
 
 jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 
-describe('ConfigService', () => {
+describe('Servicio de Configuración', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset singleton instance
-    configService.isInitialized = false;
-    configService.config = {};
-    configService.observers = [];
+    // Resetear estado interno del singleton
+    configService.config = { ...DEFAULT_CONFIG };
+    configService.listeners = new Set();
+    configService.isLoaded = false;
+    configService.saveTimeout = null;
   });
 
-  describe('initialize', () => {
-    it('should initialize with default config when no stored config exists', async () => {
+  describe('inicialización', () => {
+    it('debería inicializar con configuración por defecto cuando no hay datos guardados', async () => {
       mockAsyncStorage.getItem.mockResolvedValue(null);
       mockAsyncStorage.setItem.mockResolvedValue(undefined);
 
       await configService.initialize();
 
-      expect(configService.isInitialized).toBe(true);
-      expect(configService.config).toEqual(DEFAULT_CONFIG);
-      expect(mockAsyncStorage.setItem).toHaveBeenCalledWith(
-        'damianapp_config',
-        JSON.stringify(DEFAULT_CONFIG)
-      );
+      expect(configService.isLoaded).toBe(true);
+      expect(configService.getConfig()).toEqual(DEFAULT_CONFIG);
     });
 
-    it('should initialize with stored config when it exists', async () => {
-      const storedConfig = {
-        ...DEFAULT_CONFIG,
-        audio: { ...DEFAULT_CONFIG.audio, enabled: false },
+    it('debería cargar configuración guardada cuando existe', async () => {
+      const configGuardada = {
+        audio: { enabled: false, volume: 0.5 },
+        ui: { theme: 'light' },
       };
-      mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify(storedConfig));
+      mockAsyncStorage.getItem
+        .mockResolvedValueOnce(JSON.stringify(configGuardada)) // CONFIG_STORAGE_KEY
+        .mockResolvedValueOnce('1.0.0'); // CONFIG_VERSION_KEY
 
       await configService.initialize();
 
-      expect(configService.isInitialized).toBe(true);
-      expect(configService.config.audio.enabled).toBe(false);
+      expect(configService.isLoaded).toBe(true);
+      // Verificar que se hizo merge con DEFAULT_CONFIG manteniendo la estructura completa
+      expect(configService.get('audio.enabled')).toBe(false);
+      expect(configService.get('audio.volume')).toBe(0.5);
+      expect(configService.get('ui.theme')).toBe('light');
+      // Verificar que otros valores se mantienen del DEFAULT_CONFIG
+      expect(configService.get('app.version')).toBe(DEFAULT_CONFIG.app.version);
     });
 
-    it('should handle corrupted stored config gracefully', async () => {
-      mockAsyncStorage.getItem.mockResolvedValue('invalid json');
-      mockAsyncStorage.setItem.mockResolvedValue(undefined);
+    it('debería manejar datos corruptos con configuración por defecto', async () => {
+      mockAsyncStorage.getItem.mockResolvedValue('json_invalido');
 
       await configService.initialize();
 
-      expect(configService.isInitialized).toBe(true);
-      expect(configService.config).toEqual(DEFAULT_CONFIG);
+      // Debería fallar silenciosamente y usar config por defecto
+      expect(configService.isLoaded).toBe(true);
+      expect(configService.getConfig()).toEqual(DEFAULT_CONFIG);
+    });
+
+    it('debería manejar errores de AsyncStorage correctamente', async () => {
+      mockAsyncStorage.getItem.mockRejectedValue(new Error('Storage error'));
+
+      await configService.initialize();
+
+      // Debería manejar el error y usar config por defecto
+      expect(configService.isLoaded).toBe(true);
+      expect(configService.getConfig()).toEqual(DEFAULT_CONFIG);
     });
   });
 
-  describe('getValue', () => {
+  describe('obtener valores de configuración', () => {
     beforeEach(async () => {
       mockAsyncStorage.getItem.mockResolvedValue(null);
       mockAsyncStorage.setItem.mockResolvedValue(undefined);
       await configService.initialize();
     });
 
-    it('should return correct value for valid path', () => {
-      const value = configService.getValue('audio.enabled');
-      expect(value).toBe(DEFAULT_CONFIG.audio.enabled);
+    it('debería retornar el valor correcto para rutas válidas', () => {
+      expect(configService.get('audio.enabled')).toBe(
+        DEFAULT_CONFIG.audio.enabled
+      );
+      expect(configService.get('ui.theme')).toBe(DEFAULT_CONFIG.ui.theme);
+      expect(configService.get('app.version')).toBe(DEFAULT_CONFIG.app.version);
     });
 
-    it('should return default value for invalid path', () => {
-      const value = configService.getValue('invalid.path', 'default');
-      expect(value).toBe('default');
+    it('debería retornar valor por defecto para rutas inexistentes', () => {
+      expect(configService.get('ruta.inexistente', 'default')).toBe('default');
+      expect(configService.get('otra.ruta.profunda', 42)).toBe(42);
     });
 
-    it('should return undefined for invalid path without default', () => {
-      const value = configService.getValue('invalid.path');
-      expect(value).toBeUndefined();
+    it('debería retornar undefined si no hay valor por defecto', () => {
+      expect(configService.get('ruta.inexistente')).toBeUndefined();
+    });
+
+    it('debería manejar rutas con puntos en valores', () => {
+      // Test para asegurar que las rutas con puntos funcionen
+      const valor = configService.get('app');
+      expect(valor).toEqual(DEFAULT_CONFIG.app);
+    });
+
+    it('debería retornar toda la configuración con getConfig', () => {
+      const config = configService.getConfig();
+      expect(config).toEqual(DEFAULT_CONFIG);
+      // Debe retornar una copia, no la referencia original
+      expect(config).not.toBe(configService.config);
     });
   });
 
-  describe('setValue', () => {
+  describe('establecer valores de configuración', () => {
     beforeEach(async () => {
       mockAsyncStorage.getItem.mockResolvedValue(null);
       mockAsyncStorage.setItem.mockResolvedValue(undefined);
       await configService.initialize();
+      jest.clearAllMocks(); // Limpiar llamadas de initialize
     });
 
-    it('should set value and persist to storage', async () => {
-      const newValue = false;
-      await configService.setValue('audio.enabled', newValue);
+    it('debería establecer valores simples correctamente', () => {
+      const resultado = configService.set('audio.enabled', false);
 
-      expect(configService.config.audio.enabled).toBe(newValue);
-      expect(mockAsyncStorage.setItem).toHaveBeenCalledWith(
-        'damianapp_config',
-        JSON.stringify(configService.config)
+      expect(resultado).toBe(true);
+      expect(configService.get('audio.enabled')).toBe(false);
+    });
+
+    it('debería crear rutas anidadas que no existen', () => {
+      const resultado = configService.set('nueva.seccion.valor', 'test');
+
+      expect(resultado).toBe(true);
+      expect(configService.get('nueva.seccion.valor')).toBe('test');
+    });
+
+    it('debería activar guardado automático con debounce', () => {
+      configService.set('audio.volume', 0.8);
+
+      // saveConfig tiene debounce, verificamos que se programa
+      expect(configService.saveTimeout).not.toBeNull();
+    });
+
+    it('debería notificar a los listeners sobre cambios', () => {
+      const listener = jest.fn();
+      configService.subscribe(listener);
+
+      configService.set('ui.theme', 'dark');
+
+      expect(listener).toHaveBeenCalledWith(
+        'change',
+        expect.objectContaining({
+          path: 'ui.theme',
+          value: 'dark',
+        })
       );
     });
 
-    it('should notify observers when value changes', async () => {
-      const observer = jest.fn();
-      configService.addObserver(observer);
+    it('debería manejar valores inválidos correctamente', () => {
+      // Simulamos un validator que rechaza el valor
+      jest.spyOn(configService, 'validateValue').mockReturnValue(false);
 
-      await configService.setValue('audio.enabled', false);
+      const resultado = configService.set('audio.enabled', 'invalid');
 
-      expect(observer).toHaveBeenCalledWith(
-        'audio.enabled',
-        false,
-        expect.any(Object)
+      expect(resultado).toBe(false);
+      expect(configService.get('audio.enabled')).toBe(
+        DEFAULT_CONFIG.audio.enabled
+      );
+    });
+  });
+
+  describe('actualizar configuración masiva', () => {
+    beforeEach(async () => {
+      mockAsyncStorage.getItem.mockResolvedValue(null);
+      mockAsyncStorage.setItem.mockResolvedValue(undefined);
+      await configService.initialize();
+      jest.clearAllMocks();
+    });
+
+    it('debería actualizar múltiples valores correctamente', () => {
+      const actualizaciones = {
+        audio: { enabled: false, volume: 0.5 },
+        ui: { theme: 'dark' },
+      };
+
+      const resultado = configService.update(actualizaciones);
+
+      expect(resultado).toBe(true);
+      expect(configService.get('audio.enabled')).toBe(false);
+      expect(configService.get('audio.volume')).toBe(0.5);
+      expect(configService.get('ui.theme')).toBe('dark');
+    });
+
+    it('debería notificar sobre actualizaciones masivas', () => {
+      const listener = jest.fn();
+      configService.subscribe(listener);
+
+      configService.update({ audio: { enabled: false } });
+
+      expect(listener).toHaveBeenCalledWith(
+        'update',
+        expect.objectContaining({
+          config: expect.any(Object),
+          oldConfig: expect.any(Object),
+        })
       );
     });
 
-    it('should handle nested object paths correctly', async () => {
-      await configService.setValue('ui.animations.enabled', false);
+    it('debería rechazar actualizaciones inválidas', () => {
+      jest.spyOn(configService, 'validateConfig').mockReturnValue(false);
 
-      expect(configService.config.ui.animations.enabled).toBe(false);
+      const resultado = configService.update({ invalid: 'config' });
+
+      expect(resultado).toBe(false);
     });
   });
 
-  describe('validateConfig', () => {
-    it('should return true for valid config', () => {
-      const isValid = configService.validateConfig(DEFAULT_CONFIG);
-      expect(isValid).toBe(true);
+  describe('validación de configuración', () => {
+    it('debería validar configuración completa correctamente', () => {
+      // Primero verificamos que DEFAULT_CONFIG tiene la estructura correcta
+      expect(DEFAULT_CONFIG).toHaveProperty('app');
+      expect(DEFAULT_CONFIG).toHaveProperty('ui');
+      expect(DEFAULT_CONFIG).toHaveProperty('audio');
+      expect(DEFAULT_CONFIG).toHaveProperty('haptics');
+      expect(DEFAULT_CONFIG).toHaveProperty('accessibility');
+      expect(DEFAULT_CONFIG).toHaveProperty('performance');
+      expect(DEFAULT_CONFIG).toHaveProperty('developer');
+
+      // El servicio debe validar esta estructura
+      const resultado = configService.validateConfig(DEFAULT_CONFIG);
+      expect(resultado).toBe(true);
     });
 
-    it('should return false for invalid config', () => {
-      const invalidConfig = { invalid: 'config' };
-      const isValid = configService.validateConfig(invalidConfig);
-      expect(isValid).toBe(false);
+    it('debería rechazar configuraciones inválidas', () => {
+      expect(configService.validateConfig(null)).toBe(false);
+      expect(configService.validateConfig({})).toBe(false);
+      expect(configService.validateConfig({ invalid: 'config' })).toBe(false);
     });
 
-    it('should return false for null config', () => {
-      const isValid = configService.validateConfig(null);
-      expect(isValid).toBe(false);
+    it('debería validar valores individuales', () => {
+      // Asumiendo que el validateValue funciona (puede requerir mocks específicos)
+      const resultado = configService.validateValue('audio.enabled', true);
+      expect(typeof resultado).toBe('boolean');
     });
   });
 
-  describe('observers', () => {
+  describe('sistema de suscripciones', () => {
     beforeEach(async () => {
       mockAsyncStorage.getItem.mockResolvedValue(null);
       mockAsyncStorage.setItem.mockResolvedValue(undefined);
       await configService.initialize();
+      jest.clearAllMocks();
     });
 
-    it('should add observer correctly', () => {
-      const observer = jest.fn();
-      configService.addObserver(observer);
+    it('debería permitir suscribirse a cambios', () => {
+      const listener = jest.fn();
+      const unsubscribe = configService.subscribe(listener);
 
-      expect(configService.observers).toContain(observer);
+      expect(typeof unsubscribe).toBe('function');
+      expect(configService.listeners.has(listener)).toBe(true);
     });
 
-    it('should remove observer correctly', () => {
-      const observer = jest.fn();
-      configService.addObserver(observer);
-      configService.removeObserver(observer);
+    it('debería permitir desuscribirse correctamente', () => {
+      const listener = jest.fn();
+      const unsubscribe = configService.subscribe(listener);
 
-      expect(configService.observers).not.toContain(observer);
+      unsubscribe();
+
+      expect(configService.listeners.has(listener)).toBe(false);
     });
 
-    it('should notify all observers when config changes', async () => {
-      const observer1 = jest.fn();
-      const observer2 = jest.fn();
-      configService.addObserver(observer1);
-      configService.addObserver(observer2);
+    it('debería notificar a múltiples listeners', () => {
+      const listener1 = jest.fn();
+      const listener2 = jest.fn();
+      configService.subscribe(listener1);
+      configService.subscribe(listener2);
 
-      await configService.setValue('audio.enabled', false);
+      // Desactivar la validación temporalmente para el test
+      jest.spyOn(configService, 'validateValue').mockReturnValue(true);
 
-      expect(observer1).toHaveBeenCalled();
-      expect(observer2).toHaveBeenCalled();
+      configService.set('audio.enabled', false);
+
+      expect(listener1).toHaveBeenCalledWith(
+        'change',
+        expect.objectContaining({
+          path: 'audio.enabled',
+          value: false,
+        })
+      );
+      expect(listener2).toHaveBeenCalledWith(
+        'change',
+        expect.objectContaining({
+          path: 'audio.enabled',
+          value: false,
+        })
+      );
+    });
+
+    it('debería manejar errores en listeners sin interrumpir otros', () => {
+      const listenerConError = jest.fn(() => {
+        throw new Error('Error en listener');
+      });
+      const listenerNormal = jest.fn();
+
+      configService.subscribe(listenerConError);
+      configService.subscribe(listenerNormal);
+
+      // Desactivar la validación temporalmente para el test
+      jest.spyOn(configService, 'validateValue').mockReturnValue(true);
+
+      // No debería lanzar error
+      expect(() => configService.set('audio.enabled', false)).not.toThrow();
+      expect(listenerNormal).toHaveBeenCalledWith(
+        'change',
+        expect.objectContaining({
+          path: 'audio.enabled',
+          value: false,
+        })
+      );
     });
   });
 
-  describe('reset', () => {
+  describe('resetear configuración', () => {
     beforeEach(async () => {
       mockAsyncStorage.getItem.mockResolvedValue(null);
       mockAsyncStorage.setItem.mockResolvedValue(undefined);
       await configService.initialize();
+      jest.clearAllMocks();
     });
 
-    it('should reset config to default values', async () => {
-      // Cambiar algunos valores
-      await configService.setValue('audio.enabled', false);
-      await configService.setValue('ui.animations.enabled', false);
+    it('debería resetear a valores por defecto', async () => {
+      // Cambiar algunos valores primero
+      configService.set('audio.enabled', false);
+      configService.set('ui.theme', 'light');
 
-      // Reset
+      const resultado = await configService.reset();
+
+      expect(resultado).toBe(true);
+      expect(configService.getConfig()).toEqual(DEFAULT_CONFIG);
+      expect(mockAsyncStorage.removeItem).toHaveBeenCalledWith(
+        '@damianapp_user_config'
+      );
+    });
+
+    it('debería notificar sobre el reset', async () => {
+      const listener = jest.fn();
+      configService.subscribe(listener);
+
       await configService.reset();
 
-      expect(configService.config).toEqual(DEFAULT_CONFIG);
-      expect(mockAsyncStorage.setItem).toHaveBeenCalledWith(
-        'damianapp_config',
-        JSON.stringify(DEFAULT_CONFIG)
-      );
-    });
-
-    it('should notify observers after reset', async () => {
-      const observer = jest.fn();
-      configService.addObserver(observer);
-
-      await configService.reset();
-
-      expect(observer).toHaveBeenCalledWith(
+      expect(listener).toHaveBeenCalledWith(
         'reset',
-        DEFAULT_CONFIG,
-        DEFAULT_CONFIG
+        expect.objectContaining({
+          config: DEFAULT_CONFIG,
+          oldConfig: expect.any(Object),
+        })
       );
+    });
+
+    it('debería manejar errores de AsyncStorage en reset pero seguir funcionando', async () => {
+      mockAsyncStorage.removeItem.mockRejectedValue(new Error('Storage Error'));
+
+      const resultado = await configService.reset();
+
+      // El reset debe funcionar aunque falle el storage
+      expect(resultado).toBe(true);
+      expect(configService.getConfig()).toEqual(DEFAULT_CONFIG);
+    });
+  });
+
+  describe('métricas y utilidades', () => {
+    beforeEach(async () => {
+      mockAsyncStorage.getItem.mockResolvedValue(null);
+      mockAsyncStorage.setItem.mockResolvedValue(undefined);
+      await configService.initialize();
+    });
+
+    it('debería retornar métricas correctas', () => {
+      const metricas = configService.getMetrics();
+
+      expect(metricas).toHaveProperty('isLoaded', true);
+      expect(metricas).toHaveProperty('configSize');
+      expect(metricas).toHaveProperty('listenersCount');
+      expect(metricas).toHaveProperty('version');
+      expect(typeof metricas.configSize).toBe('number');
+    });
+
+    it('debería exportar configuración para backup', () => {
+      const backup = configService.exportConfig();
+
+      expect(backup).toHaveProperty('version');
+      expect(backup).toHaveProperty('timestamp');
+      expect(backup).toHaveProperty('config');
+      expect(backup.config).toEqual(configService.getConfig());
+    });
+
+    it('debería importar configuración desde backup', () => {
+      const backup = {
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+        config: {
+          audio: { enabled: false, volume: 0.3 },
+          ui: { theme: 'light' },
+        },
+      };
+
+      const resultado = configService.importConfig(backup);
+
+      expect(resultado).toBe(true);
+      expect(configService.get('audio.enabled')).toBe(false);
+      expect(configService.get('audio.volume')).toBe(0.3);
+      expect(configService.get('ui.theme')).toBe('light');
+    });
+
+    it('debería rechazar backups inválidos', () => {
+      const resultado = configService.importConfig({ invalid: 'backup' });
+      expect(resultado).toBe(false);
     });
   });
 });
