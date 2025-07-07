@@ -4,31 +4,55 @@
  * PROPÓSITO: Simplificar imports y centralizar acceso a servicios
  * ESCALABILIDAD: Fácil agregar nuevos servicios y mantener consistencia
  *
- * SERVICIOS DISPONIBLES:
- * - storageService: Persistencia con AsyncStorage
- * - validationService: Validación de datos y formularios
- * - utilsService: Utilidades y formateo
- * - businessLogic: Lógica de negocio específica
- * - hapticsService: Feedback táctil
- * - audioService: Reproducción de sonidos
+ * NUEVA ESTRUCTURA MODULAR:
+ * - core/: Servicios fundamentales (config, storage, validation)
+ * - media/: Servicios de multimedia (audio, haptics)
+ * - business/: Lógica de negocio específica
+ * - utils/: Utilidades y helpers
  *
  * @author Damian App
- * @version 1.0.0 - Módulo 5
+ * @version 2.0.0 - Refactorización Modular
  */
 
-// Servicios principales
-export { storageService, StorageService } from './storageService';
-export {
-  validator,
-  createValidator,
-  ValidationService,
-} from './validationService';
-export { utilsService, UtilsService } from './utilsService';
-export { businessLogic, BusinessLogicService } from './businessLogicService';
+// ═══════════════════════════════════════════════════════════════════════════
+// 🏗️ SERVICIOS CORE (Fundamentales)
+// ═══════════════════════════════════════════════════════════════════════════
+export { default as configService } from './core/config';
+export { default as storageService } from './core/storage';
+export { default as validationService } from './core/validation';
 
-// Servicios de feedback
-export { hapticsService } from './hapticsService';
-export { audioService } from './audioService';
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎵 SERVICIOS MEDIA (Multimedia)
+// ═══════════════════════════════════════════════════════════════════════════
+export { default as audioService } from './media/audio';
+export { default as hapticsService } from './media/haptics';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🏢 SERVICIOS BUSINESS (Lógica de Negocio)
+// ═══════════════════════════════════════════════════════════════════════════
+export { default as businessLogicService } from './business/businessLogicService';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🛠️ SERVICIOS UTILS (Utilidades)
+// ═══════════════════════════════════════════════════════════════════════════
+export { default as dynamicImportService } from './utils/import/dynamicImportService';
+export { default as utilsService } from './utils/helpers/utilsService';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🔄 BACKWARD COMPATIBILITY (Deprecated - Remover en v3.0.0)
+// ═══════════════════════════════════════════════════════════════════════════
+// Re-exports para mantener compatibilidad
+export { storageService as StorageService } from './core/storage';
+export {
+  validationService as validator,
+  validationService as createValidator,
+  validationService as ValidationService,
+} from './core/validation';
+export { utilsService as UtilsService } from './utils/helpers/utilsService';
+export {
+  businessLogicService as businessLogic,
+  businessLogicService as BusinessLogicService,
+} from './business/businessLogicService';
 
 // Re-export de utilidades de formateo para backward compatibility
 export { formatSeconds } from '../utils/formatters';
