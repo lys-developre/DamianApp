@@ -136,8 +136,9 @@ CALIDAD GENERAL DAMIANAPP
 ## 🔗 **Links Útiles**
 
 - 📚 [Documentación General](../README.md)
-- 🔧 [Guía de Configuración](../GUIA_CONFIGURACION.md)
-- ⚙️ [Configuraciones Avanzadas](../LISTADO_CONFIGURACIONES_AVANZADAS.md)
+- � [Configuración del Proyecto](../package.json)
+- 🔧 [Configuración ESLint](../eslint.config.js)
+- 🎨 [Configuración Prettier](../prettier.config.js)
 
 ---
 
