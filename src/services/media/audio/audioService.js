@@ -243,3 +243,6 @@ class AudioService {
 
 // Instancia singleton del servicio
 export const audioService = new AudioService();
+
+// Export default de la instancia
+export default audioService;

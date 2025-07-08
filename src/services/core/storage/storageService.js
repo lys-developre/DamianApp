@@ -374,3 +374,6 @@ export const storageService = new StorageService();
 
 // Export de la clase para testing
 export { StorageService };
+
+// Export default de la instancia
+export default storageService;

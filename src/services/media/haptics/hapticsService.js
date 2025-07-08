@@ -29,7 +29,7 @@ class HapticsService {
    */
   async isHapticsEnabled() {
     try {
-      const configStr = await AsyncStorage.getItem('@damianapp_user_config');
+      const configStr = await AsyncStorage.getItem('@damianapp_user_config_v2');
       if (!configStr) return true; // Por defecto habilitado
 
       const config = JSON.parse(configStr);
@@ -299,3 +299,6 @@ class HapticsService {
 
 // Instancia singleton del servicio
 export const hapticsService = new HapticsService();
+
+// Export default de la instancia
+export default hapticsService;

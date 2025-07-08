@@ -3,5 +3,5 @@
  * Exportación centralizada del servicio de almacenamiento
  */
 
-export { default } from './storageService';
-export { default as storageService } from './storageService';
+export { storageService } from './storageService';
+export { storageService as default } from './storageService';

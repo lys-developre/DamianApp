@@ -9,5 +9,5 @@
  * @author DamianApp Team
  * @version 1.0.0
  */
-export { default } from './audioService';
-export { default as audioService } from './audioService';
+export { audioService } from './audioService';
+export { audioService as default } from './audioService';

@@ -9,5 +9,5 @@
  * @author DamianApp Team
  * @version 1.0.0
  */
-export { default } from './hapticsService';
-export { default as hapticsService } from './hapticsService';
+export { hapticsService } from './hapticsService';
+export { hapticsService as default } from './hapticsService';
