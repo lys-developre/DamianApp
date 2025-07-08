@@ -36,15 +36,20 @@ jest.mock('@react-navigation/native', () => ({
   useFocusEffect: jest.fn(),
 }));
 
-// Simulación de módulos Expo
-jest.mock('expo-av', () => ({
-  Audio: {
-    Sound: {
-      createAsync: jest.fn(),
-    },
-    setAudioModeAsync: jest.fn(),
-  },
-}));
+// Simulación de módulos de Audio y React Native
+jest.mock('react-native-sound', () => {
+  const mockSoundInstance = {
+    play: jest.fn(callback => callback && callback(true)),
+    setVolume: jest.fn(),
+    release: jest.fn(),
+  };
+
+  const MockSound = jest.fn(() => mockSoundInstance);
+  MockSound.setCategory = jest.fn();
+  MockSound.MAIN_BUNDLE = 'MAIN_BUNDLE';
+
+  return MockSound;
+});
 
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(),
