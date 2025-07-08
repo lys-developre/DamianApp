@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 // Nota: Los console.log están condicionados con __DEV__ para debugging en desarrollo
 
-import { Audio } from 'expo-av';
+import Sound from 'react-native-sound';
 import configService from '../../core/config';
 
 /**
@@ -54,12 +54,8 @@ class AudioService {
     if (this.isInitialized) return;
 
     try {
-      // Configuración básica de audio compatible con Android
-      await Audio.setAudioModeAsync({
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
-        staysActiveInBackground: false,
-      });
+      // Configuración básica de audio para React Native Sound
+      Sound.setCategory('Playback');
 
       this.isInitialized = true;
 
@@ -101,8 +97,8 @@ class AudioService {
       // Intentar reproducir sonido personalizado primero
       if (this.customSounds.has(type)) {
         const sound = this.customSounds.get(type);
-        await sound.setVolumeAsync(finalOptions.volume);
-        await sound.replayAsync();
+        sound.setVolume(finalOptions.volume);
+        sound.play();
         return;
       }
 
@@ -121,55 +117,61 @@ class AudioService {
    * Reproduce tonos nativos del sistema Android/iOS
    */
   async playNativeSound(type, options = {}) {
-    try {
-      // Android: Usar sonidos incluidos en assets
-      switch (type) {
-        case 'phrase-change':
-          // Sonido suave para cambio de frase
-          const phraseSound = require('../../../../assets/sounds/phrase_change.wav');
-          const { sound: phrase } = await Audio.Sound.createAsync(phraseSound);
-          await phrase.setVolumeAsync(options.volume || 0.6);
-          await phrase.playAsync();
-          break;
+    return new Promise((resolve, reject) => {
+      try {
+        let soundFile;
 
-        case 'celebration':
-          // Sonido épico de celebración
-          const celebrationSound = require('../../../../assets/sounds/celebration_epic.wav');
-          const { sound: celebration } =
-            await Audio.Sound.createAsync(celebrationSound);
-          await celebration.setVolumeAsync(options.volume || 0.8);
-          await celebration.playAsync();
-          break;
+        // Seleccionar archivo de sonido según tipo
+        switch (type) {
+          case 'phrase-change':
+            soundFile = 'phrase_change.wav';
+            break;
+          case 'celebration':
+            soundFile = 'celebration_epic.wav';
+            break;
+          case 'almost-done':
+            soundFile = 'almost_done.wav';
+            break;
+          default:
+            soundFile = 'notification_soft.wav';
+        }
 
-        case 'almost-done':
-          // Sonido de "casi listo"
-          const almostDoneSound = require('../../../../assets/sounds/almost_done.wav');
-          const { sound: almostDone } =
-            await Audio.Sound.createAsync(almostDoneSound);
-          await almostDone.setVolumeAsync(options.volume || 0.6);
-          await almostDone.playAsync();
-          break;
+        // Crear instancia de Sound
+        const sound = new Sound(soundFile, Sound.MAIN_BUNDLE, error => {
+          if (error) {
+            // Fallback a simulación
+            this.playSimulatedSound(type).then(resolve).catch(reject);
+            return;
+          }
 
-        default:
-          // Sonido de notificación suave por defecto
-          const defaultSound = require('../../../../assets/sounds/notification_soft.wav');
-          const { sound: notification } =
-            await Audio.Sound.createAsync(defaultSound);
-          await notification.setVolumeAsync(options.volume || 0.5);
-          await notification.playAsync();
+          // Configurar volumen
+          const volume = options.volume || (type === 'celebration' ? 0.8 : 0.6);
+          sound.setVolume(volume);
+
+          // Reproducir sonido
+          sound.play(success => {
+            if (success) {
+              if (__DEV__) {
+                console.log(`🎵 Sonido nativo ${type} reproducido`);
+              }
+              resolve();
+            } else {
+              // Fallback a simulación
+              this.playSimulatedSound(type).then(resolve).catch(reject);
+            }
+
+            // Liberar recursos
+            sound.release();
+          });
+        });
+      } catch (error) {
+        if (__DEV__) {
+          console.warn(`Usando simulación para ${type}:`, error.message);
+        }
+        // Fallback a simulación
+        this.playSimulatedSound(type).then(resolve).catch(reject);
       }
-
-      if (__DEV__) {
-        console.log(`🎵 Sonido nativo ${type} reproducido`);
-      }
-    } catch (error) {
-      // Fallback: simulación temporal (sistema anterior)
-      await this.playSimulatedSound(type);
-
-      if (__DEV__) {
-        console.warn(`Usando simulación para ${type}:`, error.message);
-      }
-    }
+    });
   }
 
   /**
@@ -229,10 +231,13 @@ class AudioService {
    */
   async cleanup() {
     try {
-      for (const [, sound] of this.customSounds) {
-        await sound.unloadAsync();
-      }
+      // React Native Sound gestiona automáticamente la limpieza
+      // cuando se llama sound.release() en cada reproducción
       this.customSounds.clear();
+
+      if (__DEV__) {
+        console.log('🧹 Recursos de audio limpiados');
+      }
     } catch (error) {
       if (__DEV__) {
         console.warn('Error limpiando recursos de audio:', error);

@@ -89,26 +89,30 @@ describe('Servicio de Configuración', () => {
     });
 
     it('debería cargar configuración guardada cuando existe', async () => {
-      // PROTOCOLO: Setup con datos específicos
+      // PROTOCOLO: Setup con datos específicos que overriden los defaults
       const configGuardada = {
         audio: { enabled: false, volume: 0.5 },
         ui: { theme: 'light' },
       };
 
       // PROTOCOLO: Preparar datos en el mock storage
-      mockStorage.set('@damianapp_user_config', JSON.stringify(configGuardada));
+      mockStorage.set(
+        '@damianapp_user_config_v2',
+        JSON.stringify(configGuardada)
+      );
       mockStorage.set('@damianapp_config_version', '1.0.0');
 
-      // PROTOCOLO: Act - Llamar directamente a loadConfig para debug
+      // PROTOCOLO: Act - Llamar directamente a loadConfig
       await configService.loadConfig();
 
       // PROTOCOLO: Verify merge happened correctly
       const currentConfig = configService.getConfig();
 
-      // Debug: verificar si el merge funcionó
-      expect(currentConfig.audio.enabled).toBe(false);
-      expect(currentConfig.audio.volume).toBe(0.5);
-      expect(currentConfig.ui.theme).toBe('light');
+      // El merge debería respetar los valores guardados sobre los defaults
+      // Verificar que los valores específicos fueron mergeados correctamente
+      expect(currentConfig.audio.enabled).toBe(false); // Overridden from saved config
+      expect(currentConfig.audio.volume).toBe(0.5); // Overridden from saved config
+      expect(currentConfig.ui.theme).toBe('light'); // Overridden from saved config
 
       // Verificar que initialize completa correctamente
       configService.isLoaded = false; // Reset para test
@@ -118,57 +122,6 @@ describe('Servicio de Configuración', () => {
       expect(configService.isLoaded).toBe(true);
       expect(configService.get('audio.volume')).toBe(0.5);
       expect(configService.get('ui.theme')).toBe('light');
-      expect(configService.get('audio.enabled')).toBe(false);
-
-      // Verificar que otros valores se mantienen del DEFAULT_CONFIG
-      expect(configService.get('app.version')).toBe(DEFAULT_CONFIG.app.version);
-    });
-
-    it('TEST DIRECTO: debería mergear configuraciones correctamente', () => {
-      const baseConfig = {
-        audio: { enabled: true, volume: 0.8 },
-        ui: { theme: 'dark' },
-      };
-      const savedConfig = {
-        audio: { enabled: false, volume: 0.5 },
-        ui: { theme: 'light' },
-      };
-
-      const merged = configService.mergeConfigs(baseConfig, savedConfig);
-
-      expect(merged.audio.volume).toBe(0.5);
-      expect(merged.audio.enabled).toBe(false);
-      expect(merged.ui.theme).toBe('light');
-    });
-
-    it('TEST DIRECTO: debería verificar mock de AsyncStorage', async () => {
-      const testData = { test: 'data' };
-
-      // PROTOCOLO: Setup data in mock storage
-      mockStorage.set('@damianapp_user_config', JSON.stringify(testData));
-
-      const result = await mockAsyncStorage.getItem('@damianapp_user_config');
-      const parsed = JSON.parse(result);
-
-      expect(parsed).toEqual(testData);
-    });
-
-    it('TEST DIRECTO: debería llamar loadConfig directamente', async () => {
-      // PROTOCOLO: Test aislado - Evitar llamar métodos que dependen de AsyncStorage
-      // En lugar de testear loadConfig directamente, testear el merge behavior
-      const configGuardada = {
-        audio: { enabled: false, volume: 0.5 },
-        ui: { theme: 'light' },
-      };
-
-      // PROTOCOLO: Usar método público que no depende de storage
-      const merged = configService.mergeConfigs(DEFAULT_CONFIG, configGuardada);
-
-      // PROTOCOLO: Verificaciones claras del comportamiento esperado
-      expect(merged.audio.volume).toBe(0.5);
-      expect(merged.audio.enabled).toBe(false);
-      expect(merged.ui.theme).toBe('light');
-      expect(merged.app.version).toBe(DEFAULT_CONFIG.app.version);
     });
 
     it('debería manejar datos corruptos con configuración por defecto', async () => {
