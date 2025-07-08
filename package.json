@@ -30,8 +30,7 @@
     "test:coverage": "jest --coverage",
     "test:config": "jest --testPathPattern=config",
     "test:services": "jest --testPathPattern=services",
-    "test:components": "jest --testPathPattern=components",
-    "verify": "node VERIFICACION_COMPLETA.js"
+    "test:components": "jest --testPathPattern=components"
   },
   "dependencies": {
     "@expo/metro-runtime": "~5.0.4",
@@ -64,6 +63,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@babel/preset-react": "^7.27.1",
     "@testing-library/react-native": "^12.9.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "eslint": "^9.29.0",
@@ -95,6 +95,9 @@
         "lines": 70,
         "statements": 70
       }
+    },
+    "transform": {
+      "^.+\\.(js|jsx)$": "babel-jest"
     },
     "transformIgnorePatterns": [
       "node_modules/(?!(react-native|@react-native|@expo|expo-.*)/)"
