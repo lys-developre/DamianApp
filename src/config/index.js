@@ -13,7 +13,7 @@ export {
 } from '../config/appConfig';
 
 // Exportar servicio
-export { default as configService } from '../services/configService';
+export { default as configService } from '../services/core/config';
 
 // Exportar hooks
 export {

@@ -50,7 +50,7 @@ export const useTimer = () => {
     if (hapticsConfig.enabled) {
       try {
         const { hapticsService } = await import(
-          '../../../services/hapticsService'
+          '../../../services/media/haptics'
         );
         await hapticsService.celebration();
       } catch (error) {
@@ -61,7 +61,7 @@ export const useTimer = () => {
     // Ejecutar audio solo si está habilitado
     if (audioConfig.enabled) {
       try {
-        const { audioService } = await import('../../../services/audioService');
+        const { audioService } = await import('../../../services/media/audio');
         await audioService.epicCelebration();
       } catch (error) {
         console.warn('Audio no disponible:', error);
@@ -81,7 +81,7 @@ export const useTimer = () => {
     if (hapticsConfig.enabled) {
       try {
         const { hapticsService } = await import(
-          '../../../services/hapticsService'
+          '../../../services/media/haptics'
         );
         await hapticsService.heavy();
         setTimeout(async () => {
@@ -95,7 +95,7 @@ export const useTimer = () => {
     // Ejecutar audio solo si está habilitado
     if (audioConfig.enabled) {
       try {
-        const { audioService } = await import('../../../services/audioService');
+        const { audioService } = await import('../../../services/media/audio');
         await audioService.almostDone();
       } catch (error) {
         console.warn('Audio no disponible:', error);
@@ -180,7 +180,7 @@ export const useTimer = () => {
           (async () => {
             try {
               const { hapticsService } = await import(
-                '../../../services/hapticsService'
+                '../../../services/media/haptics'
               );
               await hapticsService.tick();
             } catch (error) {
@@ -213,7 +213,7 @@ export const useTimer = () => {
   useEffect(() => {
     const initializeServices = async () => {
       try {
-        const { audioService } = await import('../../../services/audioService');
+        const { audioService } = await import('../../../services/media/audio');
         await audioService.initialize();
       } catch (error) {
         console.warn('Audio service no disponible:', error);
@@ -221,7 +221,7 @@ export const useTimer = () => {
 
       try {
         const { hapticsService } = await import(
-          '../../../services/hapticsService'
+          '../../../services/media/haptics'
         );
         await hapticsService.initialize();
       } catch (error) {
@@ -236,7 +236,7 @@ export const useTimer = () => {
       (async () => {
         try {
           const { audioService } = await import(
-            '../../../services/audioService'
+            '../../../services/media/audio'
           );
           await audioService.cleanup();
         } catch (error) {

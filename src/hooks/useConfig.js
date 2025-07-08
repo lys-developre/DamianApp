@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import configService from '../services/configService';
+import configService from '../services/core/config';
 
 /**
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

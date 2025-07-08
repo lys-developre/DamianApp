@@ -27,7 +27,9 @@ const ControlButtons = React.memo(
       // Solo ejecutar haptics si está habilitado
       if (hapticsConfig.enabled) {
         try {
-          const { hapticsService } = await import('../services/hapticsService');
+          const { hapticsService } = await import(
+            '../../../services/media/haptics'
+          );
           await hapticsService.medium(); // Feedback medio para acción importante
         } catch (error) {
           console.warn('Haptics no disponible:', error);
@@ -40,7 +42,9 @@ const ControlButtons = React.memo(
     const handleResetPress = async () => {
       if (hapticsConfig.enabled) {
         try {
-          const { hapticsService } = await import('../services/hapticsService');
+          const { hapticsService } = await import(
+            '../../../services/media/haptics'
+          );
           await hapticsService.light(); // Feedback ligero para reset
         } catch (error) {
           console.warn('Haptics no disponible:', error);

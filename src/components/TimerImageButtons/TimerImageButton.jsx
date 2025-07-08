@@ -104,9 +104,7 @@ export default function TimerImageButton({
     // Solo ejecutar haptics si está habilitado
     if (hapticsConfig.enabled) {
       try {
-        const { hapticsService } = await import(
-          '../../services/hapticsService'
-        );
+        const { hapticsService } = await import('../../services/media/haptics');
         await hapticsService.medium(); // Feedback medio para acción importante
       } catch (error) {
         console.warn('Haptics no disponible:', error);

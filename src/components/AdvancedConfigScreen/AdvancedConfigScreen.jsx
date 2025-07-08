@@ -149,7 +149,7 @@ const AdvancedConfigScreen = React.memo(() => {
           onPress: async () => {
             try {
               const { hapticsService } = await import(
-                '../../services/hapticsService'
+                '../../services/media/haptics'
               );
               await hapticsService.medium();
               Alert.alert('Haptics', 'Test completado');

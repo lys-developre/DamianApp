@@ -40,7 +40,7 @@ export const useSwitches = () => {
       if (hapticsConfig.enabled) {
         try {
           const { hapticsService } = await import(
-            '../../../services/hapticsService'
+            '../../../services/media/haptics'
           );
           await hapticsService.light(); // Vibración suave al presionar
         } catch (error) {
@@ -73,7 +73,7 @@ export const useSwitches = () => {
               setTimeout(async () => {
                 try {
                   const { hapticsService } = await import(
-                    '../../../services/hapticsService'
+                    '../../../services/media/haptics'
                   );
                   await hapticsService.celebration();
                 } catch (error) {

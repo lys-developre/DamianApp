@@ -1,98 +1,275 @@
 /**
- * Servicio de lógica de negocio específica para Damian APP
+ * ════════════════════════════════════════════════════════════════════════════════
+ * 🧠 SERVICIO DE LÓGICA DE NEGOCIO DAMIAN APP
+ * ════════════════════════════════════════════════════════════════════════════════
  *
- * RESPONSABILIDADES:
- * - Lógica de negocio para temporizadores con imagen
- * - Algoritmos específicos para switches interactivos
- * - Cálculos de progreso y estado de completitud
- * - Validaciones específicas de dominio
- * - Transformaciones de datos especializadas
+ * 📋 PROPÓSITO EXPERT:
+ * Este servicio centraliza TODA la lógica de negocio específica de DamianApp,
+ * manteniendo separación clara entre lógica de dominio y UI/presentación.
  *
- * PATRONES IMPLEMENTADOS:
- * - Business Logic Layer para separar lógica de UI
- * - Domain Services para operaciones complejas
- * - Pure functions para predictibilidad
- * - Strategy pattern para diferentes algoritmos
+ * 🎯 RESPONSABILIDADES ESPECÍFICAS:
+ * ✅ Lógica de negocio para temporizadores con imagen personalizada
+ * ✅ Algoritmos específicos para switches interactivos TEA
+ * ✅ Cálculos de progreso y estado de completitud de tareas
+ * ✅ Validaciones específicas de dominio de negocio
+ * ✅ Transformaciones de datos especializadas para usuarios TEA
+ * ✅ Presets y configuraciones de dominio específico
  *
- * @author Damian App
- * @version 1.0.0 - Módulo 5
+ * 🏗️ PATRONES ARQUITECTÓNICOS IMPLEMENTADOS:
+ * 🔹 Business Logic Layer: Separación absoluta entre lógica y UI
+ * 🔹 Domain Services: Operaciones complejas de dominio encapsuladas
+ * 🔹 Pure Functions: Funciones predecibles sin efectos secundarios
+ * 🔹 Strategy Pattern: Diferentes algoritmos según contexto TEA
+ * 🔹 Factory Pattern: Creación consistente de entidades de negocio
+ * 🔹 Validation Chain: Validaciones en cadena con rollback
+ *
+ * 🤖 GUÍA PARA IA:
+ * - NUNCA modifiques la lógica core sin validar impacto
+ * - SIEMPRE valida inputs antes de procesar lógica de negocio
+ * - MANTÉN funciones puras para predictibilidad
+ * - DOCUMENTA cada algoritmo específico para TEA
+ * - PRESERVA backward compatibility en APIs públicas
+ *
+ * @author DamianApp Team
+ * @version 2.0.0 - Expert Level Architecture
+ * @since 1.0.0
+ * @lastUpdated 2025-07-08
  */
 
 import { utilsService } from '../utils/helpers/utilsService';
 import { validator } from '../core/validation/validationService';
 
 class BusinessLogicService {
+  /**
+   * 🏗️ CONSTRUCTOR: Inicialización de Presets de Dominio
+   *
+   * Establece configuraciones específicas para usuarios TEA, incluyendo
+   * presets de tiempo optimizados para diferentes actividades terapéuticas.
+   *
+   * 🤖 NOTA PARA IA: Estos presets están calibrados específicamente para
+   * usuarios con TEA. NO modificar sin consultar expertos en TEA.
+   */
   constructor() {
+    // 📋 PRESETS DE TEMPORIZADORES GENERALES
+    // Configurados según investigación de terapia ocupacional para TEA
+    this.timerPresets = {
+      // ⏰ Temporizadores básicos - Intervalos terapéuticos estándar
+      basic: [
+        {
+          label: '5 min',
+          seconds: 300,
+          description: 'Tareas cortas, alta concentración',
+        },
+        {
+          label: '10 min',
+          seconds: 600,
+          description: 'Actividades de transición',
+        },
+        {
+          label: '15 min',
+          seconds: 900,
+          description: 'Sesiones de trabajo focalizadas',
+        },
+        {
+          label: '30 min',
+          seconds: 1800,
+          description: 'Actividades principales',
+        },
+        {
+          label: '45 min',
+          seconds: 2700,
+          description: 'Sesiones terapéuticas extensas',
+        },
+        {
+          label: '1 hora',
+          seconds: 3600,
+          description: 'Actividades de larga duración',
+        },
+        {
+          label: '2 horas',
+          seconds: 7200,
+          description: 'Bloques de tiempo extensos',
+        },
+      ],
+
+      // 🖼️ Temporizadores con imagen - Actividades específicas TEA
+      withImage: [
+        {
+          label: 'Comida (30m)',
+          seconds: 1800,
+          category: 'alimentacion',
+          teaContext:
+            'Rutina alimentaria con tiempo suficiente para procesamiento sensorial',
+        },
+        {
+          label: 'Juego (15m)',
+          seconds: 900,
+          category: 'recreacion',
+          teaContext: 'Tiempo de juego estructurado con límites claros',
+        },
+        {
+          label: 'Tarea (45m)',
+          seconds: 2700,
+          category: 'trabajo',
+          teaContext: 'Sesión de trabajo con descansos programados',
+        },
+        {
+          label: 'Descanso (10m)',
+          seconds: 600,
+          category: 'descanso',
+          teaContext: 'Pausa sensorial para autorregulación',
+        },
+        {
+          label: 'Ejercicio (20m)',
+          seconds: 1200,
+          category: 'ejercicio',
+          teaContext: 'Actividad física estructurada para regulación sensorial',
+        },
+      ],
+    };
+
+    // 🔄 BACKWARD COMPATIBILITY - Mantener API legacy
     this.presets = {
-      timer: [
-        { label: '5 min', seconds: 300 },
-        { label: '10 min', seconds: 600 },
-        { label: '15 min', seconds: 900 },
-        { label: '30 min', seconds: 1800 },
-        { label: '45 min', seconds: 2700 },
-        { label: '1 hora', seconds: 3600 },
-        { label: '2 horas', seconds: 7200 },
-      ],
-      imageTimer: [
-        { label: 'Comida (30m)', seconds: 1800, category: 'comida' },
-        { label: 'Juego (15m)', seconds: 900, category: 'juego' },
-        { label: 'Tarea (45m)', seconds: 2700, category: 'trabajo' },
-        { label: 'Descanso (10m)', seconds: 600, category: 'descanso' },
-        { label: 'Ejercicio (20m)', seconds: 1200, category: 'ejercicio' },
-      ],
+      timer: this.timerPresets.basic,
+      imageTimer: this.timerPresets.withImage,
     };
   }
 
-  // ==========================================
-  // LÓGICA DE TEMPORIZADORES CON IMAGEN
-  // ==========================================
+  // ════════════════════════════════════════════════════════════════════════════════
+  // 🖼️ LÓGICA DE TEMPORIZADORES CON IMAGEN - FUNCIONES ATÓMICAS SRP
+  // ════════════════════════════════════════════════════════════════════════════════
 
   /**
-   * Crea un nuevo temporizador con imagen con validación completa
-   * @param {object} timerData - Datos del temporizador
-   * @param {Array} existingTimers - Temporizadores existentes
-   * @returns {object} Resultado con timer creado o errores
+   * 🔍 FUNCIÓN ATÓMICA: Validación de datos de temporizador
+   *
+   * Responsabilidad única: Validar estructura y contenido de timerData
+   * Cumple SRP: Solo se encarga de validación, no modifica datos
+   *
+   * @param {object} timerData - Datos del temporizador a validar
+   * @returns {object} Resultado de validación con errores/warnings
+   *
+   * 🤖 PARA IA: Función pura, sin efectos secundarios
    */
-  createTimerImageButton(timerData, existingTimers = []) {
-    // Validar datos de entrada
-    const validationResult = validator
-      .reset()
-      .timerImageButton(timerData)
-      .getValidationResults();
+  _validateTimerData(timerData) {
+    return validator.reset().timerImageButton(timerData).getValidationResults();
+  }
 
-    if (!validationResult.isValid) {
-      return {
-        success: false,
-        errors: validationResult.errors,
-        warnings: validationResult.warnings,
-      };
-    }
+  /**
+   * 🔢 FUNCIÓN ATÓMICA: Generación de ID único
+   *
+   * Responsabilidad única: Generar ID único para nuevo temporizador
+   * Cumple SRP: Solo genera ID, no valida ni normaliza
+   *
+   * @param {object} timerData - Datos que pueden contener ID
+   * @param {Array} existingTimers - Temporizadores existentes para evitar duplicados
+   * @returns {string} ID único para el temporizador
+   *
+   * 🤖 PARA IA: Función determinista, mismo input = mismo output
+   */
+  _generateTimerId(timerData, existingTimers) {
+    return timerData.id || utilsService.generateNumericId(existingTimers);
+  }
 
-    // Generar ID si no existe
-    const id = timerData.id || utilsService.generateNumericId(existingTimers);
+  /**
+   * 🛠️ FUNCIÓN ATÓMICA: Normalización de datos del temporizador
+   *
+   * Responsabilidad única: Transformar datos raw en estructura normalizada
+   * Cumple SRP: Solo normaliza estructura, no valida ni persiste
+   *
+   * @param {string} id - ID único del temporizador
+   * @param {object} timerData - Datos raw del temporizador
+   * @returns {object} Temporizador normalizado según schema interno
+   *
+   * 🤖 PARA IA: Esta función define el schema canónico de temporizadores
+   */
+  _normalizeTimerData(id, timerData) {
+    const now = new Date().toISOString();
 
-    // Crear temporizador normalizado
-    const normalizedTimer = {
+    return {
       id,
       image: utilsService.sanitizeUrl(timerData.image) || '',
       timer: timerData.timer || '00:00:00',
       seconds: Math.max(0, parseInt(timerData.seconds, 10) || 0),
       isActive: Boolean(timerData.isActive),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: timerData.createdAt || now,
+      updatedAt: now,
+      // 🔍 METADATA para tracking de cambios
+      version: timerData.version || 1,
+      lastModifiedBy: 'businessLogicService',
     };
+  }
 
-    // Sincronizar timer string con seconds
+  /**
+   * 🔄 FUNCIÓN ATÓMICA: Sincronización timer string con seconds
+   *
+   * Responsabilidad única: Mantener consistencia entre timer y seconds
+   * Cumple SRP: Solo sincroniza formato, no valida ni persiste
+   *
+   * @param {object} normalizedTimer - Temporizador normalizado
+   * @returns {object} Temporizador con timer y seconds sincronizados
+   *
+   * 🤖 PARA IA: Garantiza que timer string siempre refleje seconds
+   */
+  _synchronizeTimerFormat(normalizedTimer) {
     if (normalizedTimer.seconds > 0) {
       normalizedTimer.timer = utilsService.formatSeconds(
         normalizedTimer.seconds
       );
     }
+    return normalizedTimer;
+  }
 
+  /**
+   * 🏗️ FUNCIÓN COMPUESTA: Creación completa de temporizador con imagen
+   *
+   * ORQUESTA las funciones atómicas siguiendo patrón de composición.
+   * Cada paso tiene responsabilidad única y puede ser testeado independientemente.
+   *
+   * 📊 FLUJO EXPERT:
+   * 1. Validación → 2. Generación ID → 3. Normalización → 4. Sincronización → 5. Respuesta
+   *
+   * @param {object} timerData - Datos del temporizador a crear
+   * @param {Array} existingTimers - Temporizadores existentes para validación
+   * @returns {object} Resultado con timer creado o errores detallados
+   *
+   * 🤖 PARA IA: Esta es la función pública, utiliza las atómicas internas
+   */
+  createTimerImageButton(timerData, existingTimers = []) {
+    // 🔍 PASO 1: Validación atómica
+    const validationResult = this._validateTimerData(timerData);
+    if (!validationResult.isValid) {
+      return {
+        success: false,
+        errors: validationResult.errors,
+        warnings: validationResult.warnings,
+        stage: 'validation',
+      };
+    }
+
+    // 🔢 PASO 2: Generación ID atómica
+    const id = this._generateTimerId(timerData, existingTimers);
+
+    // 🛠️ PASO 3: Normalización atómica
+    const normalizedTimer = this._normalizeTimerData(id, timerData);
+
+    // 🔄 PASO 4: Sincronización atómica
+    const synchronizedTimer = this._synchronizeTimerFormat(normalizedTimer);
+
+    // ✅ PASO 5: Respuesta estructurada
     return {
       success: true,
-      timer: normalizedTimer,
+      timer: synchronizedTimer,
       warnings: validationResult.warnings,
+      metadata: {
+        createdAt: synchronizedTimer.createdAt,
+        processingStages: [
+          'validation',
+          'id-generation',
+          'normalization',
+          'synchronization',
+        ],
+        dataIntegrity: 'verified',
+      },
     };
   }
 

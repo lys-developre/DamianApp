@@ -46,7 +46,9 @@ const CelebrationModal = React.memo(
       // Solo ejecutar haptics si está habilitado
       if (hapticsConfig.enabled) {
         try {
-          const { hapticsService } = await import('../services/hapticsService');
+          const { hapticsService } = await import(
+            '../../../services/media/haptics'
+          );
           await hapticsService.light(); // Feedback ligero al cerrar
         } catch (error) {
           console.warn('Haptics no disponible:', error);

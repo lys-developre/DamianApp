@@ -1,10 +1,224 @@
-# 📘 PROTOCOLO DE CALIDAD DE CÓDIGO - DamianApp v2.0
+# 📘 PROTOCOLO DE CALIDAD DE CÓDIGO - DamianApp v2.1
 
 ## 🎯 **Propósito**
-Asegurar código de calidad que entrega **valor sostenible al usuario final** con el menor costo de mantenimiento posible, adaptándose al contexto y evolucionando con el proyecto.
+Protocolo **auto-validable y confiable** que garantiza que una IA pueda detectar, rechazar y corregir problemas críticos automáticamente, asegurando código Expert Level sin omisiones.
 
-## 🌟 **Filosofía Central: "VALUE-DRIVEN QUALITY"**
-> *"No todas las líneas de código son iguales. La calidad se mide por el valor entregado, no solo por métricas."*
+## 🌟 **Filosofía Central: "TRUST-FIRST QUALITY"**
+> *"Un protocolo que la IA no puede confiar es un protocolo que falla. Primero corrección, después optimización."*
+
+## 🚨 **0. PRE-AUDITORÍA OBLIGATORIA (CRÍTICA)**
+
+### **⛔ ANTES DE CUALQUIER OTRA ACCIÓN, LA IA DEBE:**
+
+#### **🔍 PASO 1: DETECCIÓN AUTOMÁTICA DE ERRORES CRÍTICOS**
+```javascript
+// 🤖 ALGORITMO OBLIGATORIO para la IA:
+const preAuditoriaObligatoria = async (codigoBase) => {
+  const erroresCriticos = [];
+  
+  // 📚 DUPLICACIÓN: Detectar archivos/funciones idénticos
+  const duplicados = await detectarDuplicacion(codigoBase);
+  if (duplicados.length > 0) {
+    erroresCriticos.push({
+      tipo: 'DUPLICACION_CRITICA',
+      prioridad: 1, // MÁXIMA
+      archivos: duplicados,
+      accion: 'DETENER_TODO_Y_CONSOLIDAR_PRIMERO'
+    });
+  }
+  
+  // 🔐 SEGURIDAD: Vulnerabilidades detectables
+  const vulnerabilidades = await escanearSeguridad(codigoBase);
+  if (vulnerabilidades.length > 0) {
+    erroresCriticos.push({
+      tipo: 'VULNERABILIDAD_SEGURIDAD',
+      prioridad: 2,
+      detalles: vulnerabilidades,
+      accion: 'RECHAZAR_HASTA_CORRECION'
+    });
+  }
+  
+  // 💥 ERRORES FATALES: Syntax, imports rotos, etc.
+  const erroresFatales = await validarSintaxis(codigoBase);
+  if (erroresFatales.length > 0) {
+    erroresCriticos.push({
+      tipo: 'ERROR_FATAL',
+      prioridad: 3,
+      errores: erroresFatales,
+      accion: 'CORREGIR_INMEDIATAMENTE'
+    });
+  }
+  
+  return erroresCriticos;
+};
+```
+
+#### **📋 PASO 2: ORDEN DE PRIORIDADES INFLEXIBLE**
+```javascript
+// 🤖 LA IA DEBE SEGUIR ESTE ORDEN SIN EXCEPCIONES:
+const ordenPrioridadesIA = [
+  // 🚨 PRIORIDAD 1: DUPLICACIÓN (Viola DRY, aumenta debt)
+  {
+    orden: 1,
+    accion: 'eliminar_duplicados',
+    criterio: 'codigo_identico > 80% similaridad',
+    bloqueante: true, // No continuar hasta resolver
+    mensaje: 'DETECTADA DUPLICACIÓN CRÍTICA - CONSOLIDANDO ANTES DE CONTINUAR'
+  },
+  
+  // 🔐 PRIORIDAD 2: SEGURIDAD (Riesgo inmediato)
+  {
+    orden: 2,
+    accion: 'corregir_vulnerabilidades',
+    criterio: 'vulnerabilidades_detectadas > 0',
+    bloqueante: true,
+    mensaje: 'VULNERABILIDADES DETECTADAS - CORRIGIENDO ANTES DE CONTINUAR'
+  },
+  
+  // 💥 PRIORIDAD 3: ERRORES FATALES (App rota)
+  {
+    orden: 3,
+    accion: 'corregir_errores_sintaxis',
+    criterio: 'errores_compilacion > 0',
+    bloqueante: true,
+    mensaje: 'ERRORES DE COMPILACIÓN - CORRIGIENDO ANTES DE CONTINUAR'
+  },
+  
+  // 📊 PRIORIDAD 4: APLICAR PROTOCOLO según contexto
+  {
+    orden: 4,
+    accion: 'aplicar_protocolo_calidad',
+    criterio: 'errores_criticos === 0',
+    bloqueante: false,
+    mensaje: 'APLICANDO MEJORAS DE CALIDAD SEGÚN CONTEXTO'
+  }
+];
+```
+
+#### **✅ PASO 3: CHECKLIST AUTO-VALIDACIÓN IA**
+```javascript
+// 🤖 LA IA DEBE VALIDARSE A SÍ MISMA ANTES DE PROPONER CAMBIOS:
+const checklistAutoValidacionIA = {
+  
+  // ✅ Pre-requisitos cumplidos
+  preRequisitos: [
+    '¿Ejecuté pre-auditoría completa?',
+    '¿Detecté TODOS los duplicados?',
+    '¿Verifiqué seguridad exhaustivamente?',
+    '¿Validé que el código compile?'
+  ],
+  
+  // ✅ Análisis de impacto
+  analisisImpacto: [
+    '¿Identifiqué correctamente el contexto (CRITICAL/CORE/FEATURE/EXPERIMENT)?',
+    '¿Apliqué el nivel de rigor apropiado?',
+    '¿Documenté todas las excepciones?',
+    '¿Verifiqué que mis cambios no rompan nada?'
+  ],
+  
+  // ✅ Calidad de propuesta
+  calidadPropuesta: [
+    '¿Mis cambios siguen SOLID según contexto?',
+    '¿La nomenclatura es clara y educativa?',
+    '¿Agregué comentarios didácticos donde necesario?',
+    '¿Los tests cubren los cambios críticos?'
+  ],
+  
+  // ✅ Verificación final
+  verificacionFinal: [
+    '¿Puedo explicar CADA cambio propuesto?',
+    '¿Los cambios mejoran realmente la calidad?',
+    '¿No introduje nueva duplicación o deuda técnica?',
+    '¿El código resultante es mantenible a largo plazo?'
+  ]
+};
+
+// 🚫 SI CUALQUIER RESPUESTA ES "NO" → REVISAR ANTES DE PROPONER
+```
+
+### **🔧 ALGORITMOS DE DETECCIÓN AUTOMÁTICA**
+
+#### **📊 Detección de Duplicación Automática**
+```javascript
+// 🤖 Algoritmo que la IA debe usar para detectar duplicados:
+const detectarDuplicacionAutomatica = (archivos) => {
+  const duplicados = [];
+  
+  // 📁 ARCHIVOS IDÉNTICOS: Mismo nombre en diferentes ubicaciones
+  const nombresArchivos = new Map();
+  archivos.forEach(archivo => {
+    const nombre = path.basename(archivo);
+    if (nombresArchivos.has(nombre)) {
+      duplicados.push({
+        tipo: 'ARCHIVO_DUPLICADO',
+        original: nombresArchivos.get(nombre),
+        duplicado: archivo,
+        similaridad: 100,
+        accion: 'CONSOLIDAR_EN_UNA_UBICACION'
+      });
+    } else {
+      nombresArchivos.set(nombre, archivo);
+    }
+  });
+  
+  // 🔍 CÓDIGO SIMILAR: AST comparison
+  archivos.forEach((archivo1, i) => {
+    archivos.slice(i + 1).forEach(archivo2 => {
+      const similaridad = calcularSimilitudCodigo(archivo1, archivo2);
+      if (similaridad > 80) {
+        duplicados.push({
+          tipo: 'CODIGO_DUPLICADO',
+          archivo1,
+          archivo2,
+          similaridad,
+          accion: 'EXTRAER_A_FUNCION_COMUN'
+        });
+      }
+    });
+  });
+  
+  return duplicados;
+};
+
+// 🎯 EJEMPLO DETECCIÓN EN DAMIANAPP:
+// ❌ DETECTADO: hapticsService.js en múltiples ubicaciones
+// ❌ DETECTADO: utilsService.js duplicado
+// ❌ DETECTADO: dinamicImportService.js en 2 sitios
+// 🚨 ACCIÓN OBLIGATORIA: Consolidar antes de cualquier mejora
+```
+
+#### **🛡️ Detección de Problemas de Arquitectura**
+```javascript
+// 🤖 Detectar violaciones arquitectónicas automáticamente:
+const detectarProblemasArquitectura = (codigoBase) => {
+  const problemas = [];
+  
+  // 🏗️ RESPONSABILIDAD ÚNICA: Detectar clases/funciones que hacen mucho
+  codigoBase.clases.forEach(clase => {
+    const responsabilidades = analizarResponsabilidades(clase);
+    if (responsabilidades.length > 1) {
+      problemas.push({
+        tipo: 'VIOLACION_SRP',
+        archivo: clase.archivo,
+        responsabilidades,
+        sugerencia: 'DIVIDIR_EN_CLASES_ESPECIFICAS'
+      });
+    }
+  });
+  
+  // 🔄 DEPENDENCIAS CIRCULARES: Graph analysis
+  const dependenciasCirculares = detectarDependenciasCirculares(codigoBase);
+  if (dependenciasCirculares.length > 0) {
+    problemas.push({
+      tipo: 'DEPENDENCIA_CIRCULAR',
+      ciclos: dependenciasCirculares,
+      accion: 'REFACTORIZAR_DEPENDENCIAS'
+    });
+  }
+  
+  return problemas;
+};
+```
 
 ---
 

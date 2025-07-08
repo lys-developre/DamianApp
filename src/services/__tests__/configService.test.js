@@ -7,7 +7,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import configService from '../configService';
+import configService from '../core/config';
 import { DEFAULT_CONFIG } from '../../config/appConfig';
 
 // 🔧 PROTOCOLO: Mock AsyncStorage usando factory function

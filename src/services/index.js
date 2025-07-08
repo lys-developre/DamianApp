@@ -63,20 +63,22 @@ export { formatSeconds } from '../utils/formatters';
 export const initializeServices = async () => {
   try {
     // Importar dinámicamente para evitar referencias circulares
-    const { storageService } = await import('./storageService');
+    const { default: storageService } = await import('./core/storage');
     await storageService.initialize();
 
     // Importar servicios de feedback dinámicamente para evitar errores en web
     try {
-      const { hapticsService: haptics } = await import('./hapticsService');
-      await haptics.initialize();
+      const { default: hapticsService } = await import(
+        './media/haptics/hapticsService'
+      );
+      await hapticsService.initialize();
     } catch (error) {
       console.warn('Haptics service no disponible:', error);
     }
 
     try {
-      const { audioService: audio } = await import('./audioService');
-      await audio.initialize();
+      const { default: audioService } = await import('./media/audio');
+      await audioService.initialize();
     } catch (error) {
       console.warn('Audio service no disponible:', error);
     }

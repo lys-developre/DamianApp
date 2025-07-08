@@ -39,7 +39,7 @@ const MainButton = React.memo(
       if (hapticsConfig.enabled) {
         try {
           const { hapticsService } = await import(
-            '../../services/hapticsService'
+            '../../services/media/haptics'
           );
           await hapticsService.light(); // Feedback ligero para navegación
         } catch (error) {

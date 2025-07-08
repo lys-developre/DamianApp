@@ -67,7 +67,7 @@ export const useTimerAnimations = ({
       if (hapticsConfig.enabled) {
         try {
           const { hapticsService } = await import(
-            '../../../services/hapticsService'
+            '../../../services/media/haptics'
           );
           await hapticsService.light();
         } catch (error) {
@@ -123,7 +123,7 @@ export const useTimerAnimations = ({
     if (hapticsConfig.enabled) {
       try {
         const { hapticsService } = await import(
-          '../../../services/hapticsService'
+          '../../../services/media/haptics'
         );
         await hapticsService.light();
       } catch (error) {
@@ -278,7 +278,7 @@ export const useTimerAnimations = ({
         (async () => {
           try {
             const { hapticsService } = await import(
-              '../../../services/hapticsService'
+              '../../../services/media/haptics'
             );
             await hapticsService.light();
           } catch (error) {

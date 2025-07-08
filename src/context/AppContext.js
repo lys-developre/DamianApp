@@ -486,7 +486,7 @@ export const AppProvider = ({ children }) => {
         if (hapticsConfig.enabled) {
           try {
             const { hapticsService } = await import(
-              '../services/hapticsService'
+              '../services/media/haptics'
             );
             await hapticsService.light();
           } catch (error) {
@@ -517,7 +517,7 @@ export const AppProvider = ({ children }) => {
               setTimeout(async () => {
                 try {
                   const { hapticsService } = await import(
-                    '../services/hapticsService'
+                    '../services/media/haptics'
                   );
                   await hapticsService.celebration();
                 } catch (error) {

@@ -20,9 +20,9 @@ export { default as CelebrationModal } from './components/CelebrationModal';
 export { useTimer } from './hooks/useTimer';
 export { useTimerAnimations } from './hooks/useTimerAnimations';
 
-// Servicios
-export { hapticsService } from './services/hapticsService';
-export { audioService } from './services/audioService';
+// Servicios - Importar desde ubicación centralizada
+export { hapticsService } from '../../services/media/haptics';
+export { audioService } from '../../services/media/audio';
 
 // Utilidades
 export * from './utils/timerUtils';
