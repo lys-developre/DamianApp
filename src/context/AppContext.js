@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { storageService } from '../services';
-import { useUIConfig, useHapticsConfig } from '../hooks/useConfig';
+import { storageService, configService } from '../services';
 
 /**
  * Context principal de la aplicación Damian APP - Módulo 5
@@ -61,39 +60,6 @@ const initialState = {
     showCelebration: false,
   },
 
-  // Configuraciones globales de la aplicación
-  globalConfig: {
-    // Configuraciones del temporizador
-    timer: {
-      defaultTime: 3600, // 1 hora por defecto
-      enableHaptics: true,
-      enableAudio: true,
-      enableMotivationalPhrases: true,
-      autoStartCelebration: true,
-    },
-
-    // Configuraciones de switches
-    switches: {
-      enableHaptics: true,
-      celebrationDuration: 3000,
-      autoResetAfterCelebration: false,
-    },
-
-    // Configuraciones de accesibilidad
-    accessibility: {
-      reduceMotion: false,
-      highContrast: false,
-      fontSize: 'normal', // 'small', 'normal', 'large'
-    },
-
-    // Configuraciones de tema
-    theme: {
-      darkMode: true,
-      primaryColor: '#45B7D1',
-      accentColor: '#F59E42',
-    },
-  },
-
   // Preferencias del usuario/terapeuta
   userPreferences: {
     lastUsedTimer: null,
@@ -125,13 +91,6 @@ const ActionTypes = {
   RESET_ALL_SWITCHES: 'RESET_ALL_SWITCHES',
   RESET_SWITCHES_CASCADE: 'RESET_SWITCHES_CASCADE',
   SET_SWITCHES_CELEBRATION: 'SET_SWITCHES_CELEBRATION',
-
-  // Configuraciones globales
-  UPDATE_GLOBAL_CONFIG: 'UPDATE_GLOBAL_CONFIG',
-  UPDATE_TIMER_CONFIG: 'UPDATE_TIMER_CONFIG',
-  UPDATE_SWITCHES_CONFIG: 'UPDATE_SWITCHES_CONFIG',
-  UPDATE_ACCESSIBILITY_CONFIG: 'UPDATE_ACCESSIBILITY_CONFIG',
-  UPDATE_THEME_CONFIG: 'UPDATE_THEME_CONFIG',
 
   // Preferencias de usuario
   UPDATE_USER_PREFERENCES: 'UPDATE_USER_PREFERENCES',
@@ -372,10 +331,6 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  // Hooks de configuración avanzada para switches
-  const uiConfig = useUIConfig();
-  const hapticsConfig = useHapticsConfig();
-
   /**
    * Guarda el estado usando StorageService con mejor manejo de errores
    */
@@ -483,7 +438,8 @@ export const AppProvider = ({ children }) => {
     switchesActions: {
       toggleSwitch: async id => {
         // Solo vibrar si está habilitado en la configuración
-        if (hapticsConfig.enabled) {
+        const hapticsEnabled = configService.get('haptics.enabled', true);
+        if (hapticsEnabled) {
           try {
             const { hapticsService } = await import(
               '../services/media/haptics'
@@ -505,7 +461,11 @@ export const AppProvider = ({ children }) => {
 
         if (allActive && !currentState.switchesState.showCelebration) {
           // Solo mostrar celebración si está habilitada en configuración
-          if (uiConfig.switches?.showCelebration !== false) {
+          const showCelebration = configService.get(
+            'ui.switches.showCelebration',
+            true
+          );
+          if (showCelebration) {
             // Mostrar modal de celebración
             dispatch({
               type: ActionTypes.SET_SWITCHES_CELEBRATION,
@@ -513,7 +473,7 @@ export const AppProvider = ({ children }) => {
             });
 
             // Vibración de celebración solo si está habilitada
-            if (hapticsConfig.enabled) {
+            if (hapticsEnabled) {
               setTimeout(async () => {
                 try {
                   const { hapticsService } = await import(
