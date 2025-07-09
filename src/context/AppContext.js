@@ -214,64 +214,6 @@ const appReducer = (state, action) => {
         },
       };
 
-    // Global Config Actions
-    case ActionTypes.UPDATE_GLOBAL_CONFIG:
-      return {
-        ...state,
-        globalConfig: {
-          ...state.globalConfig,
-          ...action.payload,
-        },
-      };
-
-    case ActionTypes.UPDATE_TIMER_CONFIG:
-      return {
-        ...state,
-        globalConfig: {
-          ...state.globalConfig,
-          timer: {
-            ...state.globalConfig.timer,
-            ...action.payload,
-          },
-        },
-      };
-
-    case ActionTypes.UPDATE_SWITCHES_CONFIG:
-      return {
-        ...state,
-        globalConfig: {
-          ...state.globalConfig,
-          switches: {
-            ...state.globalConfig.switches,
-            ...action.payload,
-          },
-        },
-      };
-
-    case ActionTypes.UPDATE_ACCESSIBILITY_CONFIG:
-      return {
-        ...state,
-        globalConfig: {
-          ...state.globalConfig,
-          accessibility: {
-            ...state.globalConfig.accessibility,
-            ...action.payload,
-          },
-        },
-      };
-
-    case ActionTypes.UPDATE_THEME_CONFIG:
-      return {
-        ...state,
-        globalConfig: {
-          ...state.globalConfig,
-          theme: {
-            ...state.globalConfig.theme,
-            ...action.payload,
-          },
-        },
-      };
-
     // User Preferences Actions
     case ActionTypes.UPDATE_USER_PREFERENCES:
       return {
@@ -520,21 +462,6 @@ export const AppProvider = ({ children }) => {
         dispatch({ type: ActionTypes.SET_SWITCHES_CELEBRATION, payload: show }),
       updateSwitchesState: updates =>
         dispatch({ type: ActionTypes.UPDATE_SWITCHES_STATE, payload: updates }),
-    },
-
-    // Acciones helper para configuraciones
-    configActions: {
-      updateTimerConfig: config =>
-        dispatch({ type: ActionTypes.UPDATE_TIMER_CONFIG, payload: config }),
-      updateSwitchesConfig: config =>
-        dispatch({ type: ActionTypes.UPDATE_SWITCHES_CONFIG, payload: config }),
-      updateAccessibilityConfig: config =>
-        dispatch({
-          type: ActionTypes.UPDATE_ACCESSIBILITY_CONFIG,
-          payload: config,
-        }),
-      updateThemeConfig: config =>
-        dispatch({ type: ActionTypes.UPDATE_THEME_CONFIG, payload: config }),
     },
 
     // Acciones helper para preferencias de usuario
