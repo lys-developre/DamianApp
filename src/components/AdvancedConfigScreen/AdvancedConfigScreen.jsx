@@ -20,6 +20,7 @@ import {
   useHapticsConfig,
   useAccessibilityConfig,
 } from '../../hooks/useConfig';
+import AudioPicker from '../shared/AudioPicker';
 
 /**
  * 🔧 PANTALLA DE CONFIGURACIÓN AVANZADA - DamianApp Módulo 8
@@ -399,6 +400,15 @@ const AdvancedConfigScreen = React.memo(() => {
           <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY }]}>
             🔊 Audio
           </Text>
+
+          {/* AudioPicker para seleccionar archivo mp3 */}
+          <AudioPicker
+            onAudioSelected={uri => {
+              // Aquí puedes guardar la URI en el estado global o local según tu flujo
+              // Por ahora solo mostramos la selección
+              // console.log('Audio seleccionado:', uri); // Eliminado para cumplir eslint
+            }}
+          />
 
           <View style={styles.configItem}>
             <Text

@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { View, Animated, Image } from 'react-native';
-import { Audio } from 'expo-av';
+import audioService from '@services/media/audio';
 
 /**
  * Componente modular para mostrar pictogramas con texto y sonido
@@ -28,17 +28,12 @@ const PictogramDisplay = React.memo(
     phraseScale,
     phraseTranslateY,
   }) => {
-    const [sound, setSound] = useState(null);
-
-    // Función para reproducir el sonido del pictograma
+    // Función para reproducir el sonido del pictograma usando audioService
     const playPictogramSound = useCallback(async () => {
       if (!audioSource || !shouldPlayAudio) return;
-
       try {
-        const { sound: audioSound } =
-          await Audio.Sound.createAsync(audioSource);
-        setSound(audioSound);
-        await audioSound.playAsync();
+        // audioSource puede ser un nombre de archivo o un identificador
+        await audioService.playSound(audioSource);
       } catch (error) {
         console.error('❌ Error reproduciendo sonido del pictograma:', error);
       }
@@ -50,15 +45,6 @@ const PictogramDisplay = React.memo(
         playPictogramSound();
       }
     }, [shouldPlayAudio, playPictogramSound]);
-
-    // Limpiar sonido al desmontar
-    useEffect(() => {
-      return sound
-        ? () => {
-            sound.unloadAsync();
-          }
-        : undefined;
-    }, [sound]);
 
     return (
       <Animated.View

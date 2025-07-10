@@ -97,6 +97,17 @@ module.exports = defineConfig([
     plugins: {
       prettier: require('eslint-plugin-prettier'),
     },
+    /**
+     * SETTINGS: Configuración de import/resolver para soportar alias de Babel
+     * Esto permite que ESLint resuelva correctamente los imports con alias
+     * definidos en babel-plugin-module-resolver (por ejemplo, @services, @components, etc.)
+     * Requiere tener instalado eslint-import-resolver-babel-module
+     */
+    settings: {
+      'import/resolver': {
+        'babel-module': {},
+      },
+    },
   },
 
   // Configuración específica para archivos de test
