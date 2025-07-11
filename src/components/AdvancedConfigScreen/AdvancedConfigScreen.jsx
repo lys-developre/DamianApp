@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
-  Modal,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -37,14 +36,13 @@ const AdvancedConfigScreen = React.memo(() => {
   const { colors } = useTheme();
 
   // Hooks de configuración reales
-  const { applyPreset, reset } = useConfig();
+  const { reset } = useConfig();
   const uiConfig = useUIConfig();
   const audioConfig = useAudioConfig();
   const hapticsConfig = useHapticsConfig();
   const accessibilityConfig = useAccessibilityConfig();
 
   // Estado local para modales y feedback
-  const [showPresetModal, setShowPresetModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
 
@@ -65,34 +63,6 @@ const AdvancedConfigScreen = React.memo(() => {
       );
     }, 1000);
   }, []);
-
-  // Handler para aplicar preset
-  const handleApplyPreset = useCallback(
-    presetName => {
-      Alert.alert(
-        'Aplicar configuración predefinida',
-        `¿Deseas aplicar la configuración "${presetName}"?`,
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          {
-            text: 'Aplicar',
-            onPress: () => {
-              applyPreset(presetName)
-                .then(() => {
-                  setShowPresetModal(false);
-                  Alert.alert('Éxito', 'Configuración aplicada correctamente');
-                })
-                .catch(error => {
-                  Alert.alert('Error', 'No se pudo aplicar la configuración');
-                  console.error('Error applying preset:', error);
-                });
-            },
-          },
-        ]
-      );
-    },
-    [applyPreset]
-  );
 
   // Handler para reset
   const handleReset = useCallback(() => {
@@ -181,19 +151,6 @@ const AdvancedConfigScreen = React.memo(() => {
             Acciones Rápidas
           </Text>
           <View style={styles.quickActions}>
-            <TouchableOpacity
-              style={[styles.actionButton, { backgroundColor: colors.PRIMARY }]}
-              onPress={() => setShowPresetModal(true)}
-            >
-              <MaterialIcons
-                name="apps"
-                size={20}
-                color={colors.TEXT_PRIMARY}
-              />
-              <Text style={[styles.actionText, { color: colors.TEXT_PRIMARY }]}>
-                Presets
-              </Text>
-            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.actionButton, { backgroundColor: colors.SUCCESS }]}
               onPress={handleTestConfiguration}
@@ -510,102 +467,7 @@ const AdvancedConfigScreen = React.memo(() => {
             </View>
           </View>
         </View>
-        {/* Configuración de Accesibilidad */}
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: colors.BACKGROUND_SECONDARY },
-          ]}
-        >
-          <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY }]}>
-            ♿ Accesibilidad
-          </Text>
 
-          <View style={styles.configItem}>
-            <Text
-              style={[styles.configLabel, { color: colors.TEXT_SECONDARY }]}
-            >
-              Reducir animaciones
-            </Text>
-            <Switch
-              value={accessibilityConfig.reduceAnimations}
-              onValueChange={accessibilityConfig.setReduceAnimations}
-              trackColor={{
-                false: colors.BORDER_PRIMARY,
-                true: colors.PRIMARY,
-              }}
-              thumbColor={colors.TEXT_PRIMARY}
-            />
-          </View>
-
-          <View style={styles.configItem}>
-            <Text
-              style={[styles.configLabel, { color: colors.TEXT_SECONDARY }]}
-            >
-              Alto contraste
-            </Text>
-            <Switch
-              value={accessibilityConfig.highContrast}
-              onValueChange={accessibilityConfig.setHighContrast}
-              trackColor={{
-                false: colors.BORDER_PRIMARY,
-                true: colors.PRIMARY,
-              }}
-              thumbColor={colors.TEXT_PRIMARY}
-            />
-          </View>
-
-          <View style={styles.configItem}>
-            <Text
-              style={[styles.configLabel, { color: colors.TEXT_SECONDARY }]}
-            >
-              Texto grande
-            </Text>
-            <Switch
-              value={accessibilityConfig.largeText}
-              onValueChange={accessibilityConfig.setLargeText}
-              trackColor={{
-                false: colors.BORDER_PRIMARY,
-                true: colors.PRIMARY,
-              }}
-              thumbColor={colors.TEXT_PRIMARY}
-            />
-          </View>
-
-          <View style={styles.configItem}>
-            <Text
-              style={[styles.configLabel, { color: colors.TEXT_SECONDARY }]}
-            >
-              UI simplificada
-            </Text>
-            <Switch
-              value={accessibilityConfig.simplifiedUI}
-              onValueChange={accessibilityConfig.setSimplifiedUI}
-              trackColor={{
-                false: colors.BORDER_PRIMARY,
-                true: colors.PRIMARY,
-              }}
-              thumbColor={colors.TEXT_PRIMARY}
-            />
-          </View>
-
-          <View style={styles.configItem}>
-            <Text
-              style={[styles.configLabel, { color: colors.TEXT_SECONDARY }]}
-            >
-              Confirmar acciones
-            </Text>
-            <Switch
-              value={accessibilityConfig.confirmActions}
-              onValueChange={accessibilityConfig.setConfirmActions}
-              trackColor={{
-                false: colors.BORDER_PRIMARY,
-                true: colors.PRIMARY,
-              }}
-              thumbColor={colors.TEXT_PRIMARY}
-            />
-          </View>
-        </View>
         {/* Información sobre configuración automática */}
         <View
           style={[
@@ -624,12 +486,6 @@ const AdvancedConfigScreen = React.memo(() => {
               ℹ️ Cómo funciona
             </Text>
           </View>
-          <Text style={[styles.infoText, { color: colors.TEXT_SECONDARY }]}>
-            • Los cambios se aplican automáticamente{'\n'}• Puedes usar
-            &quot;Guardar&quot; para confirmación visual{'\n'}• Configuración
-            persistente entre sesiones
-            {'\n'}• Usa &quot;Probar&quot; para ver tu configuración actual
-          </Text>
         </View>
         {/* Indicador de estado de guardado */}
         {lastSaved && (
@@ -652,115 +508,6 @@ const AdvancedConfigScreen = React.memo(() => {
         )}
         <View style={styles.bottomPadding} />
       </ScrollView>
-
-      {/* Modal de Presets */}
-      <Modal
-        visible={showPresetModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowPresetModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View
-            style={[
-              styles.modalContent,
-              { backgroundColor: colors.BACKGROUND_SECONDARY },
-            ]}
-          >
-            <Text style={[styles.modalTitle, { color: colors.TEXT_PRIMARY }]}>
-              Configuraciones Predefinidas
-            </Text>
-
-            <TouchableOpacity
-              style={[styles.presetButton, { backgroundColor: colors.PRIMARY }]}
-              onPress={() => handleApplyPreset('default')}
-            >
-              <Text style={[styles.presetText, { color: colors.TEXT_PRIMARY }]}>
-                📱 Por Defecto
-              </Text>
-              <Text
-                style={[
-                  styles.presetDescription,
-                  { color: colors.TEXT_SECONDARY },
-                ]}
-              >
-                Configuración estándar equilibrada
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.presetButton,
-                { backgroundColor: colors.SECONDARY },
-              ]}
-              onPress={() => handleApplyPreset('autism_friendly')}
-            >
-              <Text style={[styles.presetText, { color: colors.TEXT_PRIMARY }]}>
-                🧠 Amigable para Autismo
-              </Text>
-              <Text
-                style={[
-                  styles.presetDescription,
-                  { color: colors.TEXT_SECONDARY },
-                ]}
-              >
-                Menos animaciones, sonidos suaves
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.presetButton, { backgroundColor: colors.WARNING }]}
-              onPress={() => handleApplyPreset('silent')}
-            >
-              <Text style={[styles.presetText, { color: colors.TEXT_PRIMARY }]}>
-                🔇 Silencioso
-              </Text>
-              <Text
-                style={[
-                  styles.presetDescription,
-                  { color: colors.TEXT_SECONDARY },
-                ]}
-              >
-                Sin sonidos ni vibraciones
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.presetButton,
-                { backgroundColor: colors.BACKGROUND_PRIMARY },
-              ]}
-              onPress={() => handleApplyPreset('performance')}
-            >
-              <Text style={[styles.presetText, { color: colors.TEXT_PRIMARY }]}>
-                ⚡ Alto Rendimiento
-              </Text>
-              <Text
-                style={[
-                  styles.presetDescription,
-                  { color: colors.TEXT_SECONDARY },
-                ]}
-              >
-                Optimizado para velocidad
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.closeButton,
-                { backgroundColor: colors.BORDER_PRIMARY },
-              ]}
-              onPress={() => setShowPresetModal(false)}
-            >
-              <Text
-                style={[styles.closeButtonText, { color: colors.TEXT_PRIMARY }]}
-              >
-                Cerrar
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 });

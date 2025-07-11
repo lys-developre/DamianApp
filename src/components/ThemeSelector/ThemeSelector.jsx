@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -212,17 +213,6 @@ const ThemeSelector = React.memo(() => {
               </View>
             </View>
           </View>
-
-          {/* Indicador de selección */}
-          {isSelected && (
-            <View style={styles.selectedIndicator}>
-              <MaterialIcons
-                name="check-circle"
-                size={24}
-                color={colors.PRIMARY}
-              />
-            </View>
-          )}
         </TouchableOpacity>
       );
     },
@@ -230,28 +220,11 @@ const ThemeSelector = React.memo(() => {
   );
 
   return (
-    <View
+    <SafeAreaView
       style={[styles.container, { backgroundColor: colors.BACKGROUND_PRIMARY }]}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleGoBack}
-          accessibilityLabel="Volver"
-        >
-          <MaterialIcons
-            name="arrow-back"
-            size={24}
-            color={colors.TEXT_PRIMARY}
-          />
-        </TouchableOpacity>
-        <Text style={[styles.title, { color: colors.TEXT_PRIMARY }]}>
-          Temas de Color
-        </Text>
-        <View style={styles.placeholder} />
-      </View>
-
+      {/* Separación superior para compensar el header eliminado */}
+      <View style={{ height: 32 }} />
       {/* Contenido principal */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}>
@@ -312,7 +285,7 @@ const ThemeSelector = React.memo(() => {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 });
 
@@ -321,24 +294,6 @@ ThemeSelector.displayName = 'ThemeSelector';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: 60, // Para el status bar
-  },
-  backButton: {
-    padding: 8,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  placeholder: {
-    width: 40, // Mismo ancho que el botón de atrás
   },
   content: {
     flex: 1,
@@ -437,6 +392,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 16,
     gap: 12,
+    paddingBottom: 65, // o más si lo necesitas
   },
   actionButton: {
     flex: 1,
