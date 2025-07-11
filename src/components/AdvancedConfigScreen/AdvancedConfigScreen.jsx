@@ -10,7 +10,6 @@ import {
   Modal,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import {
@@ -34,7 +33,7 @@ import AudioPicker from '../shared/AudioPicker';
  * ✅ Interfaz organizada por categorías
  */
 const AdvancedConfigScreen = React.memo(() => {
-  const navigation = useNavigation();
+  // const navigation = useNavigation(); // Eliminado porque ya no se usa
   const { colors } = useTheme();
 
   // Hooks de configuración reales
@@ -171,31 +170,11 @@ const AdvancedConfigScreen = React.memo(() => {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={[
-              styles.backButton,
-              { backgroundColor: colors.BACKGROUND_SECONDARY },
-            ]}
-            onPress={() => navigation.goBack()}
-          >
-            <MaterialIcons
-              name="arrow-back"
-              size={24}
-              color={colors.TEXT_PRIMARY}
-            />
-          </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.TEXT_PRIMARY }]}>
-            Configuración Avanzada
-          </Text>
-        </View>
-
         {/* Acciones rápidas */}
         <View
           style={[
             styles.section,
-            { backgroundColor: colors.BACKGROUND_SECONDARY },
+            { backgroundColor: colors.BACKGROUND_SECONDARY, marginTop: 24 },
           ]}
         >
           <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY }]}>
@@ -265,7 +244,6 @@ const AdvancedConfigScreen = React.memo(() => {
             </TouchableOpacity>
           </View>
         </View>
-
         {/* Configuración de UI */}
         <View
           style={[
@@ -389,7 +367,6 @@ const AdvancedConfigScreen = React.memo(() => {
             />
           </View>
         </View>
-
         {/* Configuración de Audio */}
         <View
           style={[
@@ -465,7 +442,6 @@ const AdvancedConfigScreen = React.memo(() => {
             />
           </View>
         </View>
-
         {/* Configuración de Haptics */}
         <View
           style={[
@@ -534,7 +510,6 @@ const AdvancedConfigScreen = React.memo(() => {
             </View>
           </View>
         </View>
-
         {/* Configuración de Accesibilidad */}
         <View
           style={[
@@ -631,7 +606,6 @@ const AdvancedConfigScreen = React.memo(() => {
             />
           </View>
         </View>
-
         {/* Información sobre configuración automática */}
         <View
           style={[
@@ -657,7 +631,6 @@ const AdvancedConfigScreen = React.memo(() => {
             {'\n'}• Usa &quot;Probar&quot; para ver tu configuración actual
           </Text>
         </View>
-
         {/* Indicador de estado de guardado */}
         {lastSaved && (
           <View
@@ -677,7 +650,6 @@ const AdvancedConfigScreen = React.memo(() => {
             </Text>
           </View>
         )}
-
         <View style={styles.bottomPadding} />
       </ScrollView>
 
