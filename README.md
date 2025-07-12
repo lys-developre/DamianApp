@@ -305,7 +305,7 @@ npm run ios         # Ejecuta en simulador iOS (solo macOS)
 
 ## Información del Desarrollador
 
-**Autor:** Damian  
+**Autor:** Larry  
 **Versión:** 1.0.0  
 **Licencia:** MIT  
 **Fecha:** Julio 2025
