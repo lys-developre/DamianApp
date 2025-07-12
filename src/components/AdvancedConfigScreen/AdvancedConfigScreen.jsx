@@ -18,7 +18,6 @@ import {
   useHapticsConfig,
   useAccessibilityConfig,
 } from '../../hooks/useConfig';
-import AudioPicker from '../shared/AudioPicker';
 
 /**
  * 🔧 PANTALLA DE CONFIGURACIÓN AVANZADA - DamianApp Módulo 8
@@ -209,7 +208,7 @@ const AdvancedConfigScreen = React.memo(() => {
           ]}
         >
           <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY }]}>
-            🎨 Interfaz de Usuario
+            🎨 Pantalla Principal
           </Text>
 
           <View style={styles.configItem}>
@@ -335,15 +334,6 @@ const AdvancedConfigScreen = React.memo(() => {
             🔊 Audio
           </Text>
 
-          {/* AudioPicker para seleccionar archivo mp3 */}
-          <AudioPicker
-            onAudioSelected={uri => {
-              // Aquí puedes guardar la URI en el estado global o local según tu flujo
-              // Por ahora solo mostramos la selección
-              // console.log('Audio seleccionado:', uri); // Eliminado para cumplir eslint
-            }}
-          />
-
           <View style={styles.configItem}>
             <Text
               style={[styles.configLabel, { color: colors.TEXT_SECONDARY }]}
@@ -407,7 +397,7 @@ const AdvancedConfigScreen = React.memo(() => {
           ]}
         >
           <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY }]}>
-            📳 Haptics
+            📳 Vibracin
           </Text>
 
           <View style={styles.configItem}>
@@ -468,25 +458,6 @@ const AdvancedConfigScreen = React.memo(() => {
           </View>
         </View>
 
-        {/* Información sobre configuración automática */}
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: colors.BACKGROUND_SECONDARY },
-          ]}
-        >
-          <View style={styles.infoHeader}>
-            <MaterialIcons
-              name="info"
-              size={20}
-              color={colors.PRIMARY}
-              style={styles.infoIcon}
-            />
-            <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY }]}>
-              ℹ️ Cómo funciona
-            </Text>
-          </View>
-        </View>
         {/* Indicador de estado de guardado */}
         {lastSaved && (
           <View
@@ -617,7 +588,7 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   bottomPadding: {
-    height: 20,
+    height: 50, // antes 20, ahora más separación inferior
   },
   modalOverlay: {
     flex: 1,
